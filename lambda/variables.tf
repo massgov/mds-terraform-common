@@ -47,3 +47,8 @@ variable "tags" {
   type = "map"
   default = {}
 }
+variable "error_topics" {
+  type = "list"
+  description = "An array of SNS topics to publish notifications to when the function errors out"
+  default = []
+}
