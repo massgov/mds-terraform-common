@@ -78,7 +78,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
  * Alerting
  */
 resource "aws_cloudwatch_metric_alarm" "alarm" {
-  count = "${var.error_topics}"
+  count = "${length(var.error_topics)}"
   alarm_name = "${var.name}-failures"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = 1
@@ -89,5 +89,6 @@ resource "aws_cloudwatch_metric_alarm" "alarm" {
   dimensions {
     FunctionName = "${aws_lambda_function.default.function_name}"
   }
+  alarm_actions             = ["${element(var.error_topics, count.index)}"]
   treat_missing_data = "ignore"
 }
