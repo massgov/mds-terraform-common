@@ -3,6 +3,11 @@ Changelog
 
 ## [Unreleased]
 
+## [0.2.0] - 2018-10-31
+### Added
+- [Lambda] Add outputs for `function_name` and `function_arn`.
+- [Lambda] Add option SNS alerts on Lambda error by passing in SNS topic ARNs to `error_topics`.
+
 ## [0.1.0] - 2018-10-30
 ### Changed
 - [ECS Cluster] Update to Amazon 2 ECS optimized AMI.
