@@ -3,6 +3,14 @@ Changelog
 
 ## [Unreleased]
 
+## [0.4.0] - 2018-11-26
+### Changed
+- [Lambda] Create log group as part of Lambda module so we are able to specify the retention policy.  Note: This will require that existing log groups are deleted or imported (using `terraform import`) before applying.
+
+## [0.3.0] - 2018-11-19
+### Changed
+- [ASG] Update to schedulerv2 tags to support EOTSS requirements.
+
 ## [0.2.0] - 2018-10-31
 ### Added
 - [Lambda] Add outputs for `function_name` and `function_arn`.
