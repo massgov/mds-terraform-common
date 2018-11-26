@@ -19,6 +19,17 @@ resource "aws_lambda_function" "default" {
   ))}"
 }
 
+/**
+ * Logging
+ */
+resource "aws_cloudwatch_log_group" "logs" {
+  name = "/aws/lambda/${var.name}"
+  retention_in_days = 30
+  tags = "${merge(var.tags, map(
+      "Name", "${var.name}"
+  ))}"
+}
+
 
 /**
  * Roles/Permissioning
