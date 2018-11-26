@@ -97,6 +97,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm" {
   namespace = "AWS/Lambda"
   period = 60
   threshold = 1
+  statistic = "Sum"
   dimensions {
     FunctionName = "${aws_lambda_function.default.function_name}"
   }
