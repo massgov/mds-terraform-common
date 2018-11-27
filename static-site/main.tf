@@ -75,6 +75,9 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     }
   }
 
+  // hit Cloudfront distribution using sub domain url
+  aliases = ["${var.sub_domain_name}"]
+
   restrictions {
     geo_restriction {
       restriction_type = "none"
