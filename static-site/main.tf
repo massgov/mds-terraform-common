@@ -97,3 +97,23 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   tags = "${var.tags}"
 
 }
+
+// tld should already exist
+data "aws_route53_zone" "tld" {
+  name = "${var.zone}"
+}
+
+
+// subdomain to add
+resource "aws_route53_record" "subdomain" {
+  zone_id = "${aws_route53_zone.tld.zone_id}"
+  name    = "${var.sub_domain_name}"
+  type    = "CNAME"
+  ttl     = "${var.dns_ttl}"
+
+  alias = {
+    name                   = "${aws_cloudfront_distribution.sub_domain_distribution.domain_name}"
+    zone_id                = "${aws_cloudfront_distribution.sub_domain_distribution.hosted_zone_id}"
+    evaluate_target_health = false
+  }
+}
