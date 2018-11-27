@@ -23,13 +23,8 @@ resource "aws_s3_bucket" "mds_static_site" {
 }
 POLICY
 
-  // S3 understands what it means to host a website.
   website {
-    // Here we tell S3 what to use when a request comes in to the root
-    // ex. https://www.youssefriahi.com
     index_document = "index.html"
-    // The page to serve up if a request results in an error or a non-existing
-    // page.
     error_document = "404.html"
   }
 }
