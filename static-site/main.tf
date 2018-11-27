@@ -90,4 +90,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     minimum_protocol_version = "TLSv1"
     ssl_support_method  = "sni-only"
   }
+
+  tags = "${var.tags}"
+
 }
