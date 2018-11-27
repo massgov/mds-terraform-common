@@ -69,6 +69,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
     forwarded_values {
       query_string = true
+      headers      = ["Host"]
       cookies {
         forward = "none"
       }
