@@ -82,6 +82,8 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "none"
+      // list of countries e.g. ["US", "CA", "GB", "DE"]
+      locations        = []
     }
   }
 
