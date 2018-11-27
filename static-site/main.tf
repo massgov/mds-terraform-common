@@ -1,5 +1,5 @@
 // S3
-resource "aws_s3_bucket" "www" {
+resource "aws_s3_bucket" "mds_static_site" {
   // Our bucket's name is going to be the same as our site's domain name.
   bucket = "${var.sub_domain_name}"
   // Because we want our site to be available on the internet, we set this so
