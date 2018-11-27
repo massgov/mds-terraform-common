@@ -68,7 +68,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     max_ttl                = 31536000
 
     forwarded_values {
-      query_string = false
+      query_string = true
       cookies {
         forward = "none"
       }
