@@ -31,7 +31,7 @@ POLICY
 
 
 // TLS/SSL certificate
-resource "aws_acm_certificate" "certificate" {
+resource "aws_acm_certificate" "subdomain_certificate" {
   // We want a wildcard cert so we can host subdomains later.
   domain_name       = "*.${var.sub_domain_name}"
   validation_method = "DNS"
@@ -89,7 +89,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
   // serve with cert
   viewer_certificate {
-    acm_certificate_arn = "${aws_acm_certificate.certificate.arn}"
+    acm_certificate_arn = "${aws_acm_certificate.subdomain_certificate.arn}"
     minimum_protocol_version = "TLSv1"
     ssl_support_method  = "sni-only"
   }
