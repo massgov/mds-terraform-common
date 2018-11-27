@@ -84,4 +84,9 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     }
   }
 
+  // serve with cert
+  viewer_certificate {
+    acm_certificate_arn = "${aws_acm_certificate.certificate.arn}"
+    ssl_support_method  = "sni-only"
+  }
 }
