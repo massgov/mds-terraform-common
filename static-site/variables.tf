@@ -10,6 +10,12 @@ variable "sub_domain_name" {
 }
 
 
+// We'll also need the root domain (also known as zone apex or naked domain).
+variable "root_domain_name" {
+  default = "digital.mass.gov"
+}
+
+
 variable "zone" {
   type        = "string"
   description = "The domain name for the DNS zone"

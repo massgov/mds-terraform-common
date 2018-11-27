@@ -98,18 +98,18 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
 }
 
-// tld should already exist
-data "aws_route53_zone" "tld" {
-  name = "${var.zone}"
+
+// We want AWS to host our zone so its nameservers can point to our CloudFront
+// distribution.
+resource "aws_route53_zone" "zone" {
+  name = "${var.root_domain_name}"
 }
 
-
-// subdomain to add
-resource "aws_route53_record" "subdomain" {
-  zone_id = "${aws_route53_zone.tld.zone_id}"
+// This Route53 record will point at our CloudFront distribution.
+resource "aws_route53_record" "www" {
+  zone_id = "${aws_route53_zone.zone.zone_id}"
   name    = "${var.sub_domain_name}"
   type    = "CNAME"
-  ttl     = "${var.dns_ttl}"
 
   alias = {
     name                   = "${aws_cloudfront_distribution.sub_domain_distribution.domain_name}"
