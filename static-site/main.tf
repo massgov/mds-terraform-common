@@ -1,9 +1,7 @@
 // S3
 resource "aws_s3_bucket" "mds_static_site" {
-  // Our bucket's name is going to be the same as our site's domain name.
+  // bucket's name = domain name
   bucket = "${var.sub_domain_name}"
-  // Because we want our site to be available on the internet, we set this so
-  // anyone can read this bucket.
   acl    = "public-read"
   // We also need to create a policy that allows anyone to view the content.
   // This is basically duplicating what we did in the ACL but it's required by
@@ -32,7 +30,7 @@ POLICY
 
 // TLS/SSL certificate
 resource "aws_acm_certificate" "subdomain_certificate" {
-  // We want a wildcard cert so we can host subdomains later.
+  // wildcard cert if we want to host sub-subdomains later.
   domain_name       = "*.${var.sub_domain_name}"
   validation_method = "DNS"
 }
@@ -50,7 +48,6 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
     // S3 bucker url
     domain_name = "${aws_s3_bucket.mds_static_site.website_endpoint}"
-    // This can be any name to identify this origin.
     origin_id   = "${var.sub_domain_name}"
   }
 
@@ -99,13 +96,13 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 }
 
 
-// We want AWS to host our zone so its nameservers can point to our CloudFront
-// distribution.
+// root/zone
 resource "aws_route53_zone" "zone" {
   name = "${var.root_domain_name}"
 }
 
-// This Route53 record will point at our CloudFront distribution.
+
+// point Route53 record will point at our CloudFront distribution.
 resource "aws_route53_record" "www" {
   zone_id = "${aws_route53_zone.zone.zone_id}"
   name    = "${var.sub_domain_name}"
