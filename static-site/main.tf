@@ -1,3 +1,4 @@
+// S3
 resource "aws_s3_bucket" "www" {
   // Our bucket's name is going to be the same as our site's domain name.
   bucket = "${var.sub_domain_name}"
@@ -32,3 +33,12 @@ POLICY
     error_document = "404.html"
   }
 }
+
+
+// TLS/SSL certificate
+resource "aws_acm_certificate" "certificate" {
+  // We want a wildcard cert so we can host subdomains later.
+  domain_name       = "*.${var.sub_domain_name}"
+  validation_method = "DNS"
+}
+
