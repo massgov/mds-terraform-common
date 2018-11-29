@@ -27,14 +27,32 @@ POLICY
   }
 }
 
+# top level domain
+data "aws_route53_zone" "tld" {
+  name = "${var.root_domain_name}"
+}
 
 // TLS/SSL certificate
-resource "aws_acm_certificate" "subdomain_certificate" {
+resource "aws_acm_certificate" "default" {
   // wildcard cert if we want to host sub-subdomains later.
   domain_name       = "*.${var.sub_domain_name}"
   validation_method = "DNS"
 }
 
+# dns record to use for certificate validation
+resource "aws_route53_record" "default" {
+  name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
+  type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
+  zone_id = "${data.aws_route53_zone.tld.zone_id}"
+  records = ["${aws_acm_certificate.default.domain_validation_options.0.resource_record_value}"]
+  ttl     = "60"
+}
+
+# validate the certificate with the dns entry
+resource "aws_acm_certificate_validation" "default" {
+  certificate_arn         = "${aws_acm_certificate.default.arn}"
+  validation_record_fqdns = ["${aws_route53_record.default.fqdn}"]
+}
 
 // Cloudfront
 resource "aws_cloudfront_distribution" "sub_domain_distribution" {
@@ -86,7 +104,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
   // serve with cert
   viewer_certificate {
-    acm_certificate_arn = "${aws_acm_certificate.subdomain_certificate.arn}"
+    acm_certificate_arn = "${aws_acm_certificate.default.arn}"
     minimum_protocol_version = "TLSv1"
     ssl_support_method  = "sni-only"
   }
