@@ -14,13 +14,19 @@ variable "sub_domain_name" {
   description = "The full sub domain name"
 }
 
-variable "tags" {
-  type    = "map"
-  default = {}
-}
-
 variable "always_get_index_html_lambda" {
   type    = "string"
   default = "AlwaysRequestIndexHTML"
-  description = "The lamdas that alwasy gets index.html for static sites"
+  description = "The lambda that always get index.html for static sites"
+}
+
+variable "s3_edge_header_lambda" {
+  type    = "string"
+  default = "s3_edge_header"
+  description = "The lamda that adds s3 origin headers"
+}
+
+variable "tags" {
+  type    = "map"
+  default = {}
 }
