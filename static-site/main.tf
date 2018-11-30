@@ -131,3 +131,7 @@ resource "aws_route53_record" "www" {
     evaluate_target_health = false
   }
 }
+
+resource "aws_cloudfront_origin_access_identity" "edge" {
+    comment = "Cloudfront ID for ${aws_s3_bucket.mds_static_site.bucket}"
+}
