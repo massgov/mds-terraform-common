@@ -1,10 +1,7 @@
-// S3
+// S3 bucket for static site
 resource "aws_s3_bucket" "mds_static_site" {
   // bucket's name = domain name
   bucket = "${var.sub_domain_name}"
-  // We also need to create a policy that allows anyone to view the content.
-  // This is basically duplicating what we did in the ACL but it's required by
-  // AWS. This post: http://amzn.to/2Fa04ul explains why.
   policy = <<POLICY
 {
   "Version":"2012-10-17",
@@ -21,26 +18,29 @@ resource "aws_s3_bucket" "mds_static_site" {
 POLICY
 
   website {
+    // bucket root; subfolders are handled by a lambda@edge
     index_document = "index.html"
     error_document = "404.html"
   }
 }
 
 
-// top level domain
+// top level domain where subdomains are added
 data "aws_route53_zone" "tld" {
   name = "${var.root_domain_name}"
 }
 
-// TLS/SSL certificate
+// TLS/SSL certificate for the subdomain
 resource "aws_acm_certificate" "default" {
   // wildcard cert if we want to host sub-subdomains later.
   domain_name       = "*.${var.sub_domain_name}"
+  // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
 }
 
 
 // dns record to use for certificate validation
+// create the DNS entry in the root and relevant zone
 resource "aws_route53_record" "default" {
   name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
   type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
@@ -64,6 +64,7 @@ data "aws_lambda_function" "index_html" {
 
 
 // Cloudfront
+// cdn the subdomain
 resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   origin {
     // S3 bucker url
@@ -92,7 +93,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     default_ttl            = 3600
     max_ttl                = 86400
 
-    // associate "AlwaysRequestIndexHTML" lambda
+    // associate the "AlwaysRequestIndexHTML" lambda
     lambda_function_association {
       event_type = "origin-request"
       lambda_arn = "${data.aws_lambda_function.index_html.arn}"
@@ -107,7 +108,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     }
   }
 
-  // hit Cloudfront using sub domain url
+  // hit Cloudfront using the sub domain url
   aliases = ["${var.sub_domain_name}"]
 
   restrictions {
@@ -129,26 +130,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
 }
 
-
-// root/zone
-resource "aws_route53_zone" "zone" {
-  name = "${var.root_domain_name}"
-}
-
-
-// point Route53 record at CloudFront distribution.
-resource "aws_route53_record" "www" {
-  zone_id = "${aws_route53_zone.zone.zone_id}"
-  name    = "${var.sub_domain_name}"
-  type    = "CNAME"
-
-  alias = {
-    name                   = "${aws_cloudfront_distribution.sub_domain_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.sub_domain_distribution.hosted_zone_id}"
-    evaluate_target_health = false
-  }
-}
-
+// create an identity to access origin
 resource "aws_cloudfront_origin_access_identity" "edge" {
     comment = "Cloudfront ID for ${aws_s3_bucket.mds_static_site.bucket}"
 }
