@@ -26,7 +26,8 @@ POLICY
   }
 }
 
-# top level domain
+
+// top level domain
 data "aws_route53_zone" "tld" {
   name = "${var.root_domain_name}"
 }
@@ -38,7 +39,8 @@ resource "aws_acm_certificate" "default" {
   validation_method = "DNS"
 }
 
-# dns record to use for certificate validation
+
+// dns record to use for certificate validation
 resource "aws_route53_record" "default" {
   name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
   type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
@@ -47,7 +49,8 @@ resource "aws_route53_record" "default" {
   ttl     = "60"
 }
 
-# validate the certificate with the dns entry
+
+// validate the certificate with a dns entry
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = "${aws_acm_certificate.default.arn}"
   validation_record_fqdns = ["${aws_route53_record.default.fqdn}"]
@@ -86,8 +89,14 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     cached_methods         = ["GET", "HEAD"]
     target_origin_id       = "${var.sub_domain_name}"
     min_ttl                = 0
-    default_ttl            = 86400
-    max_ttl                = 31536000
+    default_ttl            = 3600
+    max_ttl                = 86400
+
+    // associate "AlwaysRequestIndexHTML" lambda
+    lambda_function_association {
+      event_type = "origin-request"
+      lambda_arn = "${data.aws_lambda_function.index_html.arn}"
+    }
 
     forwarded_values {
       query_string = true
@@ -98,7 +107,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     }
   }
 
-  // hit Cloudfront distribution using sub domain url
+  // hit Cloudfront using sub domain url
   aliases = ["${var.sub_domain_name}"]
 
   restrictions {
@@ -127,7 +136,7 @@ resource "aws_route53_zone" "zone" {
 }
 
 
-// point Route53 record will point at our CloudFront distribution.
+// point Route53 record at CloudFront distribution.
 resource "aws_route53_record" "www" {
   zone_id = "${aws_route53_zone.zone.zone_id}"
   name    = "${var.sub_domain_name}"
