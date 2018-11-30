@@ -57,9 +57,15 @@ resource "aws_acm_certificate_validation" "default" {
 }
 
 
-// get lambda information and store its metadata
+// get "AlwaysRequestIndexHTML" lambda and store its metadata
 data "aws_lambda_function" "index_html" {
   function_name = "${var.always_get_index_html_lambda}"
+}
+
+
+// get the "s3_edge_header" lambda and store its metadata
+data "aws_lambda_function" "s3_headers" {
+  function_name = "${var.s3_edge_header_lambda}"
 }
 
 
@@ -93,10 +99,16 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     default_ttl            = 3600
     max_ttl                = 86400
 
-    // associate the "AlwaysRequestIndexHTML" lambda
+    // associate the "AlwaysRequestIndexHTML" lambda with CF
     lambda_function_association {
       event_type = "origin-request"
       lambda_arn = "${data.aws_lambda_function.index_html.arn}"
+    }
+
+    // associate the "s3_edge_header" lambda with CF
+    lambda_function_association {
+      event_type = "origin-response"
+      lambda_arn = "${data.aws_lambda_function.s3_headers.arn}"
     }
 
     forwarded_values {
