@@ -18,3 +18,9 @@ variable "tags" {
   type    = "map"
   default = {}
 }
+
+variable "always_get_index_html_lambda" {
+  type    = "string"
+  default = "AlwaysRequestIndexHTML"
+  description = "The lamdas that alwasy gets index.html for static sites"
+}
