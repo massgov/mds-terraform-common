@@ -56,16 +56,17 @@ resource "aws_acm_certificate_validation" "default" {
 // Cloudfront
 resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   origin {
-    custom_origin_config {
-      http_port              = "80"
-      https_port             = "443"
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
-    }
-
     // S3 bucker url
     domain_name = "${aws_s3_bucket.mds_static_site.website_endpoint}"
+
+    // identifies the origin with a name (can be any string of choice)
     origin_id   = "${var.sub_domain_name}"
+
+    // since the s3 bucker is not directly accessed by the public
+    // identity to access the cloudfront distro
+    s3_origin_config {
+      origin_access_identity = "${aws_cloudfront_origin_access_identity.edge.cloudfront_access_identity_path}"
+    }
   }
 
   enabled             = true
