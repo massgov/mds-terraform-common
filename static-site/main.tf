@@ -53,6 +53,13 @@ resource "aws_acm_certificate_validation" "default" {
   validation_record_fqdns = ["${aws_route53_record.default.fqdn}"]
 }
 
+
+// get lambda information and store its metadata
+data "aws_lambda_function" "index_html" {
+  function_name = "${var.always_get_index_html_lambda}"
+}
+
+
 // Cloudfront
 resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   origin {
