@@ -1,7 +1,7 @@
 // S3
 // static site bucket
-resource "aws_s3_bucket" "mds_static_site" {
-  // name bucker after sub-domain name
+resource "aws_s3_bucket" "static_site" {
+  // name bucket after sub-domain name
   bucket = "${var.sub_domain_name}"
   policy = <<POLICY
 {
@@ -83,7 +83,7 @@ data "aws_lambda_function" "s3_headers" {
 resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   origin {
     // S3 bucker url
-    domain_name = "${aws_s3_bucket.mds_static_site.website_endpoint}"
+    domain_name = "${aws_s3_bucket.static_site.website_endpoint}"
 
     // identifies the origin with a name (can be any string of choice)
     origin_id   = "${var.sub_domain_name}"
@@ -155,5 +155,5 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 // Cloudfront
 // create an identity to access origin
 resource "aws_cloudfront_origin_access_identity" "edge" {
-    comment = "Cloudfront ID for ${aws_s3_bucket.mds_static_site.bucket}"
+    comment = "Cloudfront ID for ${aws_s3_bucket.static_site.bucket}"
 }
