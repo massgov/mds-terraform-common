@@ -1,6 +1,7 @@
-// S3 bucket for static site
+// S3
+// static site bucket
 resource "aws_s3_bucket" "mds_static_site" {
-  // bucket's name = domain name
+  // name bucker after sub-domain name
   bucket = "${var.sub_domain_name}"
   policy = <<POLICY
 {
@@ -18,29 +19,34 @@ resource "aws_s3_bucket" "mds_static_site" {
 POLICY
 
   website {
-    // bucket root; subfolders are handled by a lambda@edge
+    // bucket root index file
+    // subfolders are handled by a lambda@edge
     index_document = "index.html"
     error_document = "404.html"
   }
 }
 
 
-// top level domain where subdomains are added
+// Route 53
+// zone where subdomains are added
 data "aws_route53_zone" "tld" {
   name = "${var.root_domain_name}"
 }
 
+
+// AWS Certificate Manager
 // TLS/SSL certificate for the subdomain
 resource "aws_acm_certificate" "default" {
-  // wildcard cert if we want to host sub-subdomains later.
+  // wildcard cert if we want to host sub-subdomains later
   domain_name       = "*.${var.sub_domain_name}"
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
 }
 
 
+// Route 53
 // dns record to use for certificate validation
-// create the DNS entry in the root and relevant zone
+// create the DNS entry in th relevant zone
 resource "aws_route53_record" "default" {
   name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
   type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
@@ -50,19 +56,22 @@ resource "aws_route53_record" "default" {
 }
 
 
-// validate the certificate with a dns entry
+// Route 53
+// validate the certificate with dns entry
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = "${aws_acm_certificate.default.arn}"
   validation_record_fqdns = ["${aws_route53_record.default.fqdn}"]
 }
 
 
+// Lambda
 // get "AlwaysRequestIndexHTML" lambda and store its metadata
 data "aws_lambda_function" "index_html" {
   function_name = "${var.always_get_index_html_lambda}"
 }
 
 
+// Lambda
 // get the "s3_edge_header" lambda and store its metadata
 data "aws_lambda_function" "s3_headers" {
   function_name = "${var.s3_edge_header_lambda}"
@@ -142,6 +151,8 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
 
 }
 
+
+// Cloudfront
 // create an identity to access origin
 resource "aws_cloudfront_origin_access_identity" "edge" {
     comment = "Cloudfront ID for ${aws_s3_bucket.mds_static_site.bucket}"
