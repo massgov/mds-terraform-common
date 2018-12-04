@@ -1,10 +1,11 @@
-// S3 site bucket
+// S3
+// site bucket
 resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = "${var.domain_name}"
 }
 
-
+//IAM
 // OAI (Origin Access Identity) policy document
 data "aws_iam_policy_document" "oai_read" {
   statement {
@@ -28,7 +29,8 @@ data "aws_iam_policy_document" "oai_read" {
   }
 }
 
-// Apply policy to site bucket
+// S3
+// Apply policy to bucket
 resource "aws_s3_bucket_policy" "default" {
   bucket = "${aws_s3_bucket.site.id}"
   policy = "${data.aws_iam_policy_document.oai_read.json}"
@@ -155,7 +157,6 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   }
 
   tags = "${var.tags}"
-
 }
 
 
