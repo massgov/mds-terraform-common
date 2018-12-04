@@ -4,8 +4,8 @@ resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = "${var.domain_name}"
   website {
-  index_document = "index.html"
-  error_document = "404.html"
+    index_document = "index.html"
+    error_document = "404.html"
   }
 }
 
