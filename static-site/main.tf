@@ -1,15 +1,7 @@
-// S3
-// site bucket
+// S3 site bucket
 resource "aws_s3_bucket" "site" {
   // name bucket after sub-domain name
   bucket = "${var.sub_domain_name}"
-
-  website {
-    // bucket root index file
-    // subfolders are handled by a lambda@edge
-    index_document = "index.html"
-    error_document = "404.html"
-  }
 }
 
 
