@@ -1,6 +1,6 @@
 // S3 site bucket
 resource "aws_s3_bucket" "site" {
-  // name bucket after sub-domain name
+  // name bucket after domain name
   bucket = "${var.domain_name}"
 }
 
@@ -36,14 +36,14 @@ resource "aws_s3_bucket_policy" "default" {
 
 
 // Route 53
-// zone where subdomains are added
+// zone where domains are added
 data "aws_route53_zone" "tld" {
   name = "${var.root_domain_name}"
 }
 
 
 // AWS Certificate Manager
-// TLS/SSL certificate for the subdomain
+// TLS/SSL certificate for the new domain
 resource "aws_acm_certificate" "default" {
   domain_name       = "${var.domain_name}"
   // rely on a DNS entry for validating the certificate
@@ -86,7 +86,7 @@ data "aws_lambda_function" "s3_headers" {
 
 
 // Cloudfront
-// cdn the subdomain
+// cdn the domain
 resource "aws_cloudfront_distribution" "domain_distribution" {
   origin {
     // S3 bucker url
@@ -136,7 +136,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     }
   }
 
-  // hit Cloudfront using the sub domain url
+  // hit Cloudfront using the domain url
   aliases = ["${var.domain_name}"]
 
   restrictions {
