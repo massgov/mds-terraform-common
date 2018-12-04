@@ -37,8 +37,7 @@ data "aws_route53_zone" "tld" {
 // AWS Certificate Manager
 // TLS/SSL certificate for the subdomain
 resource "aws_acm_certificate" "default" {
-  // wildcard cert if we want to host sub-subdomains later
-  domain_name       = "*.${var.sub_domain_name}"
+  domain_name       = "${var.sub_domain_name}"
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
 }
