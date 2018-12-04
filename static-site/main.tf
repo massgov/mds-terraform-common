@@ -49,7 +49,6 @@ resource "aws_acm_certificate" "default" {
   validation_method = "DNS"
 }
 
-
 // Route 53
 // dns record to use for certificate validation
 // create the DNS entry in th relevant zone
@@ -61,14 +60,12 @@ resource "aws_route53_record" "verification" {
   ttl     = "60"
 }
 
-
 // Route 53
 // validate the certificate with dns entry
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = "${aws_acm_certificate.default.arn}"
   validation_record_fqdns = ["${aws_route53_record.verification.fqdn}"]
 }
-
 
 // Route 53
 // Add CNAME entry for domain
@@ -144,7 +141,6 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
   tags = "${var.tags}"
 }
-
 
 // Cloudfront
 // create an identity to access origin
