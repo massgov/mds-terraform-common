@@ -8,10 +8,10 @@ variable "root_domain_name" {
   default = "digital.mass.gov"
 }
 
-// new domain name
+// new site domain name
 variable "domain_name" {
   type        = "string"
-  description = "The full sub domain name"
+  description = "The full domain name"
 }
 
 variable "always_get_index_html_lambda" {
