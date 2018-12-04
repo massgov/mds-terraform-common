@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "oai_read" {
 
 // Apply policy to site bucket
 resource "aws_s3_bucket_policy" "default" {
-  bucket = "${aws_s3_bucket.default.id}"
+  bucket = "${aws_s3_bucket.site.id}"
   policy = "${data.aws_iam_policy_document.oai_read.json}"
 }
 
