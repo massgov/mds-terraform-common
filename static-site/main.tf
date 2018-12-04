@@ -56,7 +56,7 @@ resource "aws_acm_certificate" "default" {
 // Route 53
 // dns record to use for certificate validation
 // create the DNS entry in th relevant zone
-resource "aws_route53_record" "default" {
+resource "aws_route53_record" "verification" {
   name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
   type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
   zone_id = "${data.aws_route53_zone.tld.zone_id}"
@@ -69,7 +69,7 @@ resource "aws_route53_record" "default" {
 // validate the certificate with dns entry
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = "${aws_acm_certificate.default.arn}"
-  validation_record_fqdns = ["${aws_route53_record.default.fqdn}"]
+  validation_record_fqdns = ["${aws_route53_record.verification.fqdn}"]
 }
 
 
