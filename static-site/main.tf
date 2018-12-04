@@ -1,11 +1,15 @@
 // S3
-// site bucket
+// Site bucket
 resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = "${var.domain_name}"
+  website {
+  index_document = "index.html"
+  error_document = "404.html"
+  }
 }
 
-//IAM
+// IAM
 // OAI (Origin Access Identity) policy document
 data "aws_iam_policy_document" "oai_read" {
   statement {
@@ -38,7 +42,7 @@ resource "aws_s3_bucket_policy" "default" {
 
 
 // Route 53
-// zone where domains are added
+// TLD (Top Level Domain): zone where domains are added
 data "aws_route53_zone" "tld" {
   name = "${var.root_domain_name}"
 }
@@ -106,6 +110,12 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
   enabled             = true
   default_root_object = "index.html"
+
+  custom_error_response {
+  error_code = "404"
+  response_code = "200"
+  response_page_path = "/404.html"
+  }
 
   default_cache_behavior {
     viewer_protocol_policy = "redirect-to-https"
