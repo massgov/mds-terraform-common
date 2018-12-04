@@ -3,20 +3,6 @@
 resource "aws_s3_bucket" "site" {
   // name bucket after sub-domain name
   bucket = "${var.sub_domain_name}"
-  policy = <<POLICY
-{
-  "Version":"2012-10-17",
-  "Statement":[
-    {
-      "Sid":"AddPerm",
-      "Effect":"Allow",
-      "Principal": "*",
-      "Action":["s3:GetObject"],
-      "Resource":["arn:aws:s3:::${var.sub_domain_name}/*"]
-    }
-  ]
-}
-POLICY
 
   website {
     // bucket root index file
