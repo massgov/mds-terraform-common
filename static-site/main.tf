@@ -80,20 +80,6 @@ resource "aws_route53_record" "default" {
   records = ["${aws_cloudfront_distribution.domain_distribution.domain_name}"]
 }
 
-// Lambda
-// "AlwaysRequestIndexHTML"
-resource "aws_lambda_function" "origin_request_lambda" {
-  function_name = "${var.always_get_index_html_lambda}"
-}
-
-
-// Lambda
-// "s3_edge_header"
-resource "aws_lambda_function" "origin_response_lambda" {
-  function_name = "${var.s3_edge_header_lambda}"
-}
-
-
 // Cloudfront
 // cdn the domain
 resource "aws_cloudfront_distribution" "domain_distribution" {
@@ -129,18 +115,6 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
-
-    // associate "AlwaysRequestIndexHTML" lambda with CF
-    lambda_function_association {
-      event_type = "origin-request"
-      lambda_arn = "${aws_lambda_function.origin_request_lambda.arn}"
-    }
-
-    // associate "s3_edge_header" lambda with CF
-    lambda_function_association {
-      event_type = "origin-response"
-      lambda_arn = "${aws_lambda_function.origin_response_lambda.arn}"
-    }
 
     forwarded_values {
       query_string = true
