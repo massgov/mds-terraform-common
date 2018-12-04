@@ -112,9 +112,9 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   default_root_object = "index.html"
 
   custom_error_response {
-  error_code = "404"
-  response_code = "200"
-  response_page_path = "/404.html"
+    error_code = "404"
+    response_code = "200"
+    response_page_path = "/404.html"
   }
 
   default_cache_behavior {
@@ -141,7 +141,6 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
     forwarded_values {
       query_string = true
-      headers      = ["Host"]
       cookies {
         forward = "none"
       }
