@@ -8,8 +8,8 @@ variable "root_domain_name" {
   default = "digital.mass.gov"
 }
 
-// new statis sites are subdomains under *.digital.mass.gov
-variable "sub_domain_name" {
+// new domain name
+variable "domain_name" {
   type        = "string"
   description = "The full sub domain name"
 }

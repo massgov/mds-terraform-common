@@ -1,7 +1,7 @@
 // S3 site bucket
 resource "aws_s3_bucket" "site" {
   // name bucket after sub-domain name
-  bucket = "${var.sub_domain_name}"
+  bucket = "${var.domain_name}"
 }
 
 
@@ -45,7 +45,7 @@ data "aws_route53_zone" "tld" {
 // AWS Certificate Manager
 // TLS/SSL certificate for the subdomain
 resource "aws_acm_certificate" "default" {
-  domain_name       = "${var.sub_domain_name}"
+  domain_name       = "${var.domain_name}"
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
 }
@@ -87,13 +87,13 @@ data "aws_lambda_function" "s3_headers" {
 
 // Cloudfront
 // cdn the subdomain
-resource "aws_cloudfront_distribution" "sub_domain_distribution" {
+resource "aws_cloudfront_distribution" "domain_distribution" {
   origin {
     // S3 bucker url
     domain_name = "${aws_s3_bucket.site.website_endpoint}"
 
     // identifies the origin with a name (can be any string of choice)
-    origin_id   = "${var.sub_domain_name}"
+    origin_id   = "${var.domain_name}"
 
     // since the s3 bucker is not directly accessed by the public
     // identity to access the cloudfront distro
@@ -110,7 +110,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
     compress               = true
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "${var.sub_domain_name}"
+    target_origin_id       = "${var.domain_name}"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
@@ -137,7 +137,7 @@ resource "aws_cloudfront_distribution" "sub_domain_distribution" {
   }
 
   // hit Cloudfront using the sub domain url
-  aliases = ["${var.sub_domain_name}"]
+  aliases = ["${var.domain_name}"]
 
   restrictions {
     geo_restriction {
