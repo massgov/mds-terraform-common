@@ -1,4 +1,4 @@
-# aws region
+// aws region
 provider "aws" {
   region = "us-east-1"
 }
@@ -15,20 +15,14 @@ variable "domain_name" {
   description = "The full domain name being added."
 }
 
-// get index.html lambda
-variable "always_get_index_html_lambda" {
-  type    = "string"
-  default = "AlwaysRequestIndexHTML"
-  description = "The lambda that always get index.html for sites."
+// lambda to associate with a CloudFront distribution
+variable "lambda_arn" {
+  type        = "string"
+  description = "The lambda arn to associate with the CloudFront Distribution."
+
 }
 
-// add headers lambda
-variable "s3_edge_header_lambda" {
-  type    = "string"
-  default = "s3_edge_header"
-  description = "The lamda that adds s3 origin headers."
-}
-
+// tags
 variable "tags" {
   type    = "map"
   default = {}
