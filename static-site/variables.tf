@@ -4,8 +4,9 @@ provider "aws" {
 }
 
 // root domain name
-variable "root_domain_name" {
-  default = "digital.mass.gov"
+variable "zone_id" {
+  type        = "string"
+  description = "The zone that domain will be added to"
 }
 
 // new site domain name

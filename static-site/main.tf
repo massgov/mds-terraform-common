@@ -41,13 +41,6 @@ resource "aws_s3_bucket_policy" "default" {
 }
 
 
-// Route 53
-// TLD (Top Level Domain): zone where domains are added
-data "aws_route53_zone" "tld" {
-  name = "${var.root_domain_name}"
-}
-
-
 // AWS Certificate Manager
 // TLS/SSL certificate for the new domain
 resource "aws_acm_certificate" "default" {
@@ -63,7 +56,7 @@ resource "aws_acm_certificate" "default" {
 resource "aws_route53_record" "verification" {
   name    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_name}"
   type    = "${aws_acm_certificate.default.domain_validation_options.0.resource_record_type}"
-  zone_id = "${data.aws_route53_zone.tld.zone_id}"
+  zone_id = "${var.zone_id}"
   records = ["${aws_acm_certificate.default.domain_validation_options.0.resource_record_value}"]
   ttl     = "60"
 }
