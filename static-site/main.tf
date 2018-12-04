@@ -79,14 +79,14 @@ resource "aws_acm_certificate_validation" "default" {
 
 // Lambda
 // "AlwaysRequestIndexHTML"
-resource "aws_lambda_function" "index_html" {
+resource "aws_lambda_function" "origin_request_lambda" {
   function_name = "${var.always_get_index_html_lambda}"
 }
 
 
 // Lambda
 // "s3_edge_header"
-resource "aws_lambda_function" "s3_headers" {
+resource "aws_lambda_function" "origin_response_lambda" {
   function_name = "${var.s3_edge_header_lambda}"
 }
 
@@ -130,13 +130,13 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     // associate "AlwaysRequestIndexHTML" lambda with CF
     lambda_function_association {
       event_type = "origin-request"
-      lambda_arn = "${aws_lambda_function.index_html.arn}"
+      lambda_arn = "${aws_lambda_function.origin_request_lambda.arn}"
     }
 
     // associate "s3_edge_header" lambda with CF
     lambda_function_association {
       event_type = "origin-response"
-      lambda_arn = "${aws_lambda_function.s3_headers.arn}"
+      lambda_arn = "${aws_lambda_function.origin_response_lambda.arn}"
     }
 
     forwarded_values {
