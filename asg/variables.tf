@@ -6,7 +6,8 @@ variable "name" {
 variable "ami" {
   type        = "string"
   description = "The AMI ID to use for the instances. Keep this at the default value to automatically receive AMI updates to Amazon Linux 2"
-  default     = "ami-0aa9b70a12f8a24aa"
+  // amzn2-ami-hvm-2.0.20181114-x86_64-ebs
+  default     = "ami-0b8d0d6ac70e5750c"
 }
 
 variable "capacity" {
