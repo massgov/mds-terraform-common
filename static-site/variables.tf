@@ -22,6 +22,12 @@ variable "lambda_arn" {
 
 }
 
+// error document
+variable "error_document" {
+  default = "/404.html"
+  description = "The error document being used for errors."
+}
+
 // tags
 variable "tags" {
   type    = "map"
