@@ -3,6 +3,7 @@
 resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = "${var.domain_name}"
+
   website {
     index_document = "index.html"
     error_document = "404.html"
@@ -40,11 +41,11 @@ resource "aws_s3_bucket_policy" "default" {
   policy = "${data.aws_iam_policy_document.oai_read.json}"
 }
 
-
 // AWS Certificate Manager
 // TLS/SSL certificate for the new domain
 resource "aws_acm_certificate" "default" {
-  domain_name       = "${var.domain_name}"
+  domain_name = "${var.domain_name}"
+
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
 }
@@ -85,7 +86,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     domain_name = "${aws_s3_bucket.site.website_endpoint}"
 
     // identifies the origin with a name (can be any string of choice)
-    origin_id   = "${var.domain_name}"
+    origin_id = "${var.domain_name}"
 
     // since the s3 bucker is not directly accessed by the public
     // identity to access the cloudfront distro
@@ -98,8 +99,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   default_root_object = "index.html"
 
   custom_error_response {
-    error_code = "404"
-    response_code = "200"
+    error_code         = "404"
+    response_code      = "404"
     response_page_path = "/404.html"
   }
 
@@ -115,6 +116,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
     forwarded_values {
       query_string = true
+
       cookies {
         forward = "none"
       }
@@ -127,16 +129,17 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "none"
+
       // list of countries e.g. ["US", "CA", "GB", "DE"]
-      locations        = []
+      locations = []
     }
   }
 
   // serve with cert
   viewer_certificate {
-    acm_certificate_arn = "${aws_acm_certificate.default.arn}"
+    acm_certificate_arn      = "${aws_acm_certificate.default.arn}"
     minimum_protocol_version = "TLSv1"
-    ssl_support_method  = "sni-only"
+    ssl_support_method       = "sni-only"
   }
 
   tags = "${var.tags}"
@@ -145,5 +148,5 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 // Cloudfront
 // create an identity to access origin
 resource "aws_cloudfront_origin_access_identity" "edge" {
-    comment = "Cloudfront ID for ${aws_s3_bucket.site.bucket}"
+  comment = "Cloudfront ID for ${aws_s3_bucket.site.bucket}"
 }
