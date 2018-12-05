@@ -3,6 +3,14 @@ Changelog
 
 ## [Unreleased]
 
+## [0.5.0] - 2018-12-05
+### Added
+- [Static] Static site module to manage an S3 static site that is only accessible via Cloudfront.
+
+### Changed
+- [ECS Cluster] Bump AMI to latest Amazon Linux 2 ECS Optimized + SSM
+- [ASG] Bump AMI to latest Amazon Linux 2
+
 ## [0.4.0] - 2018-11-26
 ### Changed
 - [Lambda] Create log group as part of Lambda module so we are able to specify the retention policy.  Note: This will require that existing log groups are deleted or imported (using `terraform import`) before applying.
