@@ -16,7 +16,14 @@ variable "domain_name" {
 }
 
 // lambda to associate with a CloudFront distribution
-variable "lambda_arn" {
+variable "origin_request" {
+  type        = "string"
+  description = "The lambda arn to associate with the CloudFront Distribution."
+
+}
+
+// lambda to associate with a CloudFront distribution
+variable "origin_response" {
   type        = "string"
   description = "The lambda arn to associate with the CloudFront Distribution."
 
