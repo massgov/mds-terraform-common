@@ -18,3 +18,8 @@ output "host" {
 output "port" {
   value = "${aws_db_instance.default.port}"
 }
+
+// Security group that is allowed to access the database.
+output "accessor_security_group" {
+  value = "${aws_security_group.db_accessor.id}"
+}

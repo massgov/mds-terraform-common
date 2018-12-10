@@ -17,6 +17,7 @@ resource "aws_db_instance" "default" {
   db_subnet_group_name = "${aws_db_subnet_group.default.name}"
   vpc_security_group_ids = [
     "${var.security_groups}",
+    "${aws_security_group.db.id}"
   ]
   tags = "${merge(var.tags, map(
       "Name", "${var.name}",
@@ -24,4 +25,52 @@ resource "aws_db_instance" "default" {
       "schedulev2", "${var.instance_schedule}",
       "backup", "${var.instance_backup}"
   ))}"
+}
+
+// db security group
+resource "aws_security_group" "db" {
+  name = "${var.name}"
+  vpc_id = "${var.vpc}"
+  ingress {
+    from_port = 5432
+    protocol = "tcp"
+    to_port = 5432
+    security_groups = ["${aws_security_group.db_accessor.id}"]
+  }
+  ingress {
+    from_port = 3600
+    protocol = "tcp"
+    to_port = 3600
+    security_groups = ["${aws_security_group.db_accessor.id}"]
+  }
+  tags = "${merge(var.tags, map(
+      "Name", "${var.name}"
+  ))}"
+}
+
+// db accessor security group
+resource "aws_security_group" "db_accessor" {
+  name = "${var.name}-accessor"
+  vpc_id = "${var.vpc}"
+  tags = "${merge(var.tags, map(
+      "Name", "${var.name}-accessor"
+  ))}"
+}
+
+// db outgoing
+resource "aws_security_group_rule" "accessor_egress_to_db_postgres" {
+  from_port = 5432
+  protocol = "tcp"
+  to_port = 5432
+  type = "egress"
+  security_group_id = "${aws_security_group.db_accessor.id}"
+  source_security_group_id = "${aws_security_group.db.id}"
+}
+resource "aws_security_group_rule" "accessor_egress_to_db_mysql" {
+  from_port = 3600
+  protocol = "tcp"
+  to_port = 3600
+  type = "egress"
+  security_group_id = "${aws_security_group.db_accessor.id}"
+  source_security_group_id = "${aws_security_group.db.id}"
 }

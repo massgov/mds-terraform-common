@@ -2,9 +2,20 @@ variable "name" {
   type = "string"
 }
 
+variable "vpc" {
+  type = "string"
+  description = "ID of the VPC to launch instance into."
+}
+
 variable "subnets" {
   type        = "list"
   description = "Subnets to launch instance into"
+  default     = []
+}
+
+variable "security_groups" {
+  type        = "list"
+  description = "Security groups to apply to the instances."
   default     = []
 }
 
