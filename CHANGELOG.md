@@ -3,6 +3,10 @@ Changelog
 
 ## [Unreleased]
 
+## [0.6.0] - 2018-12-10
+### Added
+- [RDS Instance] Added RDS instance module to instantiate a single RDS instance (not appropriate for Aurora).
+
 ## [0.5.0] - 2018-12-05
 ### Added
 - [Static] Static site module to manage an S3 static site that is only accessible via Cloudfront.
