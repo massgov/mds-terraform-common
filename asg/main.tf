@@ -45,8 +45,8 @@ resource "aws_autoscaling_group" "default" {
   }
 
   name                = "${var.name}"
-  max_size            = 10
-  min_size            = 1
+  max_size            = "${var.capacity}"
+  min_size            = "${var.capacity}"
   desired_capacity    = "${var.capacity}"
   vpc_zone_identifier = ["${var.subnets}"]
 
@@ -60,4 +60,24 @@ resource "aws_autoscaling_group" "default" {
     propagate_at_launch = false
     value               = "${var.name}"
   }
+}
+
+resource "aws_autoscaling_schedule" "schedule_down" {
+  count = "${var.schedule && var.schedule_down != "" ? 1 : 0}"
+  autoscaling_group_name = "${aws_autoscaling_group.default.name}"
+  scheduled_action_name = "schedule_down"
+  recurrence = "${var.schedule_down}"
+  min_size = 0
+  max_size = 0
+  desired_capacity = 0
+}
+
+resource "aws_autoscaling_schedule" "schedule_up" {
+  count = "${var.schedule && var.schedule_up != "" ? 1 : 0}"
+  autoscaling_group_name = "${aws_autoscaling_group.default.name}"
+  scheduled_action_name = "schedule_up"
+  recurrence = "${var.schedule_up}"
+  min_size = "${var.capacity}"
+  max_size = "${var.capacity}"
+  desired_capacity = "${var.capacity}"
 }

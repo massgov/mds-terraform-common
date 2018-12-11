@@ -3,6 +3,10 @@ Changelog
 
 ## [Unreleased]
 
+## [0.7.0] - 2018-12-11
+### Added
+- [ASG] Add `schedule`, `schedule_down` and `schedule_up` properties, which control instance scheduling using the ASG scheduler.  Until we receive a config exception from EOTSS, these should be used in addition to the `schedulev2` tag (`instance_schedule` property).  Once the exception is granted, we should use `na` for the `schedulev2` tag, and exclusively use the ASG scheduling for all ASG instances. 
+
 ## [0.6.0] - 2018-12-10
 ### Added
 - [RDS Instance] Added RDS instance module to instantiate a single RDS instance (not appropriate for Aurora).

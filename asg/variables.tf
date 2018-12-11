@@ -51,14 +51,34 @@ variable "keypair" {
   description = "The name of an SSH keypair to attach to all instances."
 }
 
+variable "schedule" {
+  type = "string"
+  description = "A boolean indicating whether to automatically schedule the ASG according to the `schedule_down` and `schedule_up` variables."
+  default = false
+}
+
+variable "schedule_down" {
+  type = "string"
+  description = "A cron expression indicating when to schedule the ASG to scale down to 0 instances (defaults to 7PM EST weekdays)."
+  default = "00 00 * * 1-5"
+}
+
+variable "schedule_up" {
+  type = "string"
+  description = "A cron expression indicating when to schedule the ASG to scale up to $capacity instances (defaults to 7AM EST weekdays)"
+  default = "00 12 * * 1-5"
+}
+
 variable "instance_schedule" {
   type        = "string"
-  description = "The schedule on which to start and stop EC2 instances. Can be `na` or `1100;2300;utc;weekdays`, depending on whether this is a dev or prod environment."
+  description = "The value to use for the instance scheduling tag (schedulev2). Defaults to `na` for ASG instances, because ASGs should be scheduled via the ASG scheduler."
+  default = "na"
 }
 
 variable "instance_backup" {
   type        = "string"
   description = "Backup instructions for EC2 instances"
+  default = "na"
 }
 
 variable "instance_patch_group" {
