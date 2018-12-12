@@ -60,7 +60,7 @@ variable "schedule" {
 variable "schedule_down" {
   type = "string"
   description = "A cron expression indicating when to schedule the ASG to scale down to 0 instances (defaults to 7PM EST weekdays)."
-  default = "00 00 * * 1-5"
+  default = "59 23 * * 1-5"
 }
 
 variable "schedule_up" {
