@@ -65,9 +65,12 @@ resource "aws_iam_role_policy" "additional_policies" {
 /**
  * Scheduling
  */
+locals {
+  do_schedule = "${length(var.schedule)}"
+}
 resource "aws_cloudwatch_event_rule" "schedule" {
   count = "${length(var.schedule)}"
-  name = "${var.name}-${element(keys(var.schedule), count.index)}"
+  name = "${local.do_schedule ? "${var.name}-${element(keys(var.schedule), count.index)}" : ""}"
   schedule_expression = "${element(values(var.schedule), count.index)}"
 }
 resource "aws_cloudwatch_event_target" "schedule_target" {
