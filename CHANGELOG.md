@@ -3,6 +3,10 @@ Changelog
 
 ## [Unreleased]
 
+## [0.10.0] - 2019-01-30
+### Fixed
+- [Lambda] Fix an error that was causing the lambda module to fail when invoked with an empty schedule ({}).
+
 ## [0.9.0] - 2018-12-13
 ### Changed
 - [RDS Instance] Set sane defaults for the maintenance window, snapshot tagging, and deletion protection.
