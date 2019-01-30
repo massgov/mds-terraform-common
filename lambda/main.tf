@@ -78,7 +78,7 @@ resource "aws_cloudwatch_event_target" "schedule_target" {
 }
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
   count = "${aws_cloudwatch_event_rule.schedule.count}"
-  statement_id = "${var.name}-${element(keys(var.schedule), count.index)}"
+  statement_id = "${element(aws_cloudwatch_event_rule.schedule.*.name), count.index}"
   action = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.default.function_name}"
   principal = "events.amazonaws.com"
