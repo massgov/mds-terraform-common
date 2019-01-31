@@ -7,6 +7,7 @@ resource "aws_lambda_function" "default" {
   source_code_hash = "${base64sha256(file("${var.package}"))}"
   runtime = "${var.runtime}"
   timeout = "${var.timeout}"
+  version = true
   vpc_config {
     security_group_ids = ["${var.security_groups}"]
     subnet_ids = ["${var.subnets}"]
