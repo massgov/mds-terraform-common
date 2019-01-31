@@ -12,7 +12,7 @@ resource "aws_lambda_function" "default" {
     security_group_ids = ["${var.security_groups}"]
     subnet_ids = ["${var.subnets}"]
   }
-  environment = "${local.environment}"
+  environment = "${var.environment}"
   tags = "${merge(var.tags, map(
       "Name", "${var.name}"
   ))}"
