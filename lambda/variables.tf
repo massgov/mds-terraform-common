@@ -24,7 +24,7 @@ variable "subnets" {
   type = "list"
   default = []
 }
-variable "environment_variables" {
+variable "environment" {
   type = "map"
   default = {}
 }
