@@ -3,6 +3,15 @@ Changelog
 
 ## [Unreleased]
 
+## [0.11.0] - 2019-02-01
+### BREAKING
+- [Lambda] Remove `environment_variables` option.  It's been replaced by `environment`.
+### Added
+- [Lambda] Add `environment` option for lambda.  This is the new way to specify environment variables for a Lambda function.  The old way would not allow us to have no environment variables (required for Lambda@Edge).
+### Changed
+- [Lambda] Allow lambda@edge to assume the created Lambda role.
+- [Lambda] Use function versioning.
+
 ## [0.10.0] - 2019-01-30
 ### Fixed
 - [Lambda] Fix an error that was causing the lambda module to fail when invoked with an empty schedule ({}).
