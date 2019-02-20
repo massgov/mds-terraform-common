@@ -54,11 +54,13 @@ variable "keypair" {
 variable "target_group_arns" {
   type = "list"
   description = "A list of target group ARNs to pass to the ASG. See https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#target_group_arns"
+  default = []
 }
 
 variable "load_balancers" {
   type = "list"
   description = "A list of load balancers to pass to the ASG. See https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html#load_balancers"
+  default = []
 }
 
 variable "schedule" {
