@@ -3,6 +3,10 @@ Changelog
 
 ## [Unreleased]
 
+## [0.13.0] - 2019-02-20
+### Added
+- [ASG] Add `target_group_arns` and `load_balancers` properties to ASG module to support NLB usage.
+
 ## [0.11.0] - 2019-02-01
 ### BREAKING
 - [Lambda] Remove `environment_variables` option.  It's been replaced by `environment`.
