@@ -49,6 +49,8 @@ resource "aws_autoscaling_group" "default" {
   min_size            = "${var.capacity}"
   desired_capacity    = "${var.capacity}"
   vpc_zone_identifier = ["${var.subnets}"]
+  target_group_arns = ["${var.target_group_arns}"]
+  load_balancers = ["${var.load_balancers}"]
 
   launch_template {
     id      = "${aws_launch_template.default.id}"
