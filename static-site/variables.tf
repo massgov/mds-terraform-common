@@ -19,6 +19,7 @@ variable "domain_name" {
 variable "origin_id" {
   type        = "string"
   description = "Unique identifier for the CloudFront domain"
+  default = "default"
 }
 
 // error document
