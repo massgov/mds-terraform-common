@@ -109,7 +109,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     compress               = true
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "${var.domain_name}"
+    target_origin_id       = "${var.origin_id}"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
