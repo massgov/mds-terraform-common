@@ -83,10 +83,10 @@ resource "aws_route53_record" "default" {
 resource "aws_cloudfront_distribution" "domain_distribution" {
   origin {
     // S3 bucker url
-    domain_name = "${aws_s3_bucket.site.website_endpoint}"
+    domain_name = "${aws_s3_bucket.site.bucket_regional_domain_name}"
 
     // identifies the origin with a name (can be any string of choice)
-    origin_id = "${var.domain_name}"
+    origin_id = "${var.origin_id}"
 
     // since the s3 bucker is not directly accessed by the public
     // identity to access the cloudfront distro

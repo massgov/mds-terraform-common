@@ -15,11 +15,16 @@ variable "domain_name" {
   description = "The full domain name being added."
 }
 
+// new site origin id
+variable "origin_id" {
+  type        = "string"
+  description = "Unique identifier for the CloudFront domain"
+}
+
 // lambda to associate with a CloudFront distribution
 variable "origin_request_lambda_arn" {
   type        = "string"
   description = "Lambda origin-request arn to associate with the CloudFront."
-
 }
 
 // lambda to associate with a CloudFront distribution
