@@ -21,19 +21,6 @@ variable "origin_id" {
   description = "Unique identifier for the CloudFront domain"
 }
 
-// lambda to associate with a CloudFront distribution
-variable "origin_request_lambda_arn" {
-  type        = "string"
-  description = "Lambda origin-request arn to associate with the CloudFront."
-}
-
-// lambda to associate with a CloudFront distribution
-variable "origin_response_lambda_arn" {
-  type        = "string"
-  description = "Lambda origin-response arn to associate with the CloudFront."
-
-}
-
 // error document
 variable "error_document" {
   default = "/404.html"
