@@ -33,3 +33,10 @@ variable "tags" {
   type    = "map"
   default = {}
 }
+
+// data classification
+// private/public status
+variable "data_tags" {
+  type    = "map"
+  default = {}
+}
