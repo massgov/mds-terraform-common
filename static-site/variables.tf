@@ -42,5 +42,5 @@ variable "data_classification" {
 
 variable "public_state" {
   type        = "string"
-  description = "Whhether the S3 bucket is public or private."
+  description = "Whether the S3 bucket is public or private."
 }
