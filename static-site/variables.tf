@@ -34,9 +34,13 @@ variable "tags" {
   default = {}
 }
 
-// data classification
-// private/public status
-variable "data_tags" {
-  type    = "map"
-  default = {}
+
+variable "data_classification" {
+  type        = "string"
+  description = "Data classification."
+}
+
+variable "public_state" {
+  type        = "string"
+  description = "Whhether the S3 bucket is public or private."
 }

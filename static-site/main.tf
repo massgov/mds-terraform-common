@@ -9,7 +9,11 @@ resource "aws_s3_bucket" "site" {
     error_document = "${var.error_document}"
   }
 
-  tags = "${var.tags}"
+  tags = "${merge(var.tags, map(
+      "classification", "${var.data_classification}"
+      "public", "${var.public_state}"
+    ))}"
+
 }
 
 // IAM
