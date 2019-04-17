@@ -5,7 +5,7 @@ variable "name" {
 variable "human_name" {
   type = "string"
   description = "A human readable name for the function (used in alerting)."
-  default = false
+  default = ""
 }
 variable "package" {
   type = "string"

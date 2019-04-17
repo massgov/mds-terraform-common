@@ -3,6 +3,10 @@ Changelog
 
 ## [Unreleased]
 
+## [0.19.0] - 2019-04-17
+### Changed
+- [Lambda] Use human readable names for Cloudwatch alarm name/description.
+
 ## [0.18.1] - 2019-03-28
 ### Fixed
 - [Static] Add `Name` tag to the S3 bucket being used for the static site.
