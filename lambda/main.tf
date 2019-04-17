@@ -99,7 +99,8 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
  */
 resource "aws_cloudwatch_metric_alarm" "alarm" {
   count = "${length(var.error_topics)}"
-  alarm_name = "${var.name}-failures"
+  alarm_name = "Lambda error for ${var.human_name ? var.human_name : var.name}"
+  alarm_description = "The Lambda function ${var.human_name ? var.human_name : var.name} has errored"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = 1
   metric_name = "Errors"
@@ -111,5 +112,5 @@ resource "aws_cloudwatch_metric_alarm" "alarm" {
     FunctionName = "${aws_lambda_function.default.function_name}"
   }
   alarm_actions             = ["${element(var.error_topics, count.index)}"]
-  treat_missing_data = "ignore"
+  treat_missing_data = "notBreaching"
 }
