@@ -99,8 +99,8 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
  */
 resource "aws_cloudwatch_metric_alarm" "alarm" {
   count = "${length(var.error_topics)}"
-  alarm_name = "Lambda error for ${var.human_name ? var.human_name : var.name}"
-  alarm_description = "The Lambda function ${var.human_name ? var.human_name : var.name} has errored"
+  alarm_name = "Lambda error for ${coalesce(var.human_name, var.name)}"
+  alarm_description = "The Lambda function ${coalesce(var.human_name, var.name)} has errored"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = 1
   metric_name = "Errors"
