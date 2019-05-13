@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
     actions = ["kms:Decrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.arn}"]
     condition {
-      test = "StringEquals"
+      test = "StringLike"
       values = ["${local.parameter_arn}"]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
