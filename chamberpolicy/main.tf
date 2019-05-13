@@ -8,31 +8,39 @@ data "aws_kms_alias" "chamber_key" {
 locals {
   region = "${coalesce(var.region, data.aws_region.current.name)}"
   account_id = "${coalesce(var.account_id, data.aws_caller_identity.current.account_id)}"
-  parameter_arn = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${var.namespace}"
+  all_parameters_arn = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/*"
+  namespace_parameters_arn = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${var.namespace}"
 }
 
 data "aws_iam_policy_document" "read_policy" {
   statement {
+    actions = ["ssm:DescribeParameters"]
+    resources = ["arn:aws:ssm:${local.all_parameters_arn}"]
+  }
+  statement {
     actions = [
       "ssm:GetParameter",
       "ssm:GetParameters",
-      "ssm:GetParametersByPath",
-      "ssm:DescribeParameters"
+      "ssm:GetParametersByPath"
     ]
-    resources = ["${local.parameter_arn}"]
+    resources = ["${local.namespace_parameters_arn}"]
   }
   statement {
     actions = ["kms:Decrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
     condition {
       test = "StringEquals"
-      values = ["${local.parameter_arn}"]
+      values = ["${local.namespace_parameters_arn}"]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
   }
 }
 
 data "aws_iam_policy_document" "readwrite_policy" {
+  statement {
+    actions = ["ssm:DescribeParameters"]
+    resources = ["arn:aws:ssm:${local.all_parameters_arn}"]
+  }
   statement {
     actions = [
       "ssm:GetParameter",
@@ -50,7 +58,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
     resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
     condition {
       test = "StringLike"
-      values = ["${local.parameter_arn}"]
+      values = ["${local.namespace_parameters_arn}"]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
   }
