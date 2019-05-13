@@ -13,7 +13,6 @@ locals {
 
 data "aws_iam_policy_document" "read_policy" {
   statement {
-    sid = "Allow read access to SSM"
     actions = [
       "ssm:GetParameter",
       "ssm:GetParameters",
@@ -23,7 +22,6 @@ data "aws_iam_policy_document" "read_policy" {
     resources = ["${local.parameter_arn}"]
   }
   statement {
-    sid = "Allow decrypt access to KMS"
     actions = ["kms:Decrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.arn}"]
     condition {
@@ -36,7 +34,6 @@ data "aws_iam_policy_document" "read_policy" {
 
 data "aws_iam_policy_document" "readwrite_policy" {
   statement {
-    sid = "Allow read/write access to SSM"
     actions = [
       "ssm:GetParameter",
       "ssm:GetParameters",
@@ -49,7 +46,6 @@ data "aws_iam_policy_document" "readwrite_policy" {
   }
   // Read (decrypt)
   statement {
-    sid = "Allow decrypt access to KMS"
     actions = ["kms:Decrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.arn}"]
     condition {
@@ -60,7 +56,6 @@ data "aws_iam_policy_document" "readwrite_policy" {
   }
   // Write (encrypt)
   statement {
-    sid = "Allow encrypt access to KMS"
     actions = ["kms:Encrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.arn}"]
   }
