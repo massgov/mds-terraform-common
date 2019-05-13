@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "read_policy" {
   }
   statement {
     actions = ["kms:Decrypt"]
-    resources = ["${data.aws_kms_alias.chamber_key.arn}"]
+    resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
     condition {
       test = "StringEquals"
       values = ["${local.parameter_arn}"]
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
   // Read (decrypt)
   statement {
     actions = ["kms:Decrypt"]
-    resources = ["${data.aws_kms_alias.chamber_key.arn}"]
+    resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
     condition {
       test = "StringLike"
       values = ["${local.parameter_arn}"]
@@ -57,6 +57,6 @@ data "aws_iam_policy_document" "readwrite_policy" {
   // Write (encrypt)
   statement {
     actions = ["kms:Encrypt"]
-    resources = ["${data.aws_kms_alias.chamber_key.arn}"]
+    resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
   }
 }
