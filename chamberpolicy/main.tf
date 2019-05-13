@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "read_policy" {
     actions = ["kms:Decrypt"]
     resources = ["${data.aws_kms_alias.chamber_key.target_key_arn}"]
     condition {
-      test = "StringEquals"
+      test = "StringLike"
       values = ["${local.namespace_parameters_arn}"]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
