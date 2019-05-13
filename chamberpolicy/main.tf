@@ -8,14 +8,13 @@ data "aws_kms_alias" "chamber_key" {
 locals {
   region = "${coalesce(var.region, data.aws_region.current.name)}"
   account_id = "${coalesce(var.account_id, data.aws_caller_identity.current.account_id)}"
-  all_parameters_arn = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/*"
   namespace_parameters_arn = "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${var.namespace}"
 }
 
 data "aws_iam_policy_document" "read_policy" {
   statement {
     actions = ["ssm:DescribeParameters"]
-    resources = ["arn:aws:ssm:${local.all_parameters_arn}"]
+    resources = ["*"]
   }
   statement {
     actions = [
@@ -39,7 +38,7 @@ data "aws_iam_policy_document" "read_policy" {
 data "aws_iam_policy_document" "readwrite_policy" {
   statement {
     actions = ["ssm:DescribeParameters"]
-    resources = ["arn:aws:ssm:${local.all_parameters_arn}"]
+    resources = ["*"]
   }
   statement {
     actions = [
