@@ -2,12 +2,12 @@
 variable "region" {
   type = "string"
   description = "The AWS region to scope access to (defaults to current region)."
-  default = false
+  default = ""
 }
 variable "account_id" {
   type = "string"
   description = "The AWS account ID to scope access to (defaults to current account)."
-  default = false
+  default = ""
 
 }
 variable "key_alias" {
