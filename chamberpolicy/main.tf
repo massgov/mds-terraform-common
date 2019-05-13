@@ -16,6 +16,7 @@ data "aws_iam_policy_document" "read_policy" {
     actions = [
       "ssm:GetParameter",
       "ssm:GetParameters",
+      "ssm:GetParametersByPath",
       "ssm:DescribeParameters"
     ]
     resources = ["${local.parameter_arn}"]
