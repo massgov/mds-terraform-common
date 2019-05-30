@@ -5,31 +5,33 @@ provider "aws" {
 
 // root domain name
 variable "zone_id" {
-  type        = "string"
+  type        = string
   description = "The zone that domain will be added to."
 }
 
 // new site domain name
 variable "domain_name" {
-  type        = "string"
+  type        = string
   description = "The full domain name being added."
 }
 
 // new site origin id
 variable "origin_id" {
-  type        = "string"
+  type        = string
   description = "Unique identifier for the CloudFront domain"
-  default = "default"
+  default     = "default"
 }
 
 // error document
 variable "error_document" {
-  default = "/404.html"
+  default     = "/404.html"
   description = "The error document being used for errors."
 }
 
 // tags
 variable "tags" {
-  type    = "map"
-  default = {}
+  type = map(string)
+  default = {
+  }
 }
+
