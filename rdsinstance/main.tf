@@ -21,6 +21,8 @@ resource "aws_db_instance" "default" {
   storage_encrypted = "${var.storage_encrypted}"
   parameter_group_name = "${var.parameter_group_name}"
   db_subnet_group_name = "${aws_db_subnet_group.default.name}"
+  performance_insights_enabled = true
+  performance_insights_retention_period = 7
   vpc_security_group_ids = [
     "${var.security_groups}",
     "${aws_security_group.db.id}"
