@@ -3,6 +3,11 @@ Changelog
 
 ## [Unreleased]
 
+## [0.20.1] - 2019-05-31
+
+### Changed
+- [RDS Instance] Use performance insights 
+
 ## [0.20.0] - 2019-05-13
 
 ### Added
