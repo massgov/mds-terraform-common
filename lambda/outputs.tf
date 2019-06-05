@@ -20,6 +20,6 @@ output "function_version" {
 }
 
 // Developer IAM policy.
-output "developer_policy" {
-  value = "${data.aws_iam_policy_document.developer.json}"
+output "developer_policies" {
+  value = ["${data.aws_iam_policy_document.developer.json}"]
 }
