@@ -38,3 +38,39 @@ data "template_file" "instance_init" {
     cluster_name = "${aws_ecs_cluster.cluster.name}"
   }
 }
+
+data "aws_iam_policy_document" "developer" {
+  statement {
+    effect = "Allow"
+    actions = ["ecs:ListClusters"]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeClusters",
+      "ecs:ListContainerInstances",
+      "ecs:ListAttributes",
+      "ecs:SubmitContainerStateChange",
+      "ecs:SubmitTaskStateChange"
+    ]
+    resources = ["${aws_ecs_cluster.cluster.arn}"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:DescribeTasks",
+      "ecs:ListTasks",
+      "ecs:DescribeContainerInstances",
+      "ecs:StartTask",
+      "ecs:StopTask",
+      "ecs:Poll",
+    ]
+    resources = ["*"]
+    condition {
+      test = "ArnEquals"
+      values = ["${aws_ecs_cluster.cluster.arn}"]
+      variable = "ecs:cluster"
+    }
+  }
+}
