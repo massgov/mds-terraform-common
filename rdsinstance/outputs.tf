@@ -23,3 +23,7 @@ output "port" {
 output "accessor_security_group" {
   value = "${aws_security_group.db_accessor.id}"
 }
+
+output "developer_policy" {
+  value = "${data.aws_iam_policy_document.developer.json}"
+}
