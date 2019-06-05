@@ -114,3 +114,39 @@ resource "aws_cloudwatch_metric_alarm" "alarm" {
   alarm_actions             = ["${element(var.error_topics, count.index)}"]
   treat_missing_data = "notBreaching"
 }
+
+/**
+ * Developer policy
+ */
+data "aws_iam_policy_document" "developer" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:ListFunctions",
+      "lambda:ListTags",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:Get*",
+      "lambda:List*"
+    ]
+    resources = ["${aws_lambda_function.default.arn}"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "lambda:ListEventSourceMappings",
+      "lambda:GetEventSourceMapping"
+    ]
+    resources = ["*"]
+    condition {
+      test = "ArnLike"
+      values = ["${aws_lambda_function.default.arn}"]
+      variable = "lambda:FunctionArn"
+    }
+  }
+}
