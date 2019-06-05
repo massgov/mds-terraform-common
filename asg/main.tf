@@ -111,6 +111,7 @@ data "aws_iam_policy_document" "developer" {
       "ec2:TerminateInstances",
       "ec2:RebootInstances"
     ]
+    resources = ["*"]
     condition {
       test = "StringEquals"
       values = ["${var.name}"]
