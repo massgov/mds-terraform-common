@@ -87,21 +87,23 @@ data "aws_iam_policy_document" "developer" {
   // Access to list instances.
   statement {
     effect = "Allow"
-    actions = ["rds:DescribeDBInstances"]
+    actions = [
+      "rds:DescribeDBInstances",
+      "rds:DescribeDBClusters",
+      "rds:DescribeGlobalClusters"
+    ]
     resources = ["*"]
   }
   // Read/write ops on specific instance.
   statement {
     effect = "Allow"
     actions = [
+      "rds:Describe*",
       "rds:StopDBInstance",
       "rds:StartDBInstance",
       "rds:RebootDBInstance",
       "rds:DownloadDBLogFilePortion",
       "rds:ListTagsForResource",
-      "rds:DescribePendingMaintenanceActions",
-      "rds:DescribeDBSnapshots",
-      "rds:DescribeDBLogFiles",
       "rds:CreateDBSnapshot"
     ]
     resources = ["${aws_db_instance.default.arn}"]
@@ -112,6 +114,6 @@ data "aws_iam_policy_document" "developer" {
     actions = [
       "pi:*"
     ]
-    resources = ["arn:aws:pi:*:*:metrics/rds/*"]
+    resources = ["arn:aws:pi:*:*:metrics/rds/${aws_db_instance.default.resource_id}"]
   }
 }
