@@ -18,3 +18,8 @@ output "function_qualified_arn" {
 output "function_version" {
   value = "${aws_lambda_function.default.version}"
 }
+
+// Developer IAM policy.
+output "developer_policy" {
+  value = "${data.aws_iam_policy_document.developer.json}"
+}
