@@ -40,28 +40,30 @@ data "template_file" "instance_init" {
 }
 
 data "aws_iam_policy_document" "developer" {
+  // @todo: There's currently no way to allow describing of services on a per-resource level.
   statement {
     effect = "Allow"
-    actions = ["ecs:ListClusters"]
+    actions = [
+      "ecs:ListClusters",
+      "ecs:ListServices",
+      "ecs:DescribeClusters",
+      "cloudwatch:GetMetricStatistics"
+    ]
     resources = ["*"]
   }
   statement {
     effect = "Allow"
     actions = [
-      "ecs:DescribeClusters",
-      "ecs:ListContainerInstances",
-      "ecs:ListAttributes",
-      "ecs:SubmitContainerStateChange",
-      "ecs:SubmitTaskStateChange"
+      "ecs:List*",
+      "ecs:Describe*",
     ]
     resources = ["${aws_ecs_cluster.cluster.arn}"]
   }
   statement {
     effect = "Allow"
     actions = [
-      "ecs:DescribeTasks",
-      "ecs:ListTasks",
-      "ecs:DescribeContainerInstances",
+      "ecs:Describe*",
+      "ecs:List*",
       "ecs:StartTask",
       "ecs:StopTask",
       "ecs:Poll",
