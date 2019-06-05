@@ -10,5 +10,5 @@ output "ecs_cluster" {
 
 // Developer policies.
 output "developer_policies" {
-  value = ["${data.aws_iam_policy_document.developer.json}"]
+  value = ["${data.aws_iam_policy_document.developer.json}", "${module.asg.developer_policies}"]
 }

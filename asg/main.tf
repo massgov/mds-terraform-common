@@ -93,3 +93,11 @@ resource "aws_autoscaling_schedule" "schedule_up" {
   max_size = "${var.capacity}"
   desired_capacity = "${var.capacity}"
 }
+
+data "aws_iam_policy_document" "developer" {
+  statement {
+    effect = "Allow"
+    actions = ["ec2:DescribeInstances"]
+    resources = ["*"]
+  }
+}

@@ -114,6 +114,6 @@ data "aws_iam_policy_document" "developer" {
     actions = [
       "pi:*"
     ]
-    resources = ["arn:aws:pi:*:*:metrics/rds/${aws_db_instance.default.resource_id}"]
+    resources = ["arn:aws:pi:*:*:metrics/rds/*"]
   }
 }

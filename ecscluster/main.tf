@@ -47,7 +47,9 @@ data "aws_iam_policy_document" "developer" {
       "ecs:ListClusters",
       "ecs:ListServices",
       "ecs:DescribeClusters",
-      "cloudwatch:GetMetricStatistics"
+      "cloudwatch:GetMetricStatistics",
+      // Allows scheduled task visibility
+      "events:ListRuleNamesByTarget",
     ]
     resources = ["*"]
   }
