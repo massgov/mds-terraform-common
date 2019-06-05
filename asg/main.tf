@@ -100,7 +100,10 @@ data "aws_iam_policy_document" "developer" {
     actions = [
       "ec2:DescribeInstances",
       "ec2:DescribeInstanceStatus",
-      "ec2:DescribePrincipalIdFormat"
+      "ec2:DescribePrincipalIdFormat",
+      "ec2:DescribeLaunchTemplates",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeSubnets"
     ]
     resources = ["*"]
   }
