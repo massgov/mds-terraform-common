@@ -97,7 +97,24 @@ resource "aws_autoscaling_schedule" "schedule_up" {
 data "aws_iam_policy_document" "developer" {
   statement {
     effect = "Allow"
-    actions = ["ec2:DescribeInstances"]
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
+      "ec2:DescribePrincipalIdFormat"
+    ]
     resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:StopInstances",
+      "ec2:TerminateInstances",
+      "ec2:RebootInstances"
+    ]
+    condition {
+      test = "StringEquals"
+      values = ["${var.name}"]
+      variable = "ec2:ResourceTag/aws:autoscaling:groupName"
+    }
   }
 }
