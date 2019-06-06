@@ -82,38 +82,3 @@ resource "aws_security_group_rule" "accessor_egress_to_db_mysql" {
   security_group_id = "${aws_security_group.db_accessor.id}"
   source_security_group_id = "${aws_security_group.db.id}"
 }
-
-data "aws_iam_policy_document" "developer" {
-  // Access to list instances.
-  statement {
-    effect = "Allow"
-    actions = [
-      "rds:DescribeDBInstances",
-      "rds:DescribeDBClusters",
-      "rds:DescribeGlobalClusters"
-    ]
-    resources = ["*"]
-  }
-  // Read/write ops on specific instance.
-  statement {
-    effect = "Allow"
-    actions = [
-      "rds:Describe*",
-      "rds:StopDBInstance",
-      "rds:StartDBInstance",
-      "rds:RebootDBInstance",
-      "rds:DownloadDBLogFilePortion",
-      "rds:ListTagsForResource",
-      "rds:CreateDBSnapshot"
-    ]
-    resources = ["${aws_db_instance.default.arn}"]
-  }
-  // Performance insights access.
-  statement {
-    effect = "Allow"
-    actions = [
-      "pi:*"
-    ]
-    resources = ["arn:aws:pi:*:*:metrics/rds/*"]
-  }
-}

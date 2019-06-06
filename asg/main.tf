@@ -93,32 +93,3 @@ resource "aws_autoscaling_schedule" "schedule_up" {
   max_size = "${var.capacity}"
   desired_capacity = "${var.capacity}"
 }
-
-data "aws_iam_policy_document" "developer" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:DescribeInstances",
-      "ec2:DescribeInstanceStatus",
-      "ec2:DescribePrincipalIdFormat",
-      "ec2:DescribeLaunchTemplates",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeSubnets"
-    ]
-    resources = ["*"]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "ec2:StopInstances",
-      "ec2:TerminateInstances",
-      "ec2:RebootInstances"
-    ]
-    resources = ["*"]
-    condition {
-      test = "StringEquals"
-      values = ["${var.name}"]
-      variable = "ec2:ResourceTag/aws:autoscaling:groupName"
-    }
-  }
-}
