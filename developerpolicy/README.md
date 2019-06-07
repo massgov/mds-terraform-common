@@ -8,6 +8,8 @@ This Terraform module is a generic solution for granting "developer" level acces
 * **SSM Session Manager**: Allows console access, and session manager access to the project's EC2 instances.
 * **Cloudwatch**: Allows console access, access to ALL metrics in the account, and log access for any of the project's log streams.
 
+Since these are the only services that allow for tag based access control, all other access has to be granted outside of this policy.
+
 To use this policy, make sure all resources are tagged with the following two tags:
 
 * `application`: Defines the name of the application (eg: `etl`).
