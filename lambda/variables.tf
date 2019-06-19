@@ -37,7 +37,9 @@ variable "subnets" {
 }
 
 variable "environment" {
-  type = map(string)
+  type = object({
+    variables = map(string)
+  })
   default = {
   }
 }
