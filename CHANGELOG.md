@@ -3,6 +3,9 @@ Changelog
 
 ## [Unreleased]
 
+### Added
+- [VPC Read] Added a Terraform module to obtain data about a VPC and its subnets.
+
 ## [0.23.0] - 2019-06-17
 
 ### Changed
