@@ -3,6 +3,23 @@ Changelog
 
 ## [Unreleased]
 
+## [0.23.0] - 2019-06-17
+
+### Changed
+- [ASG] Rebuilt AMI for updated version of SSM agent, Amazon Linux 2
+- [ECS Cluster] Rebuilt AMI for updated version of SSM agent, Amazon Linux 2, ECS Agent.
+
+## [0.22.0] - 2019-06-11
+
+### Added
+- [Developer Policy] Added developer policy module to manage developer level access to resources that can be controlled with tags.
+- [Lambda] Added developer policy output for allowing developers to manipulate the function.
+
+## [0.21.0] - 2019-05-31
+
+### Changed
+- [RDS Instance] Use performance insights 
+
 ## [0.20.0] - 2019-05-13
 
 ### Added

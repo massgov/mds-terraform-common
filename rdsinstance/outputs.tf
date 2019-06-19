@@ -22,4 +22,3 @@ output "port" {
 output "accessor_security_group" {
   value = aws_security_group.db_accessor.id
 }
-

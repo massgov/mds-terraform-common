@@ -99,4 +99,3 @@ resource "aws_autoscaling_schedule" "schedule_up" {
   max_size               = var.capacity
   desired_capacity       = var.capacity
 }
-
