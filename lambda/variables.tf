@@ -40,8 +40,7 @@ variable "environment" {
   type = object({
     variables = map(string)
   })
-  default = {
-  }
+  default = null
 }
 
 variable "iam_policy_arns" {

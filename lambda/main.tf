@@ -20,7 +20,7 @@ resource "aws_lambda_function" "default" {
   # Use slice to get option "b" or "c" depending on whether a non-empty
   # value was passed into this module.
   dynamic "environment" {
-    for_each = [slice([var.environment], 0, length(var.environment) == 0 ? 0 : 1)]
+    for_each = var.environment == null ? [] : [var.environment]
     content {
       variables = environment.value.variables
     }
