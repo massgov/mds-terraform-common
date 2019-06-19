@@ -1,5 +1,5 @@
-
 variable "vpc_name" {
-  type = "string"
+  type        = string
   description = "The full VPC name"
 }
+
