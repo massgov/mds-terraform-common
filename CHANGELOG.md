@@ -3,8 +3,13 @@ Changelog
 
 ## [Unreleased]
 
+## [1.0.0] - 2019-06-19
+
 ### Added
 - [VPC Read] Added a Terraform module to obtain data about a VPC and its subnets.
+
+### Changed
+- [ALL] Updated all Terraform modules for Terraform 0.12. Other than updating the using code to 0.12 syntax, no other changes should be required. We've likely introduced some bugs here, which we'll work through in the coming releases.s
 
 ## [0.23.0] - 2019-06-17
 
