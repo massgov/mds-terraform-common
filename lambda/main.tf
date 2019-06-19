@@ -26,10 +26,10 @@ resource "aws_lambda_function" "default" {
     }
   }
   tags = merge(
-    var.tags,
-    {
-      "Name" = var.name
-    },
+  var.tags,
+  {
+    "Name" = var.name
+  },
   )
 }
 
@@ -40,10 +40,10 @@ resource "aws_cloudwatch_log_group" "logs" {
   name              = "/aws/lambda/${var.name}"
   retention_in_days = 30
   tags = merge(
-    var.tags,
-    {
-      "Name" = var.name
-    },
+  var.tags,
+  {
+    "Name" = var.name
+  },
   )
 }
 
@@ -95,14 +95,14 @@ resource "aws_cloudwatch_event_rule" "schedule" {
 }
 
 resource "aws_cloudwatch_event_target" "schedule_target" {
-  count     = length(aws_cloudwatch_event_rule.schedule)
+  count = length(var.schedule)
   arn       = aws_lambda_function.default.arn
   rule      = element(aws_cloudwatch_event_rule.schedule.*.name, count.index)
   target_id = "${var.name}_${count.index}"
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda" {
-  count         = length(aws_cloudwatch_event_rule.schedule)
+  count         = length(var.schedule)
   statement_id  = element(aws_cloudwatch_event_rule.schedule.*.name, count.index)
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.default.function_name
