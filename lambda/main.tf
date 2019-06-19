@@ -22,7 +22,7 @@ resource "aws_lambda_function" "default" {
   dynamic "environment" {
     for_each = [slice([var.environment], 0, length(var.environment) == 0 ? 0 : 1)]
     content {
-      variables = environment.value.variable
+      variables = environment.value.variables
     }
   }
   tags = merge(
