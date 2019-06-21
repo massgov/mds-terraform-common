@@ -25,7 +25,7 @@ resource "aws_db_instance" "default" {
   performance_insights_retention_period = 7
   vpc_security_group_ids = [
     var.security_groups,
-    aws_security_group.db.id"
+    aws_security_group.db.id
   ]
   tags = "${merge(var.tags, map(
       "Name", "${var.name}",
