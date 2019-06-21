@@ -23,10 +23,10 @@ resource "aws_db_instance" "default" {
   db_subnet_group_name = "${aws_db_subnet_group.default.name}"
   performance_insights_enabled = true
   performance_insights_retention_period = 7
-  vpc_security_group_ids = [
+  vpc_security_group_ids = flatten([
     "${var.security_groups}",
     "${aws_security_group.db.id}"
-  ]
+  ])
   tags = "${merge(var.tags, map(
       "Name", "${var.name}",
       "Patch Group", "${var.instance_patch_group}",
