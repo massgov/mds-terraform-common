@@ -1,12 +1,12 @@
 
 data "aws_caller_identity" "current" {}
+
 data "aws_region" "current" {}
 
 locals {
-  region = "${coalesce(var.region, data.aws_region.current.name)}"
-  account_id = "${coalesce(var.account_id, data.aws_caller_identity.current.account_id)}"
+  region     = coalesce(var.region, data.aws_region.current.name)
+  account_id = coalesce(var.account_id, data.aws_caller_identity.current.account_id)
 }
-
 
 /**
  * Cloudwatch - allows metric access, and log access to tagged log streams.
@@ -29,13 +29,13 @@ data "aws_iam_policy_document" "cloudwatch" {
     ]
     resources = ["*"]
     condition {
-      test = "StringEquals"
-      values = ["${var.application}"]
+      test     = "StringEquals"
+      values   = [var.application]
       variable = "logs:ResourceTag/application"
     }
     condition {
-      test = "StringEquals"
-      values = ["${var.environment}"]
+      test     = "StringEquals"
+      values   = [var.environment]
       variable = "logs:ResourceTag/environment"
     }
   }
@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "ec2" {
     effect = "Allow"
     actions = [
       "ec2:Describe*",
-      "elasticloadbalancing:Describe*"
+      "elasticloadbalancing:Describe*",
     ]
     resources = ["*"]
   }
@@ -63,13 +63,13 @@ data "aws_iam_policy_document" "ec2" {
     ]
     resources = ["*"]
     condition {
-      test = "StringEquals"
-      values = ["${var.application}"]
+      test     = "StringEquals"
+      values   = [var.application]
       variable = "ec2:ResourceTag/application"
     }
     condition {
-      test = "StringEquals"
-      values = ["${var.environment}"]
+      test     = "StringEquals"
+      values   = [var.environment]
       variable = "ec2:ResourceTag/environment"
     }
   }
@@ -84,30 +84,30 @@ data "aws_iam_policy_document" "ssm" {
     actions = [
       "ssm:DescribeInstance*",
       "ssm:DescribeSessions",
-      "ssm:GetConnectionStatus"
+      "ssm:GetConnectionStatus",
     ]
     resources = ["*"]
   }
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["ssm:StartSession"]
     resources = [
-      "arn:aws:ec2:${local.region}:${local.account_id}:instance/*"
+      "arn:aws:ec2:${local.region}:${local.account_id}:instance/*",
     ]
     condition {
-      test = "StringLike"
-      values = ["${var.application}"]
+      test     = "StringLike"
+      values   = [var.application]
       variable = "ssm:resourceTag/application"
     }
     condition {
-      test = "StringLike"
-      values = ["${var.environment}"]
+      test     = "StringLike"
+      values   = [var.environment]
       variable = "ssm:resourceTag/environment"
     }
   }
   statement {
-    effect = "Allow"
-    actions = ["ssm:TerminateSession"]
+    effect    = "Allow"
+    actions   = ["ssm:TerminateSession"]
     resources = ["arn:aws:ssm:${local.region}:${local.account_id}:session/$${aws:username}-*"]
   }
 }
@@ -118,7 +118,7 @@ data "aws_iam_policy_document" "ssm" {
 data "aws_iam_policy_document" "rds" {
   statement {
     actions = [
-      "rds:Describe*"
+      "rds:Describe*",
     ]
     resources = ["*"]
   }
@@ -129,17 +129,17 @@ data "aws_iam_policy_document" "rds" {
       "rds:RebootDBInstance",
       "rds:DownloadDBLogFilePortion",
       "rds:ListTagsForResource",
-      "rds:CreateDBSnapshot"
+      "rds:CreateDBSnapshot",
     ]
     resources = ["*"]
     condition {
-      test = "StringEquals"
-      values = ["${var.application}"]
+      test     = "StringEquals"
+      values   = [var.application]
       variable = "rds:db-tag/application"
     }
     condition {
-      test = "StringEquals"
-      values = ["${var.environment}"]
+      test     = "StringEquals"
+      values   = [var.environment]
       variable = "rds:db-tag/environment"
     }
   }
@@ -151,23 +151,24 @@ data "aws_iam_policy_document" "rds" {
       "rds:RebootDBInstance",
       "rds:DownloadDBLogFilePortion",
       "rds:ListTagsForResource",
-      "rds:CreateDBSnapshot"
+      "rds:CreateDBSnapshot",
     ]
     resources = ["*"]
     condition {
-      test = "StringEquals"
-      values = ["${var.application}"]
+      test     = "StringEquals"
+      values   = [var.application]
       variable = "rds:cluster-tag/application"
     }
     condition {
-      test = "StringEquals"
-      values = ["${var.environment}"]
+      test     = "StringEquals"
+      values   = [var.environment]
       variable = "rds:cluster-tag/environment"
     }
   }
   statement {
-    effect = "Allow"
-    actions = ["pi:*"]
+    effect    = "Allow"
+    actions   = ["pi:*"]
     resources = ["arn:aws:pi:${local.region}:${local.account_id}:metrics/rds/*"]
   }
 }
+

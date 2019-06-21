@@ -1,59 +1,76 @@
-
 variable "name" {
-  type = "string"
+  type = string
 }
+
 variable "human_name" {
-  type = "string"
+  type        = string
   description = "A human readable name for the function (used in alerting)."
-  default = ""
+  default     = ""
 }
+
 variable "package" {
-  type = "string"
+  type = string
 }
+
 variable "handler" {
-  type = "string"
+  type    = string
   default = "index.handler"
 }
+
 variable "runtime" {
-  type = "string"
+  type = string
 }
+
 variable "timeout" {
-  type = "string"
+  type    = string
   default = 300
 }
+
 variable "security_groups" {
-  type = "list"
+  type    = list(string)
   default = []
 }
+
 variable "subnets" {
-  type = "list"
+  type    = list(string)
   default = []
 }
+
 variable "environment" {
-  type = "map"
-  default = {}
+  type = object({
+    variables = map(string)
+  })
+  default = null
 }
+
 variable "iam_policy_arns" {
-  type = "list"
+  type        = list(string)
   description = "A list of additional IAM policy ARNs to attach to the function's role."
-  default = []
+  default     = []
 }
+
 variable "iam_policies" {
-  type = "list"
+  type        = list(string)
   description = "A list of additional IAM policies to attach to the function."
-  default = []
+  default     = []
 }
+
 variable "schedule" {
-  type = "map"
+  type        = map(string)
   description = "Schedule expressions to use to invoke the lambda regularly"
-  default = {}
+  default = {
+  }
 }
+
 variable "tags" {
-  type = "map"
-  default = {}
+  type = map(string)
+  default = {
+  }
 }
+
 variable "error_topics" {
-  type = "list"
+  type        = list(string)
   description = "An array of SNS topics to publish notifications to when the function errors out"
-  default = []
+  default     = []
 }
+

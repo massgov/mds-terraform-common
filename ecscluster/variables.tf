@@ -1,92 +1,95 @@
 variable "name" {
-  type = "string"
+  type = string
 }
 
 variable "tags" {
-  type        = "map"
+  type        = map(string)
   description = "A map of tags to use for created resources"
-  default     = {}
+  default = {
+  }
 }
 
 variable "vpc" {
-  type = "string"
+  type = string
 }
 
 variable "subnets" {
-  type = "list"
+  type = list(string)
 }
 
 variable "instance_type" {
-  type        = "string"
+  type        = string
   description = "The instance type to launch."
 }
 
 variable "capacity" {
-  type        = "string"
+  type        = string
   description = "The number of instances to launch."
   default     = "1"
 }
 
 variable "keypair" {
-  type        = "string"
+  type        = string
   description = "The name of the SSH keypair to attach to the instances."
 }
 
 variable "security_groups" {
-  type        = "list"
+  type        = list(string)
   description = "Security groups to attach to the instances."
   default     = []
 }
 
 variable "volume_size" {
-  type = "string"
+  type        = string
   description = "The EBS volume size to use for the root EBS volume"
-  default = 30
+  default     = 30
 }
 
 variable "volume_encryption" {
-  type = "string"
+  type        = string
   description = "A boolean indicating whether to encrypt the root EBS volume or not."
-  default = false
+  default     = false
 }
 
 variable "schedule" {
-  type = "string"
+  type        = string
   description = "A boolean indicating whether to automatically schedule the ASG according to the `schedule_down` and `schedule_up` variables."
-  default = false
+  default     = false
 }
 
 variable "schedule_down" {
-  type = "string"
+  type        = string
   description = "A cron expression indicating when to schedule the ASG to scale down to 0 instances (defaults to 7PM EST weekdays)."
-  default = "59 23 * * 1-5"
+  default     = "59 23 * * 1-5"
 }
 
 variable "schedule_up" {
-  type = "string"
+  type        = string
   description = "A cron expression indicating when to schedule the ASG to scale up to $capacity instances (defaults to 7AM EST weekdays)"
-  default = "00 12 * * 1-5"
+  default     = "00 12 * * 1-5"
 }
 
 variable "instance_schedule" {
-  type        = "string"
+  type        = string
   description = "The schedule on which to start and stop EC2 instances. Can be `na` or `1100;2300;utc;weekdays`, depending on whether this is a dev or prod environment."
 }
 
 variable "instance_backup" {
-  type        = "string"
+  type        = string
   description = "Backup instructions for EC2 instances"
 }
 
 variable "instance_patch_group" {
-  type        = "string"
+  type        = string
   description = "Patch group to apply to EC2 instances."
 }
 
 variable "ami" {
-  type = "string"
+  type        = string
   description = "AMI to use for cluster instances."
+
   // Custom AMI based on AWS Linux 2 ECS optimized
   // Also has SSM.  See packer build (/packer/ecs_ssm.json)
   default = "ami-08d6a38d714da30db"
 }
+
