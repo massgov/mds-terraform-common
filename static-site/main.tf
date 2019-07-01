@@ -171,6 +171,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
       content {
         event_type = lambda_function_association.value.event_type
         lambda_arn = lambda_function_association.value.lambda_arn
+        include_body = coalesce(lambda_function_association.value.include_body, false)
       }
     }
   }
