@@ -26,6 +26,7 @@ variable "environments" {
     edge_lambdas = list(object({
       event_type = string
       lambda_arn = string
+      include_body = string
     }))
   }))
 }
