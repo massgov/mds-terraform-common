@@ -74,9 +74,11 @@ resource "aws_s3_bucket_policy" "default" {
 resource "aws_acm_certificate" "default" {
   domain_name = local.primary_domain
   subject_alternative_names = local.alternate_domains
-
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
+  tags = merge(var.tags, {
+    "Name": var.name
+  })
 }
 
 // Route 53

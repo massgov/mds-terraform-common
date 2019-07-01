@@ -22,6 +22,6 @@ resource "aws_iam_group" "deployment" {
 }
 resource "aws_iam_group_policy" "deployment" {
   count = var.create_deployment_group ? 1 : 0
-  group = "${aws_iam_group.deployment.name}"
+  group = "${aws_iam_group.deployment[0].name}"
   policy = "${data.aws_iam_policy_document.deployment.json}"
 }
