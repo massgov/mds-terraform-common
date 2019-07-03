@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.4] - 2019-07-03
+
+- [ECS Cluster, ASG] Rebuilt AMI to add EC2 Instance Connect agent.
+
 ## [1.0.3] - 2019-07-01
 
 ### BREAKING
