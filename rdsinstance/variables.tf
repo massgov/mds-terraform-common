@@ -69,6 +69,12 @@ variable "storage_encrypted" {
   default     = false
 }
 
+variable "iam_database_authentication_enabled" {
+  type = string
+  description = "Boolean indicating whether to enable IAM database authentication"
+  default = false
+}
+
 variable "tags" {
   type        = map(string)
   description = "A map of tags to use for created resources."

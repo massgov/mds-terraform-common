@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.5] - 2019-07-05
+
+### Added
+- [RDS Instance] Add ability to toggle IAM authentication for the database.
+
 ## [1.0.4] - 2019-07-03
 
 - [ECS Cluster, ASG] Rebuilt AMI to add EC2 Instance Connect agent.
