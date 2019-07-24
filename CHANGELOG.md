@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.0.5] - 2019-07-24
+
+### Added
+- [RDS Instance] Output RDS instance ID and ARN.
+
 ## [1.0.5] - 2019-07-05
 
 ### Added

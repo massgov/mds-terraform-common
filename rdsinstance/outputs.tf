@@ -18,6 +18,16 @@ output "port" {
   value = aws_db_instance.default.port
 }
 
+// RDS Instance ID.
+output "rds_instance_id" {
+  value = aws_db_instance.default.id
+}
+
+// ARN of the RDS instance.
+output "rds_instance_arn" {
+  value = aws_db_instance.default.arn
+}
+
 // Security group that is allowed to access the database.
 output "accessor_security_group" {
   value = aws_security_group.db_accessor.id
