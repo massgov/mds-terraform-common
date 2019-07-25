@@ -55,6 +55,11 @@ resource "aws_acm_certificate" "default" {
 
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
+
+  // Replace a certificate which is currently in use
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // Route 53
