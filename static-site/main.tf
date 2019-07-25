@@ -79,6 +79,10 @@ resource "aws_acm_certificate" "default" {
   tags = merge(var.tags, {
     "Name": var.name
   })
+  // Replace certificate that is currently in use
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // Route 53
