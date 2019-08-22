@@ -12,7 +12,7 @@ resource "aws_lambda_function" "sns_to_slack" {
     variables = {
       SLACK_TOKEN     = var.SLACK_TOKEN
       DEFAULT_CHANNEL = var.default_channel
-      TOPIC_MAP       = var.topic_map
+      TOPIC_MAP       = jsonencode(var.topic_map)
     }
   }
   tags = merge(

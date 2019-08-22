@@ -8,7 +8,7 @@ const defaultMessage = {
 }
 
 // Map of special topics to slack message bodies:
-const topicMap = TOPIC_MAP.map(item => {
+const topicMap = JSON.parse(TOPIC_MAP).map(item => {
     return {
         [item.topic_arn]:  {
             username: item.username,
