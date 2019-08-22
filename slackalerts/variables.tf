@@ -37,4 +37,5 @@ variable "topic_map" {
     username = string
     icon_emoji = string
   }))
+  default = []
 }
