@@ -90,6 +90,6 @@ variable "ami" {
 
   // Custom AMI based on AWS Linux 2 ECS optimized
   // Also has SSM.  See packer build (/packer/ecs_ssm.json)
-  default = "ami-0f7e484e38ac15dcd"
+  default = "ami-0413530c7d7a6a0ad"
 }
 

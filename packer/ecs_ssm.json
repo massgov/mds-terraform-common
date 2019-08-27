@@ -31,19 +31,9 @@
   }],
   "provisioners": [
     {
-      "type": "file",
-      "source": "scripts/cas.pub",
-      "destination": "/tmp/cas.pub"
-    },
-    {
       "type": "shell",
       "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "script": "scripts/ssm.sh"
-    },
-    {
-      "type": "shell",
-      "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
-      "script": "scripts/trust-bless-ca.sh"
     }
   ]
 }

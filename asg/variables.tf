@@ -7,7 +7,7 @@ variable "ami" {
   type        = string
   description = "The AMI ID to use for the instances. Keep this at the default value to automatically receive AMI updates to Amazon Linux 2"
   // AMI Built from packer/base.json
-  default     = "ami-0fc3ac0de6438766b"
+  default     = "ami-0612f4612a1b42926"
 }
 
 variable "capacity" {

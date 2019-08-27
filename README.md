@@ -15,6 +15,8 @@ Packer
 This repository uses Packer to build custom AMIs. To rebuild an AMI:
 
 ```bash
+# Authenticate so credentials are available to packer.
+aws-exec massgov
 packer build packer/ecs_ssm.json
 # Packer will build the AMI and output the ID.
 ```
