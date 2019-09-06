@@ -48,5 +48,17 @@ variable "account_id" {
   type = "string"
   description = "The AWS account ID to scope access to (defaults to current account)."
   default = ""
-
 }
+
+variable "plan_policy" {
+  type = string
+  description = "The ARN of an AWS IAM policy to use for 'plan' jobs."
+  default = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+variable "apply_policy" {
+  type = string
+  description = "The ARN of an AWS IAM policy to use for 'apply' jobs."
+  default = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+

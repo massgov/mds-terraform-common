@@ -28,7 +28,7 @@ resource "aws_iam_role_policy" "plan_ecr" {
 
 resource "aws_iam_role_policy_attachment" "plan_ro" {
   role       = aws_iam_role.plan.id
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  policy_arn = var.plan_policy
 }
 
 /**
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy" "apply_ecr" {
 
 resource "aws_iam_role_policy_attachment" "apply_admin" {
   role       = aws_iam_role.apply.id
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = var.apply_policy
 }
 
 data "aws_iam_policy_document" "assume_role" {
