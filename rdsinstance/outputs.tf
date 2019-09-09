@@ -28,6 +28,11 @@ output "rds_instance_arn" {
   value = aws_db_instance.default.arn
 }
 
+// RDS Resource ID
+output "rds_resource_id" {
+  value = aws_db_instance.default.resource_id
+}
+
 // Security group that is allowed to access the database.
 output "accessor_security_group" {
   value = aws_security_group.db_accessor.id
