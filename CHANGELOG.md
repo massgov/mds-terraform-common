@@ -2,10 +2,17 @@
 
 ## [Unreleased]
 
+## [1.0.15] - 2019-09-19
+### Added
+- [ASG] Add EC2 instance connect to the default AMI.
+- [ECS Cluster] Add EC2 instance connect to the default AMI.
+
 ## [1.0.14] - 2019-09-17
+### Added
 - [ASG] Make ASG launch with the updated AmazonSSMManagedInstanceCore policy instead of the old SSM policy.
 
 ## [1.0.13] - 2019-09-17
+### Added
 - [ASG] Make ASG launch template EBS optimized.
 
 ## [1.0.10] - 2019-08-28
