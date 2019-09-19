@@ -14,7 +14,6 @@
     },
     "ami_name": "itd-ds-base-{{timestamp}}",
     "instance_type": "t1.micro",
-    "ebs-optimized": true,
     "ssh_username": "ec2-user",
     "run_tags": {
       "Name": "packer-tmp-build-base",
@@ -35,6 +34,11 @@
       "type": "shell",
       "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
       "script": "scripts/ssm.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+      "script": "scripts/eic.sh"
     }
   ]
 }
