@@ -69,6 +69,30 @@ variable "storage_encrypted" {
   default     = false
 }
 
+variable "monitoring_interval" {
+  type        = string
+  description = "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance."
+  default     = 0
+}
+
+variable "auto_minor_version_upgrade" {
+  type        = string
+  description = "Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window."
+  default     = false
+}
+
+variable "allow_major_version_upgrade" {
+  type        = string
+  description = "Indicates that major version upgrades are allowed."
+  default     = false
+}
+
+variable "apply_immediately" {
+  type        = string
+  description = "Specifies whether any database modifications are applied immediately, or during the next maintenance window."
+  default     = false
+}
+
 variable "iam_database_authentication_enabled" {
   type = string
   description = "Boolean indicating whether to enable IAM database authentication"
@@ -96,4 +120,3 @@ variable "instance_patch_group" {
   type        = string
   description = "Patch group to apply to EC2 instances."
 }
-

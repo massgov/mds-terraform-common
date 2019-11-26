@@ -22,6 +22,10 @@ resource "aws_db_instance" "default" {
   db_subnet_group_name    = aws_db_subnet_group.default.name
   performance_insights_enabled = true
   performance_insights_retention_period = 7
+  monitoring_interval     = var.monitoring_interval
+  auto_minor_version_upgrade  = var.auto_minor_version_upgrade 
+  allow_major_version_upgrade = var.allow_major_version_upgrade
+  apply_immediately           = var.apply_immediately
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
   vpc_security_group_ids = flatten([
     var.security_groups,
