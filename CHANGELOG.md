@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.0.17] - 2020-11-29
+### Added
+- [ECS] Add `custom_cluster_policies` as input.
+
+## [1.0.16] - 2019-11-26
+### Added
+- [RDS] Added the following RDS options
+-- monitoring_interval (default 0)
+-- auto_minor_version_upgrade (default false)
+-- allow_major_version_upgrade (default false)
+-- apply_immediately (default false)
+
+
 ## [1.0.15] - 2019-09-19
 ### Added
 - [ASG] Add EC2 instance connect to the default AMI.
