@@ -14,7 +14,6 @@
 -- allow_major_version_upgrade (default false)
 -- apply_immediately (default false)
 
-
 ## [1.0.15] - 2019-09-19
 ### Added
 - [ASG] Add EC2 instance connect to the default AMI.
