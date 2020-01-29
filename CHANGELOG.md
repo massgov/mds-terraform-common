@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [1.0.17] - 2020-11-29
+## [1.0.17] - 2020-01-29
 ### Added
 - [ECS] Add `custom_cluster_policies` as input.
 
