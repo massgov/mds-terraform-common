@@ -38,6 +38,12 @@ variable "security_groups" {
   default     = []
 }
 
+variable "custom_additional_policies" {
+  type        = "list"
+  description = "Additional ECS policies for ECS."
+  default     = []
+}
+
 variable "volume_size" {
   type = "string"
   description = "The EBS volume size to use for the root EBS volume"

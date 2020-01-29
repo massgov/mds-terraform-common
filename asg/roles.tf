@@ -16,8 +16,8 @@ resource "aws_iam_role_policy_attachment" "ssm" {
  * Allow additional policies to be attached to the instance as needed.
  */
 resource "aws_iam_role_policy_attachment" "additional" {
-  count      = "${length(var.policies)}"
-  policy_arn = "${element(var.policies, count.index)}"
+  count      = "${length(var.custom_additional_policies)}"
+  policy_arn = "${element(var.custom_additional_policies, count.index)}"
   role       = "${aws_iam_role.instance.name}"
 }
 
