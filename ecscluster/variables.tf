@@ -39,7 +39,7 @@ variable "security_groups" {
   default     = []
 }
 
-variable "custom_cluster_policies" {
+variable "policies" {
   type        = list(string)
   description = "Custom policies for the ECS Cluster."
   default     = []

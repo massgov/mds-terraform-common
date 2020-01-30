@@ -4,7 +4,7 @@
 
 ## [1.0.17] - 2020-01-29
 ### Added
-- [ECS] Add `custom_cluster_policies` as input.
+- [ECS] Add `policies` as input.
 
 ## [1.0.16] - 2019-11-26
 ### Added
