@@ -9,7 +9,7 @@ module "asg" {
   security_groups = var.security_groups
 
   subnets              = var.subnets
-  policies             = ["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"]
+  policies             = concat(["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"], var.policies)
   user_data            = base64encode(data.template_file.instance_init.rendered)
   volume_size          = var.volume_size
   volume_encryption    = var.volume_encryption
