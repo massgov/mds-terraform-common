@@ -2,57 +2,79 @@
 
 ## [Unreleased]
 
-## [1.0.17] - 2020-01-29
+## [1.0.18] - 2020-02-04
+
 ### Added
+
+- [SLACKALERTS] Update runtime to nodejs10.x.
+
+## [1.0.17] - 2020-01-29
+
+### Added
+
 - [ECS] Add `policies` as input.
 
 ## [1.0.16] - 2019-11-26
+
 ### Added
+
 - [RDS] Added the following RDS options
--- monitoring_interval (default 0)
--- auto_minor_version_upgrade (default false)
--- allow_major_version_upgrade (default false)
--- apply_immediately (default false)
+  -- monitoring_interval (default 0)
+  -- auto_minor_version_upgrade (default false)
+  -- allow_major_version_upgrade (default false)
+  -- apply_immediately (default false)
 
 ## [1.0.15] - 2019-09-19
+
 ### Added
+
 - [ASG] Add EC2 instance connect to the default AMI.
 - [ECS Cluster] Add EC2 instance connect to the default AMI.
 
 ## [1.0.14] - 2019-09-17
+
 ### Added
+
 - [ASG] Make ASG launch with the updated AmazonSSMManagedInstanceCore policy instead of the old SSM policy.
 
 ## [1.0.13] - 2019-09-17
+
 ### Added
+
 - [ASG] Make ASG launch template EBS optimized.
 
 ## [1.0.10] - 2019-08-28
 
 ### Fixed
+
 - [Pipelines] Add region and account ID variables to pipeline module.
 
 ### Changed
+
 - [All] Remove BLESS CA from packer build and update asg and ecscluster AMIs.
 
 ## [1.0.9] - 2019-08-22
 
 ### Added
+
 - [Pipelines] Implement CI pipelines module to allow for flexible Codebuild Pipelines to apply infrastructure-as-code changes.
 
 ## [1.0.8] - 2019-08-22
 
 ### Added
+
 - [Slack Alerts] Added Slack Alerts lambda module to fire Slack alerts based on SNS topic messages.
 
 ## [1.0.6] - 2019-07-24
 
 ### Added
+
 - [RDS Instance] Output RDS instance ID and ARN.
 
 ## [1.0.5] - 2019-07-05
 
 ### Added
+
 - [RDS Instance] Add ability to toggle IAM authentication for the database.
 
 ## [1.0.4] - 2019-07-03
