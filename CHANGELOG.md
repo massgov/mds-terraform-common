@@ -4,7 +4,7 @@
 
 ## [1.0.18] - 2020-02-04
 
-### Added
+### Changed
 
 - [SLACKALERTS] Update runtime to nodejs10.x.
 
