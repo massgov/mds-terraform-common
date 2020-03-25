@@ -8,6 +8,12 @@ variable "tags" {
   description = "A map of tags to apply to the codebuild jobs"
 }
 
+variable "repository_type" {
+  type        = string
+  description = "The type of repository that contains the source code to be built."
+  default     = "GITHUB"
+}
+
 variable "repository" {
   type        = string
   description = "The github repository URL"

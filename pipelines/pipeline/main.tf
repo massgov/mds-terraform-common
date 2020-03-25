@@ -33,7 +33,7 @@ resource "aws_codebuild_project" "plan" {
   }
   service_role = aws_iam_role.plan.arn
   source {
-    type                = "GITHUB"
+    type                = var.repository_type
     location            = var.repository
     git_clone_depth     = "1"
     report_build_status = true
@@ -100,7 +100,7 @@ resource "aws_codebuild_project" "apply_develop" {
   }
   service_role = aws_iam_role.apply.arn
   source {
-    type                = "GITHUB"
+    type                = var.repository_type
     location            = var.repository
     git_clone_depth     = "1"
     report_build_status = true
@@ -162,7 +162,7 @@ resource "aws_codebuild_project" "apply_master" {
   }
   service_role = aws_iam_role.apply.arn
   source {
-    type                = "GITHUB"
+    type                = var.repository_type
     location            = var.repository
     git_clone_depth     = "1"
     report_build_status = true
