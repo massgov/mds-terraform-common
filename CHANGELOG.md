@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.0.19] - 2020-03-25
+
+### Added
+
+- [PIPELINES] Add repository source type option to be able to use CODECOMMIT, BITBUCKET...etc
+- Keep `GITHUB` as default.
+
 ## [1.0.18] - 2020-02-04
 
 ### Changed
