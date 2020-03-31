@@ -26,6 +26,12 @@ variable "timeout" {
   default = 300
 }
 
+variable "memory_size" {
+  type = string
+  default = 128
+  description = "The memory limit for the Lambda Function"
+}
+
 variable "security_groups" {
   type    = list(string)
   default = []

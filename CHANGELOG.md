@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.0.19] - 2020-03-31
+
+### Added
+
+- [Lambda] Allow setting Lambda function memory.
+
 ## [1.0.18] - 2020-02-04
 
 ### Changed

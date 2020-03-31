@@ -7,6 +7,7 @@ resource "aws_lambda_function" "default" {
   runtime          = var.runtime
   timeout          = var.timeout
   publish          = true
+  memory_size      = var.memory_size
   vpc_config {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets
