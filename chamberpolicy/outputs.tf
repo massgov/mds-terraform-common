@@ -7,3 +7,6 @@ output "readwrite_policy" {
   value = data.aws_iam_policy_document.readwrite_policy.json
 }
 
+output "parameter_arn" {
+  value = local.namespace_parameters_arn
+}
