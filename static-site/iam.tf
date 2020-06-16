@@ -14,6 +14,14 @@ data "aws_iam_policy_document" "deployment" {
     ]
     resources = [aws_s3_bucket.site.arn]
   }
+  statement {
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+      "cloudfront:ListInvalidations"
+    ]
+    resources = [aws_cloudfront_distribution.domain_distribution.*.arn]
+  }
 }
 
 resource "aws_iam_group" "deployment" {
