@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "deployment" {
       "cloudfront:GetInvalidation",
       "cloudfront:ListInvalidations"
     ]
-    resources = [aws_cloudfront_distribution.domain_distribution.*.arn]
+    resources = aws_cloudfront_distribution.domain_distribution.*.arn
   }
 }
 
