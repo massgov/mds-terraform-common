@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.0.21] - 2020-06-16
+
+- [Static Site] Add Cloudfront invalidation permission to the created policy.
+
 ## [1.0.20] - 2020-04-01
 
 ### Changed
