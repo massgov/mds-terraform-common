@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.24] - 2020-06-16
+
+- [RDS] Add `backup_retention_period` and `performance_insights_enabled` and `performance_insights_retention_period` as RDS options
 
 ## [1.0.21] - 2020-06-16
 
