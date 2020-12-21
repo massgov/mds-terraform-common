@@ -120,3 +120,20 @@ variable "instance_patch_group" {
   type        = string
   description = "Patch group to apply to EC2 instances."
 }
+
+variable "performance_insights_enabled" {
+  description = "Enables database performance insights"
+  type        = string
+  default     = true
+}
+
+variable "performance_insights_retention_period" {
+  description = "Days to keep database performance insights"
+  type        = number
+  default     = 7
+}
+variable "backup_retention_period" {
+  description = "Database backup retention period in days"
+  type        = number
+  default     = 30
+}
