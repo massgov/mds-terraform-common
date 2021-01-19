@@ -27,7 +27,7 @@ exports.handler = async function(data, context, callback) {
 
     // Special handling for formatting ClamAV alert subject and message.
     data.Records.forEach(function(element, index) {
-        if (element.Sns.TopicArn.contains('massgov-clamav-scan-status')) {
+        if (element.Sns.TopicArn.includes('massgov-clamav-scan-status')) {
             const message = JSON.parse(element.Sns.Message);
             let output = ' ';
             for (const [key, value] of Object.entries(message)) {
