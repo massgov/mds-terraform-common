@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.25] - 2020-01-21
+
+- [SLACKALERTS] Add special handling for formatting ClamAV alerts' subject and message.
+
 ## [1.0.24] - 2020-06-16
 
 - [RDS] Add `backup_retention_period` and `performance_insights_enabled` and `performance_insights_retention_period` as RDS options
