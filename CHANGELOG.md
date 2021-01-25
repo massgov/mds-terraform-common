@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.26] - 2020-01-25
+
+- [SLACKALERTS] Recreated slackalerts Lambda.
+
 ## [1.0.25] - 2020-01-21
 
 - [SLACKALERTS] Add special handling for formatting ClamAV alerts' subject and message.
