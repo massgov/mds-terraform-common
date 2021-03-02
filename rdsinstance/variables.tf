@@ -137,3 +137,27 @@ variable "backup_retention_period" {
   type        = number
   default     = 30
 }
+
+variable "deletion_protection" {
+  description = "Enables deletion protection. Handy to be able to turn off if you are cleaning up."
+  type        = bool
+  default     = true
+}
+
+variable "skip_final_snapshot" {
+  description = "Don't require a final snapshot upon deletion."
+  type        = bool
+  default     = null
+}
+
+variable "final_snapshot_identifier" {
+  description = "Name of final snapshot. Required if skip_final_snapshot is false."
+  type        = string
+  default     = null
+}
+
+variable "snapshot_identifier" {
+  description = "Snapshot to be used when creating a new RDS instance."
+  type        = string
+  default     = null
+}
