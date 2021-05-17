@@ -1,9 +1,9 @@
 locals {
   domains = [
-    for environment in var.environments:
-          environment.domain
+    for environment in var.environments :
+    environment.domain
   ]
-  primary_domain = local.domains[0]
+  primary_domain    = local.domains[0]
   alternate_domains = slice(local.domains, 1, length(local.domains))
 }
 
@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "oai_read" {
       ]
 
       principals {
-        type = "AWS"
+        type        = "AWS"
         identifiers = [aws_cloudfront_origin_access_identity.edge[statement.key].iam_arn]
       }
     }
@@ -72,12 +72,12 @@ resource "aws_s3_bucket_policy" "default" {
 // AWS Certificate Manager
 // TLS/SSL certificate for the new domain
 resource "aws_acm_certificate" "default" {
-  domain_name = local.primary_domain
+  domain_name               = local.primary_domain
   subject_alternative_names = local.alternate_domains
   // rely on a DNS entry for validating the certificate
   validation_method = "DNS"
   tags = merge(var.tags, {
-    "Name": var.name
+    "Name" : var.name
   })
   // Replace certificate that is currently in use
   lifecycle {
@@ -89,7 +89,7 @@ resource "aws_acm_certificate" "default" {
 // dns record to use for certificate validation
 // create the DNS entry in th relevant zone
 resource "aws_route53_record" "verification" {
-  count = length(local.domains)
+  count   = length(local.domains)
   name    = aws_acm_certificate.default.domain_validation_options[count.index].resource_record_name
   type    = aws_acm_certificate.default.domain_validation_options[count.index].resource_record_type
   records = [aws_acm_certificate.default.domain_validation_options[count.index].resource_record_value]
@@ -107,7 +107,7 @@ resource "aws_acm_certificate_validation" "default" {
 //// Route 53
 //// Add CNAME entry for domain
 resource "aws_route53_record" "default" {
-  count = length(var.environments)
+  count   = length(var.environments)
   zone_id = var.zone_id
   name    = var.environments[count.index].domain
   type    = "CNAME"
@@ -118,8 +118,8 @@ resource "aws_route53_record" "default" {
 // Cloudfront
 // CDN for the domain
 resource "aws_cloudfront_distribution" "domain_distribution" {
-  count = length(var.environments)
-  comment = "${var.name}:${var.environments[count.index].name}"
+  count               = length(var.environments)
+  comment             = "${var.name}:${var.environments[count.index].name}"
   wait_for_deployment = false
   enabled             = true
   default_root_object = var.index_document
@@ -145,8 +145,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   dynamic "custom_error_response" {
     for_each = var.is_spa ? [1] : []
     content {
-      error_code = 404
-      response_code = 200
+      error_code         = 404
+      response_code      = 200
       response_page_path = "/${var.index_document}"
     }
   }
@@ -157,14 +157,14 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     allowed_methods        = var.allowed_methods
     cached_methods         = var.cached_methods
     target_origin_id       = "default"
-    default_ttl = var.default_ttl
+    default_ttl            = var.default_ttl
 
     // There is no backend processing in this case, so we can skip forwarding
     // things like query string and cookies. CORS headers are forwarded, if
     // we're using CORS for the site.
     forwarded_values {
       query_string = false
-      headers = var.enable_cors ? ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"] : []
+      headers      = var.enable_cors ? ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"] : []
       cookies {
         forward = "none"
       }
@@ -173,8 +173,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
       for_each = var.environments[count.index].edge_lambdas
 
       content {
-        event_type = lambda_function_association.value.event_type
-        lambda_arn = lambda_function_association.value.lambda_arn
+        event_type   = lambda_function_association.value.event_type
+        lambda_arn   = lambda_function_association.value.lambda_arn
         include_body = coalesce(lambda_function_association.value.include_body, false)
       }
     }
@@ -204,7 +204,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
 // Create an identity allowing Cloudfront to access the origin.
 resource "aws_cloudfront_origin_access_identity" "edge" {
-  count = length(var.environments)
+  count   = length(var.environments)
   comment = "Cloudfront ID for ${var.name}:${var.environments[count.index].name}"
 }
 

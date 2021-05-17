@@ -39,26 +39,26 @@ variable "failure_topics" {
 }
 
 variable "region" {
-  type = "string"
+  type        = string
   description = "The AWS region to scope access to (defaults to current region)."
-  default = ""
+  default     = ""
 }
 
 variable "account_id" {
-  type = "string"
+  type        = string
   description = "The AWS account ID to scope access to (defaults to current account)."
-  default = ""
+  default     = ""
 }
 
 variable "plan_policy" {
-  type = string
+  type        = string
   description = "The ARN of an AWS IAM policy to use for 'plan' jobs."
-  default = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+  default     = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
 
 variable "apply_policy" {
-  type = string
+  type        = string
   description = "The ARN of an AWS IAM policy to use for 'apply' jobs."
-  default = "arn:aws:iam::aws:policy/AdministratorAccess"
+  default     = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
