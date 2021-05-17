@@ -27,8 +27,8 @@ variable "timeout" {
 }
 
 variable "memory_size" {
-  type = string
-  default = 128
+  type        = string
+  default     = 128
   description = "The memory limit for the Lambda Function"
 }
 

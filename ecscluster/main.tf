@@ -73,8 +73,8 @@ data "aws_iam_policy_document" "developer" {
     ]
     resources = ["*"]
     condition {
-      test = "ArnEquals"
-      values = [aws_ecs_cluster.cluster.arn]
+      test     = "ArnEquals"
+      values   = [aws_ecs_cluster.cluster.arn]
       variable = "ecs:cluster"
     }
   }
