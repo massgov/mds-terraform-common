@@ -94,9 +94,9 @@ variable "apply_immediately" {
 }
 
 variable "iam_database_authentication_enabled" {
-  type = string
+  type        = string
   description = "Boolean indicating whether to enable IAM database authentication"
-  default = false
+  default     = false
 }
 
 variable "tags" {
