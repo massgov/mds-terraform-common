@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "read_policy" {
     actions   = ["kms:Decrypt"]
     resources = [data.aws_kms_alias.chamber_key.target_key_arn]
     condition {
-      test = "StringLike"
+      test     = "StringLike"
       values   = [local.namespace_parameters_arn]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
       "ssm:DeleteParameter",
       "ssm:DeleteParameters",
     ]
-    resources = ["${local.namespace_parameters_arn}"]
+    resources = [local.namespace_parameters_arn]
   }
 
   // Read (decrypt)
@@ -61,7 +61,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
     actions   = ["kms:Decrypt"]
     resources = [data.aws_kms_alias.chamber_key.target_key_arn]
     condition {
-      test = "StringLike"
+      test     = "StringLike"
       values   = [local.namespace_parameters_arn]
       variable = "kms:EncryptionContext:PARAMETER_ARN"
     }
