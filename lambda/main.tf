@@ -12,6 +12,14 @@ resource "aws_lambda_function" "default" {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets
   }
+  
+  # Allow XRay tracing to be configured.
+  dynamic "tracing_config" {
+    for_each = var.enable_tracing === true ? [true] : []
+    content {
+      mode = "All"  
+    }
+  }
 
   # The aws_lambda_function resource has a schema for the environment
   # variable, where the only acceptable values are:
