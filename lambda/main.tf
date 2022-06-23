@@ -12,6 +12,14 @@ resource "aws_lambda_function" "default" {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets
   }
+  
+  # Allow X-Ray tracing to be configured.
+  dynamic "tracing_config" {
+    for_each = var.enable_tracing === true ? [true] : []
+    content {
+      mode = "All"  
+    }
+  }
 
   # The aws_lambda_function resource has a schema for the environment
   # variable, where the only acceptable values are:
@@ -84,6 +92,12 @@ resource "aws_iam_role_policy" "additional_policies" {
   count  = length(var.iam_policies)
   policy = element(var.iam_policies, count.index)
   role   = aws_iam_role.default.id
+}
+# Conditionally grant X-Ray tracing access.
+resource "aws_iam_role_policy_attachment" "xray" {
+  count      = var.enable_tracing ? 1 : 0
+  role       = aws_iam_role.default.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess" 
 }
 
 /**
