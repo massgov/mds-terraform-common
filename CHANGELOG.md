@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.28] - 2022-06-24
+
+- [LAMBDA] Allow configuration of ephemeral storage.
+
 ## [1.0.26] - 2020-01-25
 
 - [SLACKALERTS] Recreated slackalerts Lambda.

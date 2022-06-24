@@ -12,6 +12,10 @@ resource "aws_lambda_function" "default" {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets
   }
+  
+  ephemeral_storage {
+    size = var.ephemeral_storage_size 
+  }
 
   # The aws_lambda_function resource has a schema for the environment
   # variable, where the only acceptable values are:
@@ -57,8 +61,8 @@ data "aws_iam_policy_document" "assume" {
     principals {
       type = "Service"
       identifiers = [
-        "lambda.amazonaws.com",
         "edgelambda.amazonaws.com",
+        "lambda.amazonaws.com",
       ]
     }
   }

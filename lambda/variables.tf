@@ -4,7 +4,7 @@ variable "name" {
 
 variable "human_name" {
   type        = string
-  description = "A human readable name for the function (used in alerting)."
+  description = "A human readable name for the function (used in alerting). This name must be unique across environments!"
   default     = ""
 }
 
@@ -30,6 +30,12 @@ variable "memory_size" {
   type = string
   default = 128
   description = "The memory limit for the Lambda Function"
+}
+
+variable "ephemeral_storage_size" {
+  type = string
+  default = 512
+  description = "The amount of ephemeral storage to provision for the Lambda"
 }
 
 variable "security_groups" {
