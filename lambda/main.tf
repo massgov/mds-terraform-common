@@ -1,5 +1,6 @@
 resource "aws_lambda_function" "default" {
   function_name    = var.name
+  description     = var.human_name
   filename         = var.package
   handler          = var.handler
   role             = aws_iam_role.default.arn
