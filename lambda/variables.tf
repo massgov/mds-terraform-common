@@ -4,7 +4,7 @@ variable "name" {
 
 variable "human_name" {
   type        = string
-  description = "A human readable name for the function (used in alerting)."
+  description = "A human readable name for the function (used in alerting). This name must be unique across environments!"
   default     = ""
 }
 
