@@ -55,3 +55,7 @@ variable "tags" {
   default = {}
 }
 
+variable "geo_restrictions" {
+  type = bool
+  default = true
+}
