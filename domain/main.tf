@@ -82,9 +82,7 @@ data "aws_ssm_parameter" "geo_restriction" {
 }
 
 locals {
-  geo_restriction_country_codes = data.aws_ssm_parameter.geo_restriction.value == ""
-    ? []
-    : split(",", data.aws_ssm_parameter.geo_restriction.value)
+  geo_restriction_country_codes = data.aws_ssm_parameter.geo_restriction.value == "" ? [] : split(",", data.aws_ssm_parameter.geo_restriction.value)
 }
 
 resource "aws_cloudfront_distribution" "dashboards" {
