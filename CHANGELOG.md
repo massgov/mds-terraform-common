@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.29] - 2022-07-07
+
+- [Domain] Add geo-restrictions.
+
 ## [1.0.28] - 2022-06-24
 
 - [LAMBDA] Allow configuration of ephemeral storage.
