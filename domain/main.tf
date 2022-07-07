@@ -77,12 +77,9 @@ resource "aws_cloudwatch_metric_alarm" "domain_watch" {
   treat_missing_data        = "breaching"
 }
 
-data "aws_ssm_parameter" "geo_restriction" {
-  name = "/infrastructure/geo-blocking/country-codes"
-}
-
-locals {
-  geo_restriction_country_codes = data.aws_ssm_parameter.geo_restriction.value == "" ? [] : split(",", data.aws_ssm_parameter.geo_restriction.value)
+module "cf_geo_restriction" {
+  source = "../cloudfront_geo_restriction"
+  enabled = var.geo_restriction
 }
 
 resource "aws_cloudfront_distribution" "dashboards" {
@@ -128,8 +125,8 @@ resource "aws_cloudfront_distribution" "dashboards" {
 
   restrictions {
     geo_restriction {
-      restriction_type = var.geo_restrictions ? "blacklist" : "none"
-      locations = var.geo_restrictions ? local.geo_restriction_country_codes : []
+      restriction_type = module.cf_geo_restriction.restriction_type
+      locations = module.cf_geo_restriction.locations
     }
   }
 

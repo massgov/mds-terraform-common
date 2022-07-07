@@ -55,7 +55,8 @@ variable "tags" {
   default = {}
 }
 
-variable "geo_restrictions" {
+variable "geo_restriction" {
   type = bool
   default = true
+  description = "Enables geo-restriction of the CloudFront distribution."
 }

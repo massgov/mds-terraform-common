@@ -98,3 +98,9 @@ variable "tags" {
   type = map(string)
   default = {}
 }
+
+variable "geo_restriction" {
+  type = bool
+  default = true
+  description = "Enables geo-restriction of the CloudFront distribution."
+}

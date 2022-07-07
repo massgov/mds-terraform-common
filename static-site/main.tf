@@ -115,6 +115,11 @@ resource "aws_route53_record" "default" {
   records = [aws_cloudfront_distribution.domain_distribution[count.index].domain_name]
 }
 
+module "cf_geo_restriction" {
+  source = "../cloudfront_geo_restriction"
+  enabled = var.geo_restriction
+}
+
 // Cloudfront
 // CDN for the domain
 resource "aws_cloudfront_distribution" "domain_distribution" {
@@ -185,10 +190,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "none"
-
-      // list of countries e.g. ["US", "CA", "GB", "DE"]
-      locations = []
+      restriction_type = module.cf_geo_restriction.restriction_type
+      locations = module.cf_geo_restriction.locations
     }
   }
 
