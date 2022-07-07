@@ -1,4 +1,4 @@
 CloudFront Geo-Restriction
 =================
 
-This Terraform module outputs geo-restrictions that are applicable to CloudFront distributions.
+This Terraform module outputs geo-restriction that is applicable to CloudFront distributions.
