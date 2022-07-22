@@ -1,3 +1,5 @@
+// @todo Switch to `domain-certificate` module some day with help of
+//   `terraform state mv` to avoid certificate re-creation.
 resource "aws_acm_certificate" "default" {
   domain_name       = var.domain_name
   validation_method = "DNS"

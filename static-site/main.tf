@@ -71,6 +71,8 @@ resource "aws_s3_bucket_policy" "default" {
 
 // AWS Certificate Manager
 // TLS/SSL certificate for the new domain
+// @todo Switch to `domain-certificate` module some day with help of
+//   `terraform state mv` to avoid certificate re-creation.
 resource "aws_acm_certificate" "default" {
   domain_name = local.primary_domain
   subject_alternative_names = local.alternate_domains

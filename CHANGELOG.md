@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.32] - 2022-07-22
+
+- [Domain Certificate] Add standalone module for domain certificates.
+
 ## [1.0.31] - 2022-07-22
 
 - [Static Site] Add ability to override expose_headers.
