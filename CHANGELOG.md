@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.31] - 2022-07-22
+
+- [Static Site] Add ability to override expose_headers.
+
 ## [1.0.30] - 2022-07-08
 
 - [CloudFront Geo-Restriction] Add helper module for projects and other modules that define CloudFront distributions.
