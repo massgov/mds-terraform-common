@@ -82,6 +82,11 @@ variable "cors_allowed_origins" {
   default = ["*"]
 }
 
+variable "cors_expose_headers" {
+  type = list(string)
+  default = ["ETag"]
+}
+
 variable "is_spa" {
   type = string
   description = "A boolean indicating whether the site is a single page app. If it is, the index document will be used instead of a 404 response."
