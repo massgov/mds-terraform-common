@@ -21,6 +21,11 @@ variable "runtime" {
   type = string
 }
 
+variable "publish" {
+  type = boolean
+  default = true
+}
+
 variable "timeout" {
   type    = string
   default = 300
