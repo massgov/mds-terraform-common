@@ -48,6 +48,11 @@ variable "subnets" {
   default = []
 }
 
+variable "layers" {
+  type    = list(string)
+  default = []
+}
+
 variable "environment" {
   type = object({
     variables = map(string)
