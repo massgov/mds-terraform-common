@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.33] - 2022-10-05
+
+- [Lambda] Add `invoke_arn` output.
+- [Lambda] Add `publish` variable to control whether a new version is published.
+- [Lambda] Add `layers` variable to allow attachment of additional layers (created externally) to the function.
+
 ## [1.0.32] - 2022-07-22
 
 - [Domain Certificate] Add standalone module for domain certificates.
