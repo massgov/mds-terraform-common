@@ -22,3 +22,8 @@ output "function_version" {
 output "developer_policies" {
   value = [data.aws_iam_policy_document.developer.json]
 }
+
+// Lambda function's Invoke ARN.
+output "invoke_arn" {
+  value = aws_lambda_function.default.invoke_arn
+}

@@ -7,8 +7,9 @@ resource "aws_lambda_function" "default" {
   source_code_hash = filebase64sha256(var.package)
   runtime          = var.runtime
   timeout          = var.timeout
-  publish          = true
+  publish          = var.publish
   memory_size      = var.memory_size
+  layers           = var.layers
   vpc_config {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets

@@ -21,6 +21,11 @@ variable "runtime" {
   type = string
 }
 
+variable "publish" {
+  type = bool
+  default = true
+}
+
 variable "timeout" {
   type    = string
   default = 300
@@ -44,6 +49,11 @@ variable "security_groups" {
 }
 
 variable "subnets" {
+  type    = list(string)
+  default = []
+}
+
+variable "layers" {
   type    = list(string)
   default = []
 }
