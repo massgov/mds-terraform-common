@@ -22,7 +22,7 @@ variable "runtime" {
 }
 
 variable "publish" {
-  type = boolean
+  type = bool
   default = true
 }
 
