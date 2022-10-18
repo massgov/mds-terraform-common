@@ -2,11 +2,8 @@ data "aws_region" "default" {}
 
 data "archive_file" "monitor_package" {
   type        = "zip"
+  source_file = "${path.module}/lambda/dist/lambda.js"
   output_path = "${path.module}/package/lambda.zip"
-  source {
-    content  = "${path.module}/lambda/dist/lambda.js"
-    filename = "lambda.js"
-  }
 }
 
 data "aws_iam_policy_document" "monitor_inline_policy" {
