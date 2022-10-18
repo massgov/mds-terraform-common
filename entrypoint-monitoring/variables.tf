@@ -50,7 +50,7 @@ variable "schedule" {
   type        = map(string)
   description = "Schedule expressions to use to invoke the lambda regularly"
   default = {
-    monday_4_30 = "cron(30 4 * * 1 *)"
+    monday_4_30 = "cron(30 4 ? * 1 *)"
   }
 }
 
