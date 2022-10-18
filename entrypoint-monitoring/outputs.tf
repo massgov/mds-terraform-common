@@ -22,8 +22,3 @@ output "function_version" {
 output "developer_policies" {
   value = module.monitor_lambda.developer_policies
 }
-
-// Lambda function's Invoke ARN.
-output "invoke_arn" {
-  value = module.monitor_lambda.invoke_arn
-}
