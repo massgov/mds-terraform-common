@@ -49,7 +49,7 @@ module "monitor_lambda" {
   package                = data.archive_file.monitor_package.output_path
   runtime                = "nodejs14.x"
   handler                = "lambda.handler"
-  ephemeral_storage_size = 0
+  ephemeral_storage_size = var.ephemeral_storage_size
   environment = {
     variables = merge({
       ALLOWED_POINTS_PARAMETER = var.allowed_points_parameter

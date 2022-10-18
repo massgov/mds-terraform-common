@@ -19,6 +19,12 @@ variable "memory_size" {
   description = "The memory limit for the Lambda Function"
 }
 
+variable "ephemeral_storage_size" {
+  type = string
+  default = 512
+  description = "The amount of ephemeral storage to provision for the Lambda"
+}
+
 variable "security_groups" {
   type    = list(string)
   default = []
