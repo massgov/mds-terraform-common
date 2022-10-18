@@ -57,7 +57,7 @@ module "monitor_lambda" {
     }, var.environment_vars)
   }
   iam_policies = concat(
-    data.aws_iam_policy_document.monitor_inline_policy.json,
+    [data.aws_iam_policy_document.monitor_inline_policy.json],
     var.iam_policies,
   )
 
