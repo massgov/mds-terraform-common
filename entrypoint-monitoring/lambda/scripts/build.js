@@ -5,7 +5,7 @@ require('esbuild')
     ],
     bundle: true,
     platform: 'node',
-    target: 'node14',
+    target: 'node12',
     external: [
       '@aws-sdk/*',
     ],
