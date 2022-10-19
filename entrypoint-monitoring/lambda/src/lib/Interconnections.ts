@@ -2,6 +2,15 @@ import Service, {ServiceType} from "../types/Service";
 import Point, {PointList} from "../types/Point";
 import ServiceList from "./ServiceList";
 
+/**
+ * Represents interconnections between points and services.
+ *
+ * That's the result of all the scans. Orphan points that don't resolve to
+ * any known service are the ones we're looking for.
+ *
+ * @see Point
+ * @see Service
+ */
 export default class Interconnections {
 
   points: PointList = new Map()
@@ -52,11 +61,6 @@ export default class Interconnections {
   getOrphanPoints(): Point[] {
     return Array.from(this.points.values())
       .filter((point) => !point.destinations.isEmpty())
-  }
-
-  hasOrphanPoints(): boolean {
-    return Array.from(this.points.values())
-      .some((point) => !point.destinations.isEmpty())
   }
 
 }
