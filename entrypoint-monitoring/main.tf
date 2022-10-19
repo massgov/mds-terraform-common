@@ -45,7 +45,7 @@ module "monitor_lambda" {
   source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
   package                = data.archive_file.monitor_package.output_path
   runtime                = "nodejs12.x"
-  handler                = "lambda.handler"
+  handler                = "lambda.default"
   environment = {
     variables = merge({
       ALLOWED_POINTS_PARAMETER = var.allowed_points_parameter
