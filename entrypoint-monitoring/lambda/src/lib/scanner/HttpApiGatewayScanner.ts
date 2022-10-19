@@ -74,11 +74,7 @@ export default class HttpApiGatewayScanner extends BaseScanner implements Scanne
       client: this.client,
       logger: this.logger,
       reader: async function*(data: GetApisCommandOutput) {
-        const apis = data.Items
-        if (!apis) {
-          throw new Error('Unable to list HTTP APIs.')
-        }
-
+        const apis = data.Items || []
         for (const api of apis) {
           yield api
         }

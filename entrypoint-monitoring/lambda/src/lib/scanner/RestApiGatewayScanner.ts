@@ -112,11 +112,7 @@ export default class RestApiGatewayScanner extends BaseScanner implements Scanne
       client: this.client,
       logger: this.logger,
       reader: async function*(data: GetDomainNamesCommandOutput) {
-        const domainNames = data.items
-        if (!domainNames) {
-          throw new Error('Unable to list custom domain names of REST APIs.')
-        }
-
+        const domainNames = data.items || []
         for (const domainName of domainNames) {
           yield domainName
         }
@@ -145,11 +141,7 @@ export default class RestApiGatewayScanner extends BaseScanner implements Scanne
       client: this.client,
       logger: this.logger,
       reader: async function*(data: GetBasePathMappingsCommandOutput) {
-        const mappings = data.items
-        if (!mappings) {
-          throw new Error('Unable to list mappings of custom domain names for REST APIs.')
-        }
-
+        const mappings = data.items || []
         for (const mapping of mappings) {
           yield mapping
         }
@@ -177,11 +169,7 @@ export default class RestApiGatewayScanner extends BaseScanner implements Scanne
       client: this.client,
       logger: this.logger,
       reader: async function*(data: GetRestApisCommandOutput) {
-        const apis = data.items
-        if (!apis) {
-          throw new Error('Unable to list REST APIs.')
-        }
-
+        const apis = data.items || []
         for (const api of apis) {
           yield api
         }

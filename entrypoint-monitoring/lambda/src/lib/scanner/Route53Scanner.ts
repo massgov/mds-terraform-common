@@ -134,10 +134,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
       client: this.client,
       logger: this.logger,
       reader: async function*(data: ListHostedZonesCommandOutput) {
-        const hostedZones = data.HostedZones
-        if (!hostedZones) {
-          throw new Error('Unable to list Route53 hosted zones.')
-        }
+        const hostedZones = data.HostedZones || []
         for (const hostedZone of hostedZones) {
           yield hostedZone
         }
@@ -167,10 +164,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
       client: this.client,
       logger: this.logger,
       reader: async function*(data: ListResourceRecordSetsCommandOutput) {
-        const recordSets = data.ResourceRecordSets
-        if (!recordSets) {
-          throw new Error('Unable to list Route53 record sets.')
-        }
+        const recordSets = data.ResourceRecordSets || []
         for (const recordSet of recordSets) {
           yield recordSet
         }

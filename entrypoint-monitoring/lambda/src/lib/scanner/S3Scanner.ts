@@ -159,10 +159,7 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       client: this.client,
       logger: this.logger,
       reader: async function*(data: ListBucketsCommandOutput) {
-        const buckets = data.Buckets
-        if (!buckets) {
-          throw new Error('Unable to list S3 buckets.')
-        }
+        const buckets = data.Buckets || []
         for (const bucket of buckets) {
           yield bucket
         }

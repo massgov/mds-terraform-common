@@ -93,10 +93,7 @@ export default class DistributionScanner extends BaseScanner implements Scanner 
       client: this.client,
       logger: this.logger,
       reader: async function*(data: ListDistributionsCommandOutput) {
-        const distributionSummaries = data.DistributionList?.Items
-        if (!distributionSummaries) {
-          throw new Error('Unable to list CloudFront distributions.')
-        }
+        const distributionSummaries = data.DistributionList?.Items || []
         for (const distSummary of distributionSummaries) {
           yield distSummary
         }

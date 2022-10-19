@@ -67,10 +67,7 @@ export default class LoadBalancerScanner extends BaseScanner implements Scanner 
       client: this.client,
       logger: this.logger,
       reader: async function*(data: DescribeLoadBalancersCommandOutput) {
-        const balancers = data.LoadBalancers
-        if (!balancers) {
-          throw new Error('Unable to list load balancers.')
-        }
+        const balancers = data.LoadBalancers || []
         for (const balancer of balancers) {
           yield balancer
         }
