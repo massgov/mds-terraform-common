@@ -6,9 +6,6 @@ require('esbuild')
     bundle: true,
     platform: 'node',
     target: 'node12',
-    external: [
-      '@aws-sdk/*',
-    ],
     outfile: 'dist/lambda.js',
   })
   .then(() => {
