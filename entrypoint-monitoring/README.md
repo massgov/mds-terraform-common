@@ -13,7 +13,7 @@ The lambda scans the following services and entrypoints:
   * Targets of default records
   * Targets of alias records
 * CloudFront Distributions
-  * Distribution auto-generated names
+  * Auto-generated domain names
   * Origins
 * REST API Gateways
   * Default execution endpoints
@@ -21,7 +21,7 @@ The lambda scans the following services and entrypoints:
 * HTTP API Gateways
   * Default execution endpoints
 * S3 Buckets
-  * Website entrypoint when enabled
+  * Website entrypoint
   * Unconditional redirects
   * Routing rules
   * Alias names used by CloudFront to point to a bucket
