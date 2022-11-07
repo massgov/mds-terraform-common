@@ -33,6 +33,7 @@ export default class S3Scanner extends BaseScanner implements Scanner {
     this.logger.log('==== Scanning S3 Buckets... ====')
 
     const region = await this.client.config.region()
+    const requestPromises: Promise<any>[] = [];
     for await (const bucket of this.getBuckets()) {
       const bucketName = bucket.Name
       if (bucketName === undefined) {
@@ -51,61 +52,83 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       )
       this.logger.debug(`-- CF-specific entrypoint: ${cfOriginPoint}`)
 
-      const websiteConfig = await this.getBucketWebsiteConfig(bucketName)
-      if (websiteConfig === undefined) {
-        this.logger.debug('-- No website configuration.')
-      }
-      else {
-        // Existence of the website configuration means that the bucket is
-        // accessible through a few more points.
-        // See https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteEndpoints.html
-        const websiteEndpoints = [
-          `${bucketName}.s3-website.${region}.amazonaws.com`,
-          `${bucketName}.s3-website-${region}.amazonaws.com`,
-        ];
-        for (const websiteEndpoint of websiteEndpoints) {
-          interconnections.addPointToServiceLink(
-            websiteEndpoint,
-            this.serviceType,
-            bucketName
-          )
-          this.logger.debug(`-- Website entrypoint: ${websiteEndpoint}`)
-        }
-
-        // The website config could define an unconditional redirect to another
-        // point.
-        const redirectHostname = websiteConfig.RedirectAllRequestsTo?.HostName
-        if (redirectHostname) {
-          interconnections.addServiceToPointLink(
-            this.serviceType,
+      const websiteConfigPromise = this.getBucketWebsiteConfig(bucketName)
+        .then((websiteConfig: WebsiteConfiguration|undefined) => {
+          this.doScanBucketWebsiteConfig(
+            region,
             bucketName,
-            redirectHostname
+            websiteConfig,
+            interconnections
           )
-          this.logger.debug(`-- Unconditional redirect to ${redirectHostname}`)
-        }
-
-        // The website config could also define a set of routing rules that also
-        // redirects to another point.
-        if (websiteConfig.RoutingRules?.length) {
-          this.logger.debug(`-- Routing rules.`)
-          for (const routingRule of websiteConfig.RoutingRules) {
-            const ruleHostname = routingRule.Redirect?.HostName
-            if (!ruleHostname) {
-              continue;
-            }
-
-            interconnections.addServiceToPointLink(
-              this.serviceType,
-              bucketName,
-              ruleHostname
-            )
-            this.logger.debug(`--- Routing rule target: ${ruleHostname}`)
-          }
-        }
-      }
+        })
+      requestPromises.push(websiteConfigPromise)
     }
 
+    // Wait until all the requests complete.
+    await Promise.all(requestPromises)
+
     this.logger.log('==== The S3 Buckets scan is complete. ====')
+  }
+
+  protected doScanBucketWebsiteConfig(
+    region: string,
+    bucketName: string,
+    websiteConfig: WebsiteConfiguration|undefined,
+    interconnections: Interconnections
+  ) {
+    if (websiteConfig === undefined) {
+      this.logger.debug(`- No website config for the ${bucketName} bucket.`)
+      return;
+    }
+
+    this.logger.debug(`- Website config of the ${bucketName} bucket:`)
+
+    // Existence of the website configuration means that the bucket is
+    // accessible through a few more points.
+    // See https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteEndpoints.html
+    const websiteEndpoints = [
+      `${bucketName}.s3-website.${region}.amazonaws.com`,
+      `${bucketName}.s3-website-${region}.amazonaws.com`,
+    ];
+    for (const websiteEndpoint of websiteEndpoints) {
+      interconnections.addPointToServiceLink(
+        websiteEndpoint,
+        this.serviceType,
+        bucketName
+      )
+      this.logger.debug(`-- Website entrypoint: ${websiteEndpoint}`)
+    }
+
+    // The website config could define an unconditional redirect to another
+    // point.
+    const redirectHostname = websiteConfig.RedirectAllRequestsTo?.HostName
+    if (redirectHostname) {
+      interconnections.addServiceToPointLink(
+        this.serviceType,
+        bucketName,
+        redirectHostname
+      )
+      this.logger.debug(`-- Unconditional redirect to ${redirectHostname}`)
+    }
+
+    // The website config could also define a set of routing rules that also
+    // redirects to another point.
+    if (websiteConfig.RoutingRules?.length) {
+      this.logger.debug(`-- Routing rules.`)
+      for (const routingRule of websiteConfig.RoutingRules) {
+        const ruleHostname = routingRule.Redirect?.HostName
+        if (!ruleHostname) {
+          continue;
+        }
+
+        interconnections.addServiceToPointLink(
+          this.serviceType,
+          bucketName,
+          ruleHostname
+        )
+        this.logger.debug(`--- Routing rule target: ${ruleHostname}`)
+      }
+    }
   }
 
   protected async getBucketWebsiteConfig(
