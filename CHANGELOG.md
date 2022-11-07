@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.34] - 2022-11-07
+
+- [Entrypoint Monitor] Add module with an entrypoint monitoring lambda.
+
 ## [1.0.33] - 2022-10-05
 
 - [Lambda] Add `invoke_arn` output.
