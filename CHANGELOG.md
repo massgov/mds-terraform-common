@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.34] - 2022-11-07
+## [1.0.34] - 2022-11-14
 
 - [Entrypoint Monitor] Add module with an entrypoint monitoring lambda.
 
