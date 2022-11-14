@@ -1,0 +1,4 @@
+/src/config.ts
+/run.*.sh
+!/run.example.sh
+/node_modules
