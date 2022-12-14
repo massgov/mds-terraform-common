@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.35] - 2022-12-14
+
+- [Static Site] Output S3 bucket and Cloudfront distribution arns.
+
 ## [1.0.34] - 2022-11-14
 
 - [Entrypoint Monitor] Add module with an entrypoint monitoring lambda.
