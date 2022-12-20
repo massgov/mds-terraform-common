@@ -43,6 +43,10 @@ Its value is a comma-separated list of valid entrypoints, for example:
 8.8.8.8,example.com
 ```
 
+## Scheduled execution
+
+By default, the scanner is executed early morning every Monday. But, this could be configured per AWS account.
+
 ## Local development
 
 Follow the following steps in order to set up local development environment:
