@@ -30,6 +30,19 @@ The lambda scans the following services and entrypoints:
   * Network Load Balancers
   * Gateway Load Balancers (not tested yet)
 
+## Allowed external entrypoints
+
+A service could point to a valid external domain name or an IP address.
+We don't want this external address to appear on the report over and over again.
+All known and valid domain names & IP addresses must be added to this list.
+
+The monitor reads the list of valid external entrypoints from an SSM parameter.
+By default, the parameter name is `/infrastructure/entrypoint-monitoring/allowed-points` but could be configured per AWS account.
+Its value is a comma-separated list of valid entrypoints, for example:
+```
+8.8.8.8,example.com
+```
+
 ## Local development
 
 Follow the following steps in order to set up local development environment:
