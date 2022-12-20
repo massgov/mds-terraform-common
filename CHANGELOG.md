@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.36] - 2022-12-20
+
+- [Entrypoint Monitor] Improve formatting of the report message.
+
 ## [1.0.35] - 2022-12-14
 
 - [Static Site] Output S3 bucket and Cloudfront distribution arns.

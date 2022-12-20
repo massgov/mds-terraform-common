@@ -14,6 +14,7 @@ export default class SnsNotifier {
 
   async send(message: string) {
     const command = new PublishCommand({
+      Subject: 'Entrypoint monitor alert',
       Message: message,
       TopicArn: this.config.reportSnsTopic,
     })
