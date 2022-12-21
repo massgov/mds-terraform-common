@@ -40,10 +40,10 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
       "apigateway:GET",
     ]
     resources = [
-      "arn:aws:apigateway:${data.aws_region.default.name}::/restapis",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/domainnames",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/domainnames/*/basepathmappings",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/apis",
+      "arn:aws:apigateway:${local.aws_region}::/restapis",
+      "arn:aws:apigateway:${local.aws_region}::/domainnames",
+      "arn:aws:apigateway:${local.aws_region}::/domainnames/*/basepathmappings",
+      "arn:aws:apigateway:${local.aws_region}::/apis",
     ]
   }
 
