@@ -61,6 +61,7 @@ export default class AllowListScanner extends BaseScanner implements Scanner {
     catch (e:any) {
       if (e.name !== 'ParameterNotFound') {
         this.logger.error(e)
+        throw e
       }
 
       return undefined

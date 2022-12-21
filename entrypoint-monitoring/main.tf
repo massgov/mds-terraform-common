@@ -1,5 +1,12 @@
 data "aws_region" "default" {}
 
+data "aws_caller_identity" "current" {}
+
+locals {
+  aws_region = data.aws_region.default.name
+  aws_account_id = data.aws_caller_identity.current.account_id
+}
+
 data "archive_file" "monitor_package" {
   type        = "zip"
   source_file = "${path.module}/lambda/dist/lambda.js"
@@ -33,10 +40,19 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
       "apigateway:GET",
     ]
     resources = [
-      "arn:aws:apigateway:${data.aws_region.default.name}::/restapis",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/domainnames",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/domainnames/*/basepathmappings",
-      "arn:aws:apigateway:${data.aws_region.default.name}::/apis",
+      "arn:aws:apigateway:${local.aws_region}::/restapis",
+      "arn:aws:apigateway:${local.aws_region}::/domainnames",
+      "arn:aws:apigateway:${local.aws_region}::/domainnames/*/basepathmappings",
+      "arn:aws:apigateway:${local.aws_region}::/apis",
+    ]
+  }
+
+  statement {
+    actions = [
+      "ssm:GetParameter",
+    ]
+    resources = [
+      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.allowed_points_parameter}"
     ]
   }
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.38] - 2022-12-21
+
+- [Entrypoint Monitor] Grant read access to the SSM parameter.
+- [Entrypoint Monitor] Let the lambda fail if the SSM parameter can't be read.
+
 ## [1.0.37] - 2022-12-21
 
 - [Entrypoint Monitor] Properly discover default endpoints on HTTP APIs.
