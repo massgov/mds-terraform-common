@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.37] - 2022-12-21
+
+- [Entrypoint Monitor] Properly discover default endpoints on HTTP APIs.
+
 ## [1.0.36] - 2022-12-20
 
 - [Entrypoint Monitor] Improve formatting of the report message.

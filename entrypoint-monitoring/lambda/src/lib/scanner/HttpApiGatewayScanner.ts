@@ -39,11 +39,15 @@ export default class HttpApiGatewayScanner extends BaseScanner implements Scanne
 
       // Add default endpoint, if enabled.
       if (!api.DisableExecuteApiEndpoint) {
-        const endpoint = api.ApiEndpoint
-        if (!endpoint) {
+        const endpointUri = api.ApiEndpoint
+        if (!endpointUri) {
           this.logger.error(`The ${api.ApiId} HTTP API doesn't have a default endpoint.`)
           continue;
         }
+
+        // AWS adds `https://` prefix to the endpoint URI, and we only need a domain name.
+        const endpoint = endpointUri
+          .replace(/^https?:\/\//i, '')
 
         interconnections.addPointToServiceLink(
           endpoint,
