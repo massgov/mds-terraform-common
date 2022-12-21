@@ -34,7 +34,7 @@ The lambda scans the following services and entrypoints:
 
 A service could point to a valid external domain name or an IP address.
 We don't want this external address to appear on the report over and over again.
-All known and valid domain names & IP addresses must be added to this list.
+All known and valid domain names & IP addresses must be added to the allowlist.
 
 The monitor reads the list of valid external entrypoints from an SSM parameter.
 By default, the parameter name is `/infrastructure/entrypoint-monitoring/allowed-points` but could be configured per AWS account.
