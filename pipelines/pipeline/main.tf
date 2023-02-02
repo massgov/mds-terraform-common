@@ -62,7 +62,8 @@ resource "aws_codebuild_webhook" "plan" {
 
     filter {
       type = "HEAD_REF"
-      pattern = "^refs/heads/(?!master|develop).*$"
+      pattern = "^refs/heads/(?:master|develop)$"
+      exclude_matched_pattern = true
     }
   }
 }
