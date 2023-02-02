@@ -53,12 +53,35 @@ resource "aws_codebuild_project" "plan" {
 
 resource "aws_codebuild_webhook" "plan" {
   project_name  = aws_codebuild_project.plan.name
-  branch_filter = "^(?!master|develop).*$"
+
+  filter_group {
+    filter {
+      type = "EVENT"
+      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+    }
+
+    filter {
+      type = "HEAD_REF"
+      pattern = "^refs/heads/(?:master|develop)$"
+      exclude_matched_pattern = true
+    }
+  }
 }
 
 resource "aws_codebuild_webhook" "apply_develop" {
   project_name  = aws_codebuild_project.apply_develop.name
-  branch_filter = "^develop$"
+
+  filter_group {
+    filter {
+      type = "EVENT"
+      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+    }
+
+    filter {
+      type = "HEAD_REF"
+      pattern = "^refs/heads/develop$"
+    }
+  }
 
   // We use a provisioner here to remove the pull_request event from the apply
   // webhook.  Otherwise, this codebuild job will run for every PR.
@@ -120,7 +143,18 @@ resource "aws_codebuild_project" "apply_develop" {
 
 resource "aws_codebuild_webhook" "apply_master" {
   project_name  = aws_codebuild_project.apply_master.name
-  branch_filter = "^master$"
+
+  filter_group {
+    filter {
+      type = "EVENT"
+      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+    }
+
+    filter {
+      type = "HEAD_REF"
+      pattern = "^refs/heads/master$"
+    }
+  }
 
   // We use a provisioner here to remove the pull_request event from the apply
   // webhook.  Otherwise, this codebuild job will run for every PR.

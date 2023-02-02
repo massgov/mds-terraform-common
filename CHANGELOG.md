@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.39] - 2023-02-02
+
+- [Pipelines] - Switch from `branch_filter` to `filter_group`.
+
 ## [1.0.38] - 2022-12-21
 
 - [Entrypoint Monitor] Grant read access to the SSM parameter.
