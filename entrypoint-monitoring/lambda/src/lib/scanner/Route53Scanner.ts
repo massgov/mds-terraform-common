@@ -101,7 +101,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
 
             // Ignore the certificate validation records.
             if (recordSet.Type === 'CNAME' && this.ignoredCnameTarget.test(record.Value)) {
-              this.logger.debug(`---- Ignoring a special CNAME record: ${record.Value}`)
+              this.logger.debug(`--- Ignoring a special CNAME record: ${record.Value}`)
               continue;
             }
 
@@ -110,7 +110,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
               serviceId,
               this.normalizeDomainName(record.Value)
             )
-            this.logger.debug(`---- ${record.Value}`);
+            this.logger.debug(`--- ${record.Value}`);
           }
         }
         else {
@@ -153,7 +153,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
           serviceId,
           s3BucketEndpoint
         )
-        this.logger.debug(`- S3 website: ${s3BucketEndpoint}`)
+        this.logger.debug(`--- S3 website: ${s3BucketEndpoint}`)
         return;
       }
     }
@@ -164,7 +164,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
       serviceId,
       normalizedTargetDnsName
     )
-    this.logger.debug(`- ${normalizedTargetDnsName}`)
+    this.logger.debug(`--- ${normalizedTargetDnsName}`)
   }
 
   async* getHostedZones(): AsyncGenerator<HostedZone> {
