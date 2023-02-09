@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.40] - 2023-02-09
+
+- [Entrypoint Monitor] Add support for S3 alias records to the Route53 scanner.
+
 ## [1.0.39] - 2023-02-02
 
 - [Pipelines] - Switch from `branch_filter` to `filter_group`.
