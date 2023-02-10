@@ -1,4 +1,5 @@
 import {
+  AliasTarget,
   HostedZone,
   ListHostedZonesCommand,
   ListHostedZonesCommandInput,
@@ -45,6 +46,12 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
   protected async doScan(interconnections: Interconnections) {
     this.logger.log('==== Scanning Route53 Record Sets... ====')
 
+    const region = await this.client.config.region()
+    const s3AliasTargets = [
+      `s3-website.${region}.amazonaws.com`,
+      `s3-website-${region}.amazonaws.com`,
+    ]
+
     for await (const zone of this.getHostedZones()) {
       if (!zone.Id) {
         this.logger.error(`Zone without ID!`);
@@ -78,17 +85,12 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
 
         this.logger.debug(`-- Record set ${recordSet.Name} `)
         if (recordSet.AliasTarget) {
-          if (recordSet.AliasTarget.DNSName === undefined) {
-            this.logger.error(`Route53 record set without an alias DNS name!`)
-            continue;
-          }
-
-          interconnections.addServiceToPointLink(
-            this.serviceType,
+          this.addAliasLink({
+            interconnections,
             serviceId,
-            this.normalizeDomainName(recordSet.AliasTarget.DNSName)
-          )
-          this.logger.debug(`- ${recordSet.AliasTarget.DNSName}`)
+            aliasTarget: recordSet.AliasTarget,
+            s3AliasTargets
+          })
         }
         else if (recordSet.ResourceRecords) {
           for (const record of recordSet.ResourceRecords) {
@@ -99,7 +101,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
 
             // Ignore the certificate validation records.
             if (recordSet.Type === 'CNAME' && this.ignoredCnameTarget.test(record.Value)) {
-              this.logger.debug(`---- Ignoring a special CNAME record: ${record.Value}`)
+              this.logger.debug(`--- Ignoring a special CNAME record: ${record.Value}`)
               continue;
             }
 
@@ -108,7 +110,7 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
               serviceId,
               this.normalizeDomainName(record.Value)
             )
-            this.logger.debug(`---- ${record.Value}`);
+            this.logger.debug(`--- ${record.Value}`);
           }
         }
         else {
@@ -118,6 +120,51 @@ export default class Route53Scanner extends BaseScanner implements Scanner {
     }
 
     this.logger.log('==== The Route53 Record Sets scan is complete. ====')
+  }
+
+  addAliasLink({
+    interconnections,
+    serviceId,
+    aliasTarget,
+    s3AliasTargets
+  }: {
+    interconnections: Interconnections,
+    serviceId: string,
+    aliasTarget: AliasTarget,
+    s3AliasTargets: string[]
+  }): void {
+    if (aliasTarget.DNSName === undefined) {
+      this.logger.error(`Route53 record set without an alias DNS name!`)
+      return;
+    }
+
+    const normalizedTargetDnsName = this.normalizeDomainName(aliasTarget.DNSName)
+
+    // Route53 allows directly pointing to S3 Website endpoints. API shows it as
+    // an alias record pointing to a website endpoint but without the bucket
+    // prefix. We add `bucket.` prefix to them in order to match S3 website
+    // endpoints discovered by the S3 scanner.
+    for (const s3Target of s3AliasTargets) {
+      if (normalizedTargetDnsName === s3Target) {
+        const s3BucketEndpoint = `${this.normalizeDomainName(serviceId)}.${s3Target}`
+
+        interconnections.addServiceToPointLink(
+          this.serviceType,
+          serviceId,
+          s3BucketEndpoint
+        )
+        this.logger.debug(`--- S3 website: ${s3BucketEndpoint}`)
+        return;
+      }
+    }
+
+    // Fallback to simply adding the alias target.
+    interconnections.addServiceToPointLink(
+      this.serviceType,
+      serviceId,
+      normalizedTargetDnsName
+    )
+    this.logger.debug(`--- ${normalizedTargetDnsName}`)
   }
 
   async* getHostedZones(): AsyncGenerator<HostedZone> {
