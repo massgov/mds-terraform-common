@@ -1,0 +1,19 @@
+{
+  "name": "massgov-aws-sns-to-teams",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/archiver": "^5.3.1",
+    "@types/node": "^18.13.0",
+    "archiver": "^5.3.1",
+    "esbuild": "^0.17.8",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {},
+  "scripts": {
+    "build": "ts-node bin/build.ts"
+  },
+  "volta": {
+    "node": "14.20.0"
+  }
+}
