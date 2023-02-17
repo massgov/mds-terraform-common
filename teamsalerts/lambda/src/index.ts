@@ -1,27 +1,33 @@
 import assert from 'assert';
-import { EventBridgeHandler, Handler, SNSHandler } from 'aws-lambda';
+import { SNSHandler } from 'aws-lambda';
 import { TopicMap } from './types';
+import { consume, map, pipeline, tap } from 'streaming-iterables';
+import { enrichWithMessageCards, publishToTeams } from './util';
 
-const handler: SNSHandler = async function(event, context, callback) {
-    assert(process.env.TOPIC_MAP && typeof process.env.TOPIC_MAP === 'string');
-    const topicMap = <TopicMap>JSON.parse(process.env.TOPIC_MAP);
-    // // Special handling for formatting ClamAV alert subject and message.
-    // data.Records.forEach(function(element, index) {
-    //     if (element.Sns.TopicArn.includes('massgov-clamav-scan-status')) {
-    //         const message = JSON.parse(element.Sns.Message);
-    //         let output = ' ';
-    //         for (const [key, value] of Object.entries(message)) {
-    //             output += "*" + key + "*: " + value + "\n";
-    //         }
-    //         data.Records[index].Sns.Subject = 'ClamAV detected an infected file';
-    //         data.Records[index].Sns.Message = output;
-    //     }
-    // });
+const handler: SNSHandler = async function(event) {
+  assert(process.env.TEAMS_WEBHOOK_URL && typeof process.env.TEAMS_WEBHOOK_URL === 'string');
+  assert(process.env.TOPIC_MAP && typeof process.env.TOPIC_MAP === 'string');
 
-    // const messages = data.Records.map(record => {
-    //     return publisher.publish(record);
-    // })
-    // return Promise.all(messages)
+  const webhookUrl = process.env.TEAMS_WEBHOOK_URL;
+  const topicMap = <TopicMap>JSON.parse(process.env.TOPIC_MAP);
+
+  await pipeline(
+    () => event.Records,
+    (records) => enrichWithMessageCards(records, topicMap),
+    tap((record) => record.hasMappedTopic
+      ? undefined
+      : console.error(`Unmapped topic: ${record.record.Sns.TopicArn}`)
+    ),
+    (records) => publishToTeams(records, webhookUrl),
+    tap((record) => record.publishResult.success
+      ? console.log(`Successfully published ${record.record.Sns.MessageId} from ${record.record.Sns.TopicArn} to Teams`)
+      : console.error(
+        `Failed to publish ${record.record.Sns.MessageId} from ${record.record.Sns.TopicArn} to Teams: %s`,
+        record.publishResult.error
+      )
+    ),
+    consume
+  );
 }
 
 export {

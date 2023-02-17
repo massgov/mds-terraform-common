@@ -7,7 +7,8 @@ resource "aws_lambda_function" "sns_to_teams" {
   runtime          = "nodejs14.x"
   environment {
     variables = {
-      TOPIC_MAP       = jsonencode(var.topic_map)
+      TOPIC_MAP         = jsonencode(var.topic_map)
+      TEAMS_WEBHOOK_URL = var.teams_webhook_url
     }
   }
   tags = merge(
