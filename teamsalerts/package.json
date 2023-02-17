@@ -1,9 +1,0 @@
-{
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.110"
-  },
-  "dependencies": {
-    "assert": "^2.0.0",
-    "streaming-iterables": "^7.1.0"
-  }
-}

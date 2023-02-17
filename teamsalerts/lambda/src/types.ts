@@ -1,3 +1,5 @@
+import { SNSEventRecord } from "aws-lambda"
+
 export interface MessageCardSection {
   activityTitle: string,
   activitySubtitle: string,
@@ -35,3 +37,16 @@ export type TopicMap = Array<{
   human_name: string
   emoji_uni_hex: string
 }>
+
+export interface WithMessageCard {
+  record: SNSEventRecord,
+  messageCard: MessageCard,
+  hasMappedTopic: boolean,
+}
+
+export type WithPublishResult = WithMessageCard & {
+  publishResult: {
+    success: boolean,
+    error: string | null
+  }
+}

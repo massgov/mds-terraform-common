@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { SNSHandler } from 'aws-lambda';
 import { TopicMap } from './types';
-import { consume, map, pipeline, tap } from 'streaming-iterables';
+import { consume, pipeline, tap } from 'streaming-iterables';
 import { enrichWithMessageCards, publishToTeams } from './util';
 
 const handler: SNSHandler = async function(event) {
@@ -16,7 +16,7 @@ const handler: SNSHandler = async function(event) {
     (records) => enrichWithMessageCards(records, topicMap),
     tap((record) => record.hasMappedTopic
       ? undefined
-      : console.error(`Unmapped topic: ${record.record.Sns.TopicArn}`)
+      : console.warn(`Unmapped topic: ${record.record.Sns.TopicArn}`)
     ),
     (records) => publishToTeams(records, webhookUrl),
     tap((record) => record.publishResult.success

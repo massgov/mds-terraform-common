@@ -2,7 +2,7 @@ import { SNSEventRecord } from "aws-lambda";
 import { request } from "http";
 import { AnyIterable, batch, getIterator } from "streaming-iterables";
 import { parse } from "url";
-import { MessageCard, TopicMap } from "./types";
+import { MessageCard, TopicMap, WithMessageCard, WithPublishResult } from "./types";
 
 type TopicInfo = Pick<TopicMap[number], 'emoji_uni_hex' | 'human_name'>;
 
@@ -20,12 +20,6 @@ const getImageData = (emojiHex: string) => {
     </svg>
   `).toString('base64url');
   return `data:text/svg;base64,${base64}`;
-}
-
-interface WithMessageCard {
-  record: SNSEventRecord,
-  messageCard: MessageCard,
-  hasMappedTopic: boolean,
 }
 
 export const enrichWithMessageCards = async function * (records: AnyIterable<SNSEventRecord>, topicMap: TopicMap) {
@@ -84,12 +78,6 @@ export const enrichWithMessageCards = async function * (records: AnyIterable<SNS
   }
 }
 
-type WithPublishResult = WithMessageCard & {
-  publishResult: {
-    success: boolean,
-    error: string | null
-  }
-}
 export const publishToTeams = async function* (records: AnyIterable<WithMessageCard>, webhookUrl: string) {
   const urlParts = parse(webhookUrl);
   for await (const chunk of batch(10, records)) {
