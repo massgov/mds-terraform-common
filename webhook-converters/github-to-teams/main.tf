@@ -45,7 +45,6 @@ module "lambda" {
   human_name      = var.human_name
   tags            = var.tags
   subnets         = var.subnets
-  schedule        = var.schedule
   error_topics    = var.error_topics
   iam_policy_arns = var.iam_policy_arns
   memory_size     = var.memory_size
