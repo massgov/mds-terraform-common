@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.41] - 2023-02-21
+
+- [GitHub to Teams] Add a module that converts GitHub webhooks into Teams channel messages.
+
 ## [1.0.40] - 2023-02-09
 
 - [Entrypoint Monitor] Add support for S3 alias records to the Route53 scanner.
