@@ -1,12 +1,9 @@
-# TODO Drop it if not needed.
 data "aws_region" "default" {}
 
-# TODO Drop it if not needed.
 data "aws_caller_identity" "current" {}
 
-# TODO Drop it if not needed.
 locals {
-  aws_region = data.aws_region.default.name
+  aws_region     = data.aws_region.default.name
   aws_account_id = data.aws_caller_identity.current.account_id
 }
 
@@ -16,58 +13,28 @@ data "archive_file" "lambda_package" {
   output_path = "${path.module}/package/lambda.zip"
 }
 
-# TODO Drop it if not needed.
 data "aws_iam_policy_document" "lambda_inline_policy" {
-#  statement {
-#    actions = [
-#      "sns:Publish"
-#    ]
-#    resources = [
-#      var.report_topic_arn
-#    ]
-#  }
-#
-#  statement {
-#    actions = [
-#      "cloudfront:ListDistributions",
-#      "elasticloadbalancing:DescribeLoadBalancers",
-#      "route53:ListHostedZones",
-#      "route53:ListResourceRecordSets",
-#      "s3:ListAllMyBuckets",
-#      "s3:GetBucketWebsite",
-#    ]
-#    resources = ["*"]
-#  }
-#
-#  statement {
-#    actions = [
-#      "apigateway:GET",
-#    ]
-#    resources = [
-#      "arn:aws:apigateway:${local.aws_region}::/restapis",
-#      "arn:aws:apigateway:${local.aws_region}::/domainnames",
-#      "arn:aws:apigateway:${local.aws_region}::/domainnames/*/basepathmappings",
-#      "arn:aws:apigateway:${local.aws_region}::/apis",
-#    ]
-#  }
-#
-#  statement {
-#    actions = [
-#      "ssm:GetParameter",
-#    ]
-#    resources = [
-#      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.allowed_points_parameter}"
-#    ]
-#  }
+  statement {
+    actions = [
+      "ssm:GetParameter",
+    ]
+    resources = [
+      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.ssm_parameter_prefix}/*"
+    ]
+  }
 }
 
 module "lambda" {
-  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
-  package                = data.archive_file.lambda_package.output_path
-  runtime                = "nodejs12.x"
-  handler                = "lambda.default"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
+  package = data.archive_file.lambda_package.output_path
+  runtime = "nodejs12.x"
+  handler = "lambda.default"
   environment = {
-    variables = var.environment_vars
+    variables = merge({
+      CONFIGURABLE_PARAM_PREFIX = var.ssm_parameter_prefix
+      MIN_LOG_LEVEL             = var.min_log_level
+      SEND_TO_TEAMS             = var.send_to_teams ? "yes" : "no"
+    }, var.environment_vars)
   }
   iam_policies = concat(
     [data.aws_iam_policy_document.lambda_inline_policy.json],

@@ -55,7 +55,7 @@ variable "schedule" {
 }
 
 variable "tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
@@ -65,16 +65,20 @@ variable "error_topics" {
   default     = []
 }
 
-# @TODO Pass this parameter to the lambda as an env variable. See entrypoint monitor for the example.
-variable "ssm_parameter_prefix" {
-  type    = string
-  description = "The name prefix of the SSM parameters used for runtime configuration."
-  default = '/infrastructure/dependabot-to-teams-webhook'
+variable "min_log_level" {
+  type        = string
+  description = "The logging level. Accepted values are 'debug', 'log', or 'error'."
+  default     = "error"
 }
 
-# @TODO Pass this parameter to the lambda as an env variable. See entrypoint monitor for the example.
+variable "ssm_parameter_prefix" {
+  type        = string
+  description = "The name prefix of the SSM parameters used for runtime configuration. It must have no trailing slash!"
+  default     = "/infrastructure/dependabot-to-teams-webhook"
+}
+
 variable "send_to_teams" {
-  type    = string
-  description = "Whether to actually send the message to the Teams channel or just log the payload that could be sent to Teams. Pass 'yes' to enable it."
-  default = 'no'
+  type        = bool
+  description = "Whether to actually send the message to the Teams channel or just log the payload that could be sent to Teams."
+  default     = false
 }
