@@ -4,6 +4,7 @@ import { AnyIterable, batch } from "streaming-iterables";
 import { parse } from "url";
 import {
   MessageCard,
+  MessageCardSection,
   TopicMap,
   WithMessageCard,
   WithPublishResult,
@@ -15,6 +16,13 @@ const MAYFLOWER_DUCKLING_YELLOW = "F6C51B";
 const DEFAULT_TOPIC_INFO: TopicInfo = {
   emoji_uni_hex: "26AO", // ⚠️
   human_name: "Unnamed Topic",
+};
+
+const formatMessagePart = (value: unknown): string => {
+  if (typeof value === "object") {
+    return "`" + JSON.stringify(value) + "`";
+  }
+  return `${value}`;
 };
 
 const getImageData = (emojiHex: string) => {
@@ -45,26 +53,56 @@ export const enrichWithMessageCards = async function* (
 
     const { human_name, emoji_uni_hex } = mappedTopic ?? DEFAULT_TOPIC_INFO;
 
+    const sections = new Array<MessageCardSection>();
+    let messageJson: Object | null = null;
+    try {
+      messageJson = JSON.parse(Message);
+    } catch (_) {
+      // no op
+    }
+
+    const activityTitle = Subject || `New message on **${TopicArn}**`;
+    const activitySubtitle = new Date(Timestamp).toUTCString();
+    const activityImage = getImageData(emoji_uni_hex);
+
+    sections.push({
+      activityTitle,
+      activitySubtitle,
+      activityImage,
+      ...(messageJson
+        ? {
+            text: "#### Message contents:",
+            facts: Object.entries(messageJson).map(([key, value]) => ({
+              name: key,
+              value: formatMessagePart(value),
+            })),
+          }
+        : {
+            text: Message,
+            facts: [],
+          }),
+    });
+
+    if (MessageAttributes) {
+      sections.push({
+        startGroup: true,
+        text: "#### Message attributes:",
+        facts: Object.entries(MessageAttributes).map(
+          ([name, { Type, Value }]) => ({
+            name,
+            value: `${Type} - ${Value}`,
+          })
+        ),
+      });
+    }
+
     const messageCard: MessageCard = {
       "@context": "https://schema.org/extensions",
       "@type": "MessageCard",
-      summary: `SNS Alert: ${TopicArn}`,
+      summary: `SNS alert: ${TopicArn}`,
       themeColor: MAYFLOWER_DUCKLING_YELLOW,
-      title: `SNS Alert from ${human_name}`,
-      sections: [
-        {
-          activityTitle: Subject,
-          activitySubtitle: `@ ${Timestamp}`,
-          activityImage: getImageData(emoji_uni_hex),
-          text: Message,
-          facts: Object.entries(MessageAttributes).map(
-            ([name, { Type, Value }]) => ({
-              name,
-              value: `${Type} — ${Value}`,
-            })
-          ),
-        },
-      ],
+      title: `SNS alert from ${human_name}`,
+      sections,
       potentialAction: [
         {
           "@type": "OpenUri",

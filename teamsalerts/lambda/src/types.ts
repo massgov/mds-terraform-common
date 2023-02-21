@@ -1,6 +1,7 @@
 import { SNSEventRecord } from "aws-lambda";
 
-export interface MessageCardSection {
+export type MessageCardSection = Partial<{
+  startGroup: boolean;
   activityTitle: string;
   activitySubtitle: string;
   activityImage: string;
@@ -9,7 +10,7 @@ export interface MessageCardSection {
     value: string;
   }>;
   text: string;
-}
+}>;
 
 // this is actually a union type, but for our purposes
 // we're limiting it to just URI actions
