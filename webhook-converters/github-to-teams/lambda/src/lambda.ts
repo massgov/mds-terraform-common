@@ -4,10 +4,20 @@ import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 import createWebhookHandler from "./lib/createWebhookHandler";
 import ConsoleLogger from "./lib/log/ConsoleLogger";
 import { WebhookLambdaInputSchema } from "./types/WebhookLambdaInput";
+import validateToken from "./lib/validateToken";
 
 const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const configBuilder = new EnvConfigBuilder()
   const config = configBuilder.build()
+
+  // Validate the token passed in the path before anything else.
+  if (!validateToken(config.token, event.path.slice(1))) {
+    return {
+      statusCode: 404,
+      body: '',
+    }
+  }
+
   const logger = new ConsoleLogger(config.minLogLevel);
   logger.debug('Config: ', config);
 

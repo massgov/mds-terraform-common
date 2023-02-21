@@ -13,6 +13,7 @@ export default class EnvConfigBuilder {
       paramPrefix: this.getEnvVar('CONFIGURABLE_PARAM_PREFIX'),
       sendToTeams: (this.getEnvVar('SEND_TO_TEAMS') === 'yes'),
       minLogLevel: this.getEnvVar('MIN_LOG_LEVEL') as LogLevel,
+      token: this.getEnvVar('PATH_TOKEN'),
     }
 
     return ConfigSchema.parse(result)

@@ -25,6 +25,11 @@ data "aws_iam_policy_document" "lambda_inline_policy" {
   }
 }
 
+resource "random_password" "path_token" {
+  length  = 50
+  special = false
+}
+
 module "lambda" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
   package = data.archive_file.lambda_package.output_path
@@ -35,6 +40,7 @@ module "lambda" {
       CONFIGURABLE_PARAM_PREFIX = var.ssm_parameter_prefix
       MIN_LOG_LEVEL             = var.min_log_level
       SEND_TO_TEAMS             = var.send_to_teams ? "yes" : "no"
+      PATH_TOKEN                = random_password.path_token
     }, var.environment_vars)
   }
   iam_policies = concat(
