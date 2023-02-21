@@ -64,7 +64,7 @@ Below is the list of parameters and their purpose:
 
 ### Adding new repository
 
-* Use Lambda URL as a webhook URL in GitHub.
+* Use Lambda URL + `/[PATH_TOKEN]` as a webhook URL in GitHub. The path token could be found in the Lambda's env vars.
 * Specify the secret stored in the SSM parameter (see the section above) as a webhook secret.
 * Enable just Dependabot alerts for the webhook.
 * Try to reopen existing alerts in order to test it. The alert should appear in the corresponding Teams channel.
