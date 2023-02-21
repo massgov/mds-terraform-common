@@ -66,7 +66,7 @@ variable "min_log_level" {
 variable "ssm_parameter_prefix" {
   type        = string
   description = "The name prefix of the SSM parameters used for runtime configuration. It must have no trailing slash!"
-  default     = "/infrastructure/dependabot-to-teams-webhook"
+  default     = "/infrastructure/github-to-teams-webhook"
 }
 
 variable "send_to_teams" {

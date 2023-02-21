@@ -56,7 +56,7 @@ Then, commit everything including the bundled code in the `lambda/dist` folder.
 
 The app uses SSM patameters for runtime configuration.
 The parameter name prefix is defined as a Terraform module parameter (`ssm_parameter_prefix`).
-By default, it's `/infrastructure/dependabot-to-teams-webhook`.
+By default, it's `/infrastructure/github-to-teams-webhook`.
 Below is the list of parameters and their purpose:
 
 * `[PREFIX]/teams-webhook` - full URL of the incoming webhook configured in Teams.
