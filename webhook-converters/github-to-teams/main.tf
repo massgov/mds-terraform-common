@@ -40,7 +40,7 @@ module "lambda" {
       CONFIGURABLE_PARAM_PREFIX = var.ssm_parameter_prefix
       MIN_LOG_LEVEL             = var.min_log_level
       SEND_TO_TEAMS             = var.send_to_teams ? "yes" : "no"
-      PATH_TOKEN                = random_password.path_token
+      PATH_TOKEN                = random_password.path_token.result
     }, var.environment_vars)
   }
   iam_policies = concat(
