@@ -77,3 +77,8 @@ There is a [online visual designer](https://adaptivecards.io/designer/) for such
 See a [card example](./lambda/docs/card-example.json) for a complete JSON that could be used in the above visual designer.
 
 **@TODO:** Provide an NPM command to generate an example card, so that we don't have to manually sync it with code.
+
+## Lambda URL
+
+Configuration of a lambda URL is not available in the 2.x version of the AWS provider.
+So, you must configure it manually in order to invoke the lambda through its URL.
