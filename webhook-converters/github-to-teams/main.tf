@@ -19,7 +19,8 @@ data "aws_iam_policy_document" "lambda_inline_policy" {
       "ssm:GetParameter",
     ]
     resources = [
-      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.ssm_parameter_prefix}/*"
+      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.ssm_parameter_prefix}/teams-webhook",
+      "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.ssm_parameter_prefix}/github-secret",
     ]
   }
 }
