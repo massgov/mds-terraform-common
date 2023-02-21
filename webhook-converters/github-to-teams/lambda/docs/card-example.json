@@ -1,93 +1,84 @@
 {
-  "type": "message",
-  "attachments": [
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.4",
+  "body": [
     {
-      "contentType": "application/vnd.microsoft.card.adaptive",
-      "contentUrl": null,
-      "content": {
-        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-        "type": "AdaptiveCard",
-        "version": "1.4",
-        "body": [
-          {
-            "type": "ColumnSet",
-            "columns": [
-              {
-                "type": "Column",
-                "width": "stretch",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "Alert #8 was dismissed",
-                    "wrap": true,
-                    "size": "large"
-                  }
-                ],
-                "verticalContentAlignment": "center"
-              },
-              {
-                "type": "Column",
-                "width": "auto",
-                "items": [
-                  {
-                    "type": "TextBlock",
-                    "text": "CRITICAL",
-                    "horizontalAlignment": "right",
-                    "color": "attention",
-                    "weight": "bolder"
-                  }
-                ],
-                "horizontalAlignment": "right",
-                "style": "emphasis",
-                "verticalContentAlignment": "center",
-                "separator": true
-              }
-            ],
-            "style": "emphasis",
-            "horizontalAlignment": "left"
-          },
-          {
-            "type": "Container",
-            "spacing": "default",
-            "items": [
-              {
-                "type": "FactSet",
-                "facts": [
-                  {
-                    "title": "Repository",
-                    "value": "DmitriiTartynovLCM/mayflower"
-                  },
-                  {
-                    "title": "Package",
-                    "value": "simple-git"
-                  },
-                  {
-                    "title": "Versions",
-                    "value": "< 3.16.0"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Container",
-            "spacing": "default",
-            "items": [
-              {
-                "type": "ActionSet",
-                "actions": [
-                  {
-                    "type": "Action.OpenUrl",
-                    "title": "View on GitHub",
-                    "url": "https://github.com/DmitriiTartynovLCM/mayflower/security/dependabot/8"
-                  }
-                ]
-              }
-            ],
-            "horizontalAlignment": "left"
-          }
-        ]
-      }
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": "stretch",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "Alert #8 was reopened",
+              "wrap": true,
+              "size": "large"
+            }
+          ],
+          "verticalContentAlignment": "center"
+        },
+        {
+          "type": "Column",
+          "width": "auto",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "CRITICAL",
+              "horizontalAlignment": "right",
+              "color": "attention",
+              "weight": "bolder"
+            }
+          ],
+          "horizontalAlignment": "right",
+          "style": "emphasis",
+          "verticalContentAlignment": "center",
+          "separator": true
+        }
+      ],
+      "style": "emphasis",
+      "horizontalAlignment": "left"
+    },
+    {
+      "type": "Container",
+      "spacing": "default",
+      "items": [
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Repository",
+              "value": "massgov/mayflower"
+            },
+            {
+              "title": "Package",
+              "value": "simple-git"
+            },
+            {
+              "title": "Versions",
+              "value": "< 3.16.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Container",
+      "spacing": "default",
+      "items": [
+        {
+          "type": "ActionSet",
+          "actions": [
+            {
+              "type": "Action.OpenUrl",
+              "title": "View on GitHub",
+              "url": "https://github.com/massgov/mayflower/security/dependabot/8"
+            }
+          ]
+        }
+      ],
+      "horizontalAlignment": "left"
     }
   ]
 }
