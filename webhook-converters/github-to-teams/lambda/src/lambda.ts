@@ -27,13 +27,7 @@ const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> =
   const webhooks = createWebhookHandler({config, params, logger})
 
   logger.debug('Verifying and processing the webhook payload...')
-  webhooks.verifyAndReceive(input)
-    .then(() => {
-      logger.debug('The webhook verification & processing is complete.')
-    })
-    .catch((e) => {
-      logger.error('Unable to verify & receive the webhook payload:', e)
-    })
+  await webhooks.verifyAndReceive(input)
 
   logger.debug('Returning the result to Github.')
   return {

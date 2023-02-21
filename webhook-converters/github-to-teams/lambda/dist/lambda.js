@@ -52839,11 +52839,7 @@ var handler = async (event) => {
   logger.debug("Creating a webhook processor...");
   const webhooks = createWebhookHandler_default({ config, params, logger });
   logger.debug("Verifying and processing the webhook payload...");
-  webhooks.verifyAndReceive(input).then(() => {
-    logger.debug("The webhook verification & processing is complete.");
-  }).catch((e) => {
-    logger.error("Unable to verify & receive the webhook payload:", e);
-  });
+  await webhooks.verifyAndReceive(input);
   logger.debug("Returning the result to Github.");
   return {
     statusCode: 200,
