@@ -16,7 +16,7 @@ data "archive_file" "lambda_package" {
 data "aws_iam_policy_document" "lambda_inline_policy" {
   statement {
     actions = [
-      "ssm:GetParameter",
+      "ssm:GetParameters",
     ]
     resources = [
       "arn:aws:ssm:${local.aws_region}:${local.aws_account_id}:parameter${var.ssm_parameter_prefix}/teams-webhook",
