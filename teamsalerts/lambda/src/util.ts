@@ -146,17 +146,19 @@ export const publishToTeams = async function* (
       };
 
       return new Promise<WithPublishResult>((resolve) => {
-        const req = request(options, ({ statusCode }) =>
+        const req = request(options, ({ statusCode, statusMessage }) => {
+          const error =
+            statusCode && statusCode < 300 && statusCode >= 200
+              ? null
+              : `Webhook URL returned ${statusCode} - ${statusMessage}`;
           resolve({
             ...record,
             publishResult: {
-              success: Boolean(
-                statusCode && statusCode < 300 && statusCode >= 200
-              ),
-              error: null,
+              success: !error,
+              error,
             },
-          })
-        );
+          });
+        });
 
         req.on("error", (e) =>
           resolve({
