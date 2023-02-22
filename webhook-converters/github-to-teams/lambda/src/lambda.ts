@@ -22,17 +22,25 @@ const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyRe
   if (!isTokenValid) {
     return {
       statusCode: 404,
-      body: '',
     }
   }
 
   logger.debug('Checking the input...');
-  const input = WebhookLambdaInputSchema.parse({
-    id: event.headers["x-github-delivery"],
-    name: event.headers["x-github-event"],
-    payload: event.body,
-    signature: event.headers["x-hub-signature-256"],
-  })
+  let input;
+  try {
+    input = WebhookLambdaInputSchema.parse({
+      id: event.headers["x-github-delivery"],
+      name: event.headers["x-github-event"],
+      payload: event.body,
+      signature: event.headers["x-hub-signature-256"],
+    })
+  }
+  catch (e) {
+    console.error('Invalid input: ', e)
+    return {
+      statusCode: 400,
+    }
+  }
 
   logger.debug(`Reading SSM parameters (${config.paramPrefix}*)...`)
   const paramReader = new ConfigurableParamsReader(config)
