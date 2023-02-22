@@ -1,7 +1,5 @@
 import { Context, SNSEventRecord } from "aws-lambda";
-import { request } from "http";
 import { AnyIterable, batch } from "streaming-iterables";
-import { parse } from "url";
 import {
   MessageCard,
   MessageCardSection,
@@ -9,6 +7,7 @@ import {
   WithMessageCard,
   WithPublishResult,
 } from "./types";
+import { IncomingWebhook } from "ms-teams-webhook";
 
 type TopicInfo = Pick<TopicMap[number], "icon_url" | "human_name">;
 
@@ -71,7 +70,7 @@ export const enrichWithMessageCards = async function* (
           }),
     });
 
-    if (MessageAttributes) {
+    if (Object.keys(MessageAttributes).length > 0) {
       sections.push({
         startGroup: true,
         text: "#### Message attributes:",
@@ -128,52 +127,33 @@ export const enrichWithMessageCards = async function* (
 export const publishToTeams = async function* (
   records: AnyIterable<WithMessageCard>,
   webhookUrl: string
-) {
-  const urlParts = parse(webhookUrl);
+): AsyncIterable<WithPublishResult> {
+  const webhook = new IncomingWebhook(webhookUrl);
   for await (const chunk of batch(10, records)) {
-    const promises = chunk.map((record) => {
-      const postData = JSON.stringify(record.messageCard);
+    const promises = chunk.map(async (record) => {
+      let publishResult;
+      try {
+        await webhook.send(record.messageCard);
+        publishResult = {
+          success: true,
+          error: null
+        }
+      } catch(e) {
+        const error = e instanceof Error
+          ? e.message
+          : `${e}`;
+        publishResult = {
+          success: false,
+          error,
+        }
+      }
 
-      const options = {
-        hostname: urlParts.hostname,
-        port: 80,
-        path: urlParts.path,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
-        },
+      return {
+        ...record,
+        publishResult
       };
-
-      return new Promise<WithPublishResult>((resolve) => {
-        const req = request(options, ({ statusCode, statusMessage }) => {
-          const error =
-            statusCode && statusCode < 300 && statusCode >= 200
-              ? null
-              : `Webhook URL returned ${statusCode} - ${statusMessage}`;
-          resolve({
-            ...record,
-            publishResult: {
-              success: !error,
-              error,
-            },
-          });
-        });
-
-        req.on("error", (e) =>
-          resolve({
-            ...record,
-            publishResult: {
-              success: false,
-              error: e.message,
-            },
-          })
-        );
-
-        req.write(postData);
-        req.end();
-      });
     });
+
 
     const results = await Promise.all(promises);
     yield* results;

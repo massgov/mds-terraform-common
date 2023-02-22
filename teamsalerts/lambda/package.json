@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "assert": "^2.0.0",
+    "ms-teams-webhook": "^2.0.2",
     "streaming-iterables": "^7.1.0"
   },
   "scripts": {
