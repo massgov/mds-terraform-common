@@ -46714,7 +46714,7 @@ var require_dist_node = __commonJS({
   "node_modules/@octokit/webhooks-methods/dist-node/index.js"(exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var buffer = require("buffer");
     var Algorithm;
     (function(Algorithm2) {
@@ -46739,7 +46739,7 @@ var require_dist_node = __commonJS({
       if (!Object.values(Algorithm).includes(algorithm)) {
         throw new TypeError(`[@octokit/webhooks] Algorithm ${algorithm} is not supported. Must be  'sha1' or 'sha256'`);
       }
-      return `${algorithm}=${crypto.createHmac(algorithm, secret).update(payload).digest("hex")}`;
+      return `${algorithm}=${crypto2.createHmac(algorithm, secret).update(payload).digest("hex")}`;
     }
     sign.VERSION = VERSION;
     var getAlgorithm = (signature) => {
@@ -46758,7 +46758,7 @@ var require_dist_node = __commonJS({
       if (signatureBuffer.length !== verificationBuffer.length) {
         return false;
       }
-      return crypto.timingSafeEqual(signatureBuffer, verificationBuffer);
+      return crypto2.timingSafeEqual(signatureBuffer, verificationBuffer);
     }
     verify.VERSION = VERSION;
     exports.sign = sign;
@@ -52533,7 +52533,8 @@ var ConfigSchema = mod.object({
   region: mod.string().min(1),
   paramPrefix: mod.string().min(1),
   sendToTeams: mod.boolean(),
-  minLogLevel: mod.enum(logLevels)
+  minLogLevel: mod.enum(logLevels),
+  token: mod.string().min(50)
 });
 
 // src/lib/config/EnvConfigBuilder.ts
@@ -52546,7 +52547,8 @@ var EnvConfigBuilder = class {
       region: this.getEnvVar("AWS_REGION"),
       paramPrefix: this.getEnvVar("CONFIGURABLE_PARAM_PREFIX"),
       sendToTeams: this.getEnvVar("SEND_TO_TEAMS") === "yes",
-      minLogLevel: this.getEnvVar("MIN_LOG_LEVEL")
+      minLogLevel: this.getEnvVar("MIN_LOG_LEVEL"),
+      token: this.getEnvVar("PATH_TOKEN")
     };
     return ConfigSchema.parse(result);
   }
@@ -52820,12 +52822,37 @@ var WebhookLambdaInputSchema = mod.object({
   signature: mod.string().min(1)
 });
 
+// src/lib/validateToken.ts
+var import_crypto = __toESM(require("crypto"));
+function validateToken_default({ key, input }) {
+  const keyByteLength = Buffer.byteLength(key);
+  const keyBuffer = Buffer.alloc(keyByteLength);
+  const inputBuffer = Buffer.alloc(keyByteLength);
+  keyBuffer.write(key);
+  inputBuffer.write(input);
+  const buffersEqual = import_crypto.default.timingSafeEqual(keyBuffer, inputBuffer);
+  const sameLength = key.length === input.length;
+  return buffersEqual && sameLength;
+}
+
 // src/lambda.ts
 var handler = async (event) => {
   const configBuilder = new EnvConfigBuilder();
   const config = configBuilder.build();
   const logger = new ConsoleLogger(config.minLogLevel);
   logger.debug("Config: ", config);
+  const tokenInput = event.path.slice(1);
+  logger.debug("Validating the token: ", tokenInput);
+  const isTokenValid = validateToken_default({
+    key: config.token,
+    input: tokenInput
+  });
+  if (!isTokenValid) {
+    return {
+      statusCode: 404,
+      body: ""
+    };
+  }
   logger.debug("Checking the input...");
   const input = WebhookLambdaInputSchema.parse({
     id: event.headers["x-github-delivery"],
