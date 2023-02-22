@@ -9,17 +9,22 @@ import validateToken from "./lib/validateToken";
 const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   const configBuilder = new EnvConfigBuilder()
   const config = configBuilder.build()
+  const logger = new ConsoleLogger(config.minLogLevel);
+  logger.debug('Config: ', config);
 
   // Validate the token passed in the path before anything else.
-  if (!validateToken(config.token, event.path.slice(1))) {
+  const tokenInput = event.path.slice(1);
+  logger.debug('Validating the token: ', tokenInput);
+  const isTokenValid = validateToken({
+    key: config.token,
+    input: tokenInput,
+  })
+  if (!isTokenValid) {
     return {
       statusCode: 404,
       body: '',
     }
   }
-
-  const logger = new ConsoleLogger(config.minLogLevel);
-  logger.debug('Config: ', config);
 
   logger.debug('Checking the input...');
   const input = WebhookLambdaInputSchema.parse({
