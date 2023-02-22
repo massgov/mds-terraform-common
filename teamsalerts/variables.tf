@@ -23,7 +23,7 @@ variable "topic_map" {
   type = list(object({
     topic_arn     = string
     human_name    = string
-    emoji_uni_hex = string
+    icon_url      = string
   }))
   default = []
 }

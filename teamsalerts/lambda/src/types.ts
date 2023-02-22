@@ -36,7 +36,7 @@ export interface MessageCard {
 export type TopicMap = Array<{
   topic_arn: string;
   human_name: string;
-  emoji_uni_hex: string;
+  icon_url: string;
 }>;
 
 export interface WithMessageCard {

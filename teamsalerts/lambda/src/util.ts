@@ -10,11 +10,11 @@ import {
   WithPublishResult,
 } from "./types";
 
-type TopicInfo = Pick<TopicMap[number], "emoji_uni_hex" | "human_name">;
+type TopicInfo = Pick<TopicMap[number], "icon_url" | "human_name">;
 
 const MAYFLOWER_DUCKLING_YELLOW = "F6C51B";
 const DEFAULT_TOPIC_INFO: TopicInfo = {
-  emoji_uni_hex: "26AO", // ⚠️
+  icon_url: "https://img.icons8.com/color/100/general-warning-sign.png", // ⚠️
   human_name: "Unnamed Topic",
 };
 
@@ -23,18 +23,6 @@ const formatMessagePart = (value: unknown): string => {
     return "`" + JSON.stringify(value) + "`";
   }
   return `${value}`;
-};
-
-const getImageData = (emojiHex: string) => {
-  const base64 = Buffer.from(
-    `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" height="100">
-      <title>emoji</title>
-      <text y="85" style="width: 100%; height:100%; font-size: 100px">&#x${emojiHex};</text> 
-    </svg>
-  `
-  ).toString("base64url");
-  return `data:text/svg;base64,${base64}`;
 };
 
 export const enrichWithMessageCards = async function* (
@@ -51,7 +39,7 @@ export const enrichWithMessageCards = async function* (
         topic_arn.toUpperCase().trim() === TopicArn.toUpperCase().trim()
     );
 
-    const { human_name, emoji_uni_hex } = mappedTopic ?? DEFAULT_TOPIC_INFO;
+    const { human_name, icon_url } = mappedTopic ?? DEFAULT_TOPIC_INFO;
 
     const sections = new Array<MessageCardSection>();
     let messageJson: Object | null = null;
@@ -63,7 +51,7 @@ export const enrichWithMessageCards = async function* (
 
     const activityTitle = Subject || `New message on **${TopicArn}**`;
     const activitySubtitle = new Date(Timestamp).toUTCString();
-    const activityImage = getImageData(emoji_uni_hex);
+    const activityImage = icon_url;
 
     sections.push({
       activityTitle,
