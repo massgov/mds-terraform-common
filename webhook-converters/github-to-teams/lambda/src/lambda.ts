@@ -1,19 +1,19 @@
 import EnvConfigBuilder from "./lib/config/EnvConfigBuilder";
 import ConfigurableParamsReader from "./lib/params/ConfigurableParamsReader";
-import { APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayProxyResultV2, APIGatewayProxyEventV2 } from 'aws-lambda';
 import createWebhookHandler from "./lib/createWebhookHandler";
 import ConsoleLogger from "./lib/log/ConsoleLogger";
 import { WebhookLambdaInputSchema } from "./types/WebhookLambdaInput";
 import validateToken from "./lib/validateToken";
 
-const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
   const configBuilder = new EnvConfigBuilder()
   const config = configBuilder.build()
   const logger = new ConsoleLogger(config.minLogLevel);
   logger.debug('Config: ', config);
 
   // Validate the token passed in the path before anything else.
-  const tokenInput = event.path.slice(1);
+  const tokenInput = event.rawPath.slice(1);
   logger.debug('Validating the token: ', tokenInput);
   const isTokenValid = validateToken({
     key: config.token,
