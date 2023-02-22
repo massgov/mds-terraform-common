@@ -4,7 +4,7 @@ resource "aws_lambda_function" "sns_to_teams" {
   function_name    = var.name
   handler          = "lambda.handler"
   role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs14.x"
+  runtime          = "nodejs12.x"
   environment {
     variables = {
       TOPIC_MAP         = jsonencode(var.topic_map)
