@@ -1,8 +1,7 @@
 Webhook converter: GitHub to MS Teams
 =================
 
-The module defines a lambda function with a publicly accessible URL that accepts .
-For example, it looks for DNS records that point to CloudFront distributions that don't exist anymore.
+The module defines a lambda function with a publicly accessible URL that accepts a GitHub webhook and transforms it into a message sent to a Teams channel.
 
 ## Local development
 
