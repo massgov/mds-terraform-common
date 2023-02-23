@@ -4,9 +4,10 @@ import { randomInt } from "crypto";
 const noop = () => {};
 
 /**
+ * Simple CLI for local testing of sns-to-teams lambda code
  * Example usage:
     TOPIC_MAP='[{ "human_name": "Test Topic", "topic_arn": "arn:partition:service:region:account-id:12345", "icon_url": "https://mayflower.digital.mass.gov/core/static/media/stateseal-black.5188ad6f.png" }]' \
-    TEAMS_WEBHOOK_URL='https://abc123foobaz.m.pipedream.net' \
+    TEAMS_WEBHOOK_URL='https://massgov.webhook.office.com/webhookb2/ffff-aaaa@0000-1111/IncomingWebhook/123/cafe-babe' \
     npx ts-node cli.ts;
  */
 const run = async (): Promise<void> => {
@@ -22,7 +23,7 @@ const run = async (): Promise<void> => {
             Timestamp: new Date().toISOString(),
             Signature: `${randomInt(10000)}`,
             SigningCertUrl: "",
-            MessageId: `${randomInt(10000)}`,
+            MessageId: `message-${randomInt(10000)}`,
             Message: JSON.stringify({
               a: "A",
               b: 1234,
@@ -32,6 +33,33 @@ const run = async (): Promise<void> => {
             Type: "Notification",
             UnsubscribeUrl: "",
             TopicArn: "arn:partition:service:region:account-id:12345",
+            Subject: "Test Subject 1",
+          },
+        },
+        {
+          EventVersion: "1",
+          EventSubscriptionArn: "arn:partition:service:region:account-id:00001",
+          EventSource: "",
+          Sns: {
+            SignatureVersion: "1",
+            Timestamp: new Date().toISOString(),
+            Signature: `${randomInt(10000)}`,
+            SigningCertUrl: "",
+            MessageId: `message-${randomInt(10000)}`,
+            Message: "hello world",
+            MessageAttributes: {
+              attr1: {
+                Type: "foo",
+                Value: "bar"
+              },
+              attr2: {
+                Type: "baz",
+                Value: "quux"
+              }
+            },
+            Type: "Notification",
+            UnsubscribeUrl: "",
+            TopicArn: "arn:partition:service:region:account-id:67890",
             Subject: "Test Subject",
           },
         },

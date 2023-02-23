@@ -58,7 +58,7 @@ export const enrichWithMessageCards = async function* (
       activityImage,
       ...(messageJson
         ? {
-            text: "#### Message contents:",
+            text: "##### Message contents:",
             facts: Object.entries(messageJson).map(([key, value]) => ({
               name: key,
               value: formatMessagePart(value),
@@ -73,7 +73,7 @@ export const enrichWithMessageCards = async function* (
     if (Object.keys(MessageAttributes).length > 0) {
       sections.push({
         startGroup: true,
-        text: "#### Message attributes:",
+        text: "##### Message attributes:",
         facts: Object.entries(MessageAttributes).map(
           ([name, { Type, Value }]) => ({
             name,
@@ -97,9 +97,7 @@ export const enrichWithMessageCards = async function* (
           targets: [
             {
               os: "default",
-              uri: `https://console.aws.amazon.com/cloudwatch/home#logEventViewer:group=${
-                context.logGroupName
-              };stream=${context.logStreamName};start=${new Date()}`,
+              uri: `https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups/log-group/${context.logGroupName}/log-events/${context.logStreamName}`
             },
           ],
         },
