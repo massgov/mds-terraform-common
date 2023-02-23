@@ -1,4 +1,7 @@
 # Changelog
+## [1.0.41] - 2023-02-23
+
+- [SNS to Teams] Add a module for subscribing Microsoft Teams incoming webhooks to SNS topics.
 
 ## [1.0.40] - 2023-02-09
 
