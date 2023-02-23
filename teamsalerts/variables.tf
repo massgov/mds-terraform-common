@@ -13,17 +13,15 @@ variable "tags" {
   default = {}
 }
 
-// variable "sns_topic_count" {
-//   type        = string
-//   description = "Count of SNS topics to subscribe to (works around TF bug using count on calculated lists)"
-// }
-
 variable "topic_map" {
-  description = "SNS topic ARNs mapped to human readable names"
+  description = "The SNS topic(s) to subscribe to, and associated display information"
   type = list(object({
     topic_arn  = string
     human_name = string
     icon_url   = string
   }))
-  default = []
+  validation {
+    condition     = length(var.topic_map) > 0
+    error_message = "Topic map must specify at least one SNS topic to subscribe to."
+  }
 }
