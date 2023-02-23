@@ -50,12 +50,12 @@ const run = async (): Promise<void> => {
             MessageAttributes: {
               attr1: {
                 Type: "foo",
-                Value: "bar"
+                Value: "bar",
               },
               attr2: {
                 Type: "baz",
-                Value: "quux"
-              }
+                Value: "quux",
+              },
             },
             Type: "Notification",
             UnsubscribeUrl: "",

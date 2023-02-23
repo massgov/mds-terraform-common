@@ -97,7 +97,7 @@ export const enrichWithMessageCards = async function* (
           targets: [
             {
               os: "default",
-              uri: `https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups/log-group/${context.logGroupName}/log-events/${context.logStreamName}`
+              uri: `https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups/log-group/${context.logGroupName}/log-events/${context.logStreamName}`,
             },
           ],
         },
@@ -134,24 +134,21 @@ export const publishToTeams = async function* (
         await webhook.send(record.messageCard);
         publishResult = {
           success: true,
-          error: null
-        }
-      } catch(e) {
-        const error = e instanceof Error
-          ? e.message
-          : `${e}`;
+          error: null,
+        };
+      } catch (e) {
+        const error = e instanceof Error ? e.message : `${e}`;
         publishResult = {
           success: false,
           error,
-        }
+        };
       }
 
       return {
         ...record,
-        publishResult
+        publishResult,
       };
     });
-
 
     const results = await Promise.all(promises);
     yield* results;
