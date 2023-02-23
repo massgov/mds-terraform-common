@@ -3,7 +3,7 @@ variable "name" {
   description = "A descriptive name to use for created resources"
 }
 
-variable "teams_webhook_url"{
+variable "teams_webhook_url" {
   type        = string
   description = "URL of incoming webhook"
 }
@@ -21,9 +21,9 @@ variable "tags" {
 variable "topic_map" {
   description = "SNS topic ARNs mapped to human readable names"
   type = list(object({
-    topic_arn     = string
-    human_name    = string
-    icon_url      = string
+    topic_arn  = string
+    human_name = string
+    icon_url   = string
   }))
   default = []
 }

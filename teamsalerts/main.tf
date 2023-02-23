@@ -20,9 +20,9 @@ resource "aws_lambda_function" "sns_to_teams" {
 }
 
 resource "aws_sns_topic_subscription" "default" {
-  count     = length(var.topic_map)
-  endpoint  = aws_lambda_function.sns_to_teams.arn
-  protocol  = "lambda"
+  count    = length(var.topic_map)
+  endpoint = aws_lambda_function.sns_to_teams.arn
+  protocol = "lambda"
   topic_arn = lookup(
     element(var.topic_map, count.index),
     "topic_arn"
@@ -34,7 +34,7 @@ resource "aws_lambda_permission" "sns_to_teams" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.sns_to_teams.function_name
   principal     = "sns.amazonaws.com"
-  source_arn    = lookup(
+  source_arn = lookup(
     element(var.topic_map, count.index),
     "topic_arn"
   )
@@ -48,9 +48,9 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 data "aws_iam_policy_document" "assume_policy" {
   statement {
     actions = ["sts:AssumeRole"]
-    effect = "Allow"
+    effect  = "Allow"
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
   }
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "log_policy" {
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["${aws_cloudwatch_log_group.lambda_logs.arn}:*"]
   }
 }
