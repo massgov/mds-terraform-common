@@ -1,4 +1,4 @@
-module "sns_to_teams_lambda" {
+module "sns_to_teams" {
   source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.41"
   package                = "${path.module}/lambda/dist/archive.zip"
   runtime                = "nodejs14.x"
@@ -25,7 +25,7 @@ module "sns_to_teams_lambda" {
 
 resource "aws_sns_topic_subscription" "default" {
   count    = length(var.topic_map)
-  endpoint = aws_lambda_function.sns_to_teams.arn
+  endpoint = module.sns_to_teams.function_arn
   protocol = "lambda"
   topic_arn = lookup(
     element(var.topic_map, count.index),
@@ -36,7 +36,7 @@ resource "aws_sns_topic_subscription" "default" {
 resource "aws_lambda_permission" "sns_to_teams" {
   count         = length(var.topic_map)
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sns_to_teams.function_name
+  function_name = module.sns_to_teams.function_name
   principal     = "sns.amazonaws.com"
   source_arn = lookup(
     element(var.topic_map, count.index),
