@@ -1,22 +1,26 @@
-resource "aws_lambda_function" "sns_to_teams" {
-  filename         = "${path.module}/lambda/dist/archive.zip"
-  source_code_hash = filebase64sha256("${path.module}/lambda/dist/archive.zip")
-  function_name    = var.name
-  handler          = "lambda.handler"
-  role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs12.x"
-  environment {
+module "sns_to_teams_lambda" {
+  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.41"
+  package                = "${path.module}/lambda/dist/archive.zip"
+  runtime                = "nodejs14.x"
+  handler                = "lambda.handler"
+  environment = {
     variables = {
       TOPIC_MAP         = jsonencode(var.topic_map)
       TEAMS_WEBHOOK_URL = var.teams_webhook_url
     }
   }
-  tags = merge(
+  iam_policies    = [data.aws_iam_policy_document.log_policy.json]
+  name            = var.name
+  human_name      = var.human_name
+  tags            = merge(
     var.tags,
     {
       "Name" = var.name
-    },
+    }
   )
+  error_topics    = var.error_topics
+  memory_size     = var.memory_size
+  timeout         = var.timeout
 }
 
 resource "aws_sns_topic_subscription" "default" {
@@ -39,41 +43,3 @@ resource "aws_lambda_permission" "sns_to_teams" {
     "topic_arn"
   )
 }
-
-resource "aws_cloudwatch_log_group" "lambda_logs" {
-  name = "/aws/lambda/${aws_lambda_function.sns_to_teams.function_name}"
-  tags = var.tags
-}
-
-data "aws_iam_policy_document" "assume_policy" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    effect  = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-data "aws_iam_policy_document" "log_policy" {
-  statement {
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-    effect    = "Allow"
-    resources = ["${aws_cloudwatch_log_group.lambda_logs.arn}:*"]
-  }
-}
-
-resource "aws_iam_role" "lambda" {
-  name               = "LambdaSNSToTeams"
-  assume_role_policy = data.aws_iam_policy_document.assume_policy.json
-}
-
-resource "aws_iam_role_policy" "lambda" {
-  role   = aws_iam_role.lambda.id
-  policy = data.aws_iam_policy_document.log_policy.json
-}
-
