@@ -21,6 +21,6 @@
     "prettier": "npx prettier --write '**/*.{js,jsx,ts,tsx,json}'"
   },
   "volta": {
-    "node": "14.20.0"
+    "node": "12.22.0"
   }
 }
