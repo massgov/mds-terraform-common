@@ -18,7 +18,7 @@ variable "tags" {
   default = {}
 }
 
-variable memory_size {
+variable "memory_size" {
   type        = number
   description = "Amount of memory in MB the lambda can use at runtime."
   default     = 128

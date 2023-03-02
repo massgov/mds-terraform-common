@@ -1,4 +1,4 @@
-import { handler } from "./index";
+import { handler } from "../src";
 import { randomInt } from "crypto";
 
 const noop = () => {};

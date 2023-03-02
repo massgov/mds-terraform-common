@@ -1,5 +1,5 @@
 module "sns_to_teams" {
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.41"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
   package = "${path.module}/lambda/dist/archive.zip"
   runtime = "nodejs14.x"
   handler = "lambda.handler"
