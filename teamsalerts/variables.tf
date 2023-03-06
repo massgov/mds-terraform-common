@@ -43,8 +43,4 @@ variable "topic_map" {
     human_name = string
     icon_url   = string
   }))
-  validation {
-    condition     = length(var.topic_map) > 0
-    error_message = "Topic map must specify at least one SNS topic to subscribe to."
-  }
 }
