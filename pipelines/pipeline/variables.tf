@@ -39,13 +39,13 @@ variable "failure_topics" {
 }
 
 variable "region" {
-  type = "string"
+  type = string
   description = "The AWS region to scope access to (defaults to current region)."
   default = ""
 }
 
 variable "account_id" {
-  type = "string"
+  type = string
   description = "The AWS account ID to scope access to (defaults to current account)."
   default = ""
 }
