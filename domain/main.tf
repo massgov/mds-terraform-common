@@ -14,7 +14,7 @@ resource "aws_acm_certificate" "default" {
 
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = aws_acm_certificate.default.arn
-  validation_record_fqdns = [aws_route53_record.validation.fqdn]
+  validation_record_fqdns = [for v in aws_route53_record.validation : v.fqdn]
 }
 
 data "aws_route53_zone" "tld" {
