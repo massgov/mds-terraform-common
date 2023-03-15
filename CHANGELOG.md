@@ -1,4 +1,9 @@
 # Changelog
+## [1.0.43] - 2023-03-15
+
+- [ALL] Upgrade all modules to require terraform 0.13.
+- [ALL] Add minimum provider version constraints to all modules.
+
 ## [1.0.42] - 2023-03-03
 
 - [SNS to Teams] Add a module for subscribing Microsoft Teams incoming webhooks to SNS topics.
