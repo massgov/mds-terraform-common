@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "readwrite_policy" {
       "ssm:DeleteParameter",
       "ssm:DeleteParameters",
     ]
-    resources = ["${local.namespace_parameters_arn}"]
+    resources = [local.namespace_parameters_arn]
   }
 
   // Read (decrypt)
