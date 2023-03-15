@@ -21,6 +21,6 @@
     "build": "node scripts/build.js"
   },
   "volta": {
-    "node": "14.20.0"
+    "node": "16.19.0"
   }
 }
