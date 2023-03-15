@@ -1,5 +1,6 @@
 module "sns_to_teams" {
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.26"
+  # TODO: change branch to tag before deploying
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.43"
   package = "${path.module}/lambda/dist/archive.zip"
   runtime = "nodejs12.x"
   handler = "lambda.handler"
