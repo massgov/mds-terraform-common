@@ -73,6 +73,10 @@ resource "aws_s3_bucket_policy" "default" {
 // TLS/SSL certificate for the new domain
 // @todo Switch to `domain-certificate` module some day with help of
 //   `terraform state mv` to avoid certificate re-creation.
+//   NOTE: I tried switching this for 1.0.45, but doing it alongside a
+//   terraform 0.13 version upgrade makes terraform get confused about the
+//   provider name. So once things are updated to this 0.13, we should
+//   be able to swap this out no problem.
 resource "aws_acm_certificate" "default" {
   domain_name = local.primary_domain
   subject_alternative_names = local.alternate_domains
@@ -91,10 +95,17 @@ resource "aws_acm_certificate" "default" {
 // dns record to use for certificate validation
 // create the DNS entry in th relevant zone
 resource "aws_route53_record" "verification" {
-  count = length(local.domains)
-  name    = aws_acm_certificate.default.domain_validation_options[count.index].resource_record_name
-  type    = aws_acm_certificate.default.domain_validation_options[count.index].resource_record_type
-  records = [aws_acm_certificate.default.domain_validation_options[count.index].resource_record_value]
+  for_each = {
+    for dvo in aws_acm_certificate.default.domain_validation_options : dvo.domain_name => {
+      name = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type = dvo.resource_record_type
+    }
+  }
+
+  name    = each.value.name
+  type    = each.value.type
+  records = [each.value.record]
   zone_id = var.zone_id
   ttl     = "60"
 }
@@ -103,8 +114,9 @@ resource "aws_route53_record" "verification" {
 // validate the certificate with dns entry
 resource "aws_acm_certificate_validation" "default" {
   certificate_arn         = aws_acm_certificate.default.arn
-  validation_record_fqdns = aws_route53_record.verification.*.fqdn
+  validation_record_fqdns = [for v in aws_route53_record.verification : v.fqdn]
 }
+
 
 //// Route 53
 //// Add CNAME entry for domain
