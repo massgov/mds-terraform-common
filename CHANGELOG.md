@@ -1,4 +1,8 @@
 # Changelog
+## [1.0.45] - 2023-03-17
+
+- [Entrypoint Monitor, SNS-to-Teams Alerts] Upgrade to node16 runtime, aws provider 4.8.0
+
 ## [1.0.43] - 2023-03-15
 
 - [ALL] Upgrade all modules to require terraform 0.13.
