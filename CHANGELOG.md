@@ -1,7 +1,17 @@
 # Changelog
-## [1.0.45] - 2023-03-17
 
-- [Entrypoint Monitor, SNS-to-Teams Alerts] Upgrade to node16 runtime, aws provider 4.8.0
+## [1.0.46] - 2023-03-17
+
+- [Entrypoint Monitor] Upgrade to node16 runtime, aws provider 4.8.0
+- [SNS to Teams] Upgrade to node16 runtime, aws provider 4.8.0
+
+## [1.0.45] - 2023-03-16
+
+- [Domain] Fix static-site module for hashicorp/aws versions >= 3.
+
+## [1.0.44] - 2023-03-15
+
+- [Domain] Fix domain module for hashicorp/aws versions >= 3.
 
 ## [1.0.43] - 2023-03-15
 
