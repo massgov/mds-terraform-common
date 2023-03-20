@@ -14,7 +14,7 @@ const run = async (): Promise<void> => {
     entryPoints: [path.join(__dirname, "..", "src", "index.ts")],
     bundle: true,
     platform: "node",
-    target: "node12",
+    target: "node16",
     outfile: path.join(tmp, "lambda.js"),
   });
   const archivePath = path.join(__dirname, "..", "dist", "archive.zip");

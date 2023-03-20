@@ -58,10 +58,9 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
 }
 
 module "monitor_lambda" {
-  # TODO: change branch to tag before deploying
-  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.43"
+  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.44"
   package                = data.archive_file.monitor_package.output_path
-  runtime                = "nodejs12.x"
+  runtime                = "nodejs16.x"
   handler                = "lambda.default"
   environment = {
     variables = merge({
