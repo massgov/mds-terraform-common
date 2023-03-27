@@ -15847,10 +15847,9 @@ var require_Aws_json1_1 = __commonJS({
       };
     };
     var serializeAws_json1_1CreateMaintenanceWindowRequest = (input, context) => {
-      var _a;
       return {
         ...input.AllowUnassociatedTargets != null && { AllowUnassociatedTargets: input.AllowUnassociatedTargets },
-        ClientToken: (_a = input.ClientToken) != null ? _a : (0, uuid_1.v4)(),
+        ClientToken: input.ClientToken ?? (0, uuid_1.v4)(),
         ...input.Cutoff != null && { Cutoff: input.Cutoff },
         ...input.Description != null && { Description: input.Description },
         ...input.Duration != null && { Duration: input.Duration },
@@ -15897,7 +15896,6 @@ var require_Aws_json1_1 = __commonJS({
       };
     };
     var serializeAws_json1_1CreatePatchBaselineRequest = (input, context) => {
-      var _a;
       return {
         ...input.ApprovalRules != null && {
           ApprovalRules: serializeAws_json1_1PatchRuleGroup(input.ApprovalRules, context)
@@ -15911,7 +15909,7 @@ var require_Aws_json1_1 = __commonJS({
         ...input.ApprovedPatchesEnableNonSecurity != null && {
           ApprovedPatchesEnableNonSecurity: input.ApprovedPatchesEnableNonSecurity
         },
-        ClientToken: (_a = input.ClientToken) != null ? _a : (0, uuid_1.v4)(),
+        ClientToken: input.ClientToken ?? (0, uuid_1.v4)(),
         ...input.Description != null && { Description: input.Description },
         ...input.GlobalFilters != null && {
           GlobalFilters: serializeAws_json1_1PatchFilterGroup(input.GlobalFilters, context)
@@ -15959,9 +15957,8 @@ var require_Aws_json1_1 = __commonJS({
       };
     };
     var serializeAws_json1_1DeleteInventoryRequest = (input, context) => {
-      var _a;
       return {
-        ClientToken: (_a = input.ClientToken) != null ? _a : (0, uuid_1.v4)(),
+        ClientToken: input.ClientToken ?? (0, uuid_1.v4)(),
         ...input.DryRun != null && { DryRun: input.DryRun },
         ...input.SchemaDeleteOption != null && { SchemaDeleteOption: input.SchemaDeleteOption },
         ...input.TypeName != null && { TypeName: input.TypeName }
@@ -17321,9 +17318,8 @@ var require_Aws_json1_1 = __commonJS({
       };
     };
     var serializeAws_json1_1RegisterTargetWithMaintenanceWindowRequest = (input, context) => {
-      var _a;
       return {
-        ClientToken: (_a = input.ClientToken) != null ? _a : (0, uuid_1.v4)(),
+        ClientToken: input.ClientToken ?? (0, uuid_1.v4)(),
         ...input.Description != null && { Description: input.Description },
         ...input.Name != null && { Name: input.Name },
         ...input.OwnerInformation != null && { OwnerInformation: input.OwnerInformation },
@@ -17333,12 +17329,11 @@ var require_Aws_json1_1 = __commonJS({
       };
     };
     var serializeAws_json1_1RegisterTaskWithMaintenanceWindowRequest = (input, context) => {
-      var _a;
       return {
         ...input.AlarmConfiguration != null && {
           AlarmConfiguration: serializeAws_json1_1AlarmConfiguration(input.AlarmConfiguration, context)
         },
-        ClientToken: (_a = input.ClientToken) != null ? _a : (0, uuid_1.v4)(),
+        ClientToken: input.ClientToken ?? (0, uuid_1.v4)(),
         ...input.CutoffBehavior != null && { CutoffBehavior: input.CutoffBehavior },
         ...input.Description != null && { Description: input.Description },
         ...input.LoggingInfo != null && { LoggingInfo: serializeAws_json1_1LoggingInfo(input.LoggingInfo, context) },
@@ -21806,15 +21801,12 @@ var require_Aws_json1_1 = __commonJS({
       });
       return retVal;
     };
-    var deserializeMetadata = (output) => {
-      var _a, _b;
-      return {
-        httpStatusCode: output.statusCode,
-        requestId: (_b = (_a = output.headers["x-amzn-requestid"]) != null ? _a : output.headers["x-amzn-request-id"]) != null ? _b : output.headers["x-amz-request-id"],
-        extendedRequestId: output.headers["x-amz-id-2"],
-        cfId: output.headers["x-amz-cf-id"]
-      };
-    };
+    var deserializeMetadata = (output) => ({
+      httpStatusCode: output.statusCode,
+      requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+      extendedRequestId: output.headers["x-amz-id-2"],
+      cfId: output.headers["x-amz-cf-id"]
+    });
     var collectBody = (streamBody = new Uint8Array(), context) => {
       if (streamBody instanceof Uint8Array) {
         return Promise.resolve(streamBody);
@@ -21847,9 +21839,8 @@ var require_Aws_json1_1 = __commonJS({
       return {};
     });
     var parseErrorBody = async (errorBody, context) => {
-      var _a;
       const value = await parseBody(errorBody, context);
-      value.message = (_a = value.message) != null ? _a : value.Message;
+      value.message = value.message ?? value.Message;
       return value;
     };
     var loadRestJsonErrorCode = (output, data) => {
@@ -31652,11 +31643,10 @@ var require_EndpointParameters = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resolveClientEndpointParameters = void 0;
     var resolveClientEndpointParameters = (options) => {
-      var _a, _b;
       return {
         ...options,
-        useDualstackEndpoint: (_a = options.useDualstackEndpoint) != null ? _a : false,
-        useFipsEndpoint: (_b = options.useFipsEndpoint) != null ? _b : false,
+        useDualstackEndpoint: options.useDualstackEndpoint ?? false,
+        useFipsEndpoint: options.useFipsEndpoint ?? false,
         defaultSigningName: "ssm"
       };
     };
@@ -31668,42 +31658,24 @@ var require_EndpointParameters = __commonJS({
 var require_package = __commonJS({
   "node_modules/@aws-sdk/client-ssm/package.json"(exports, module2) {
     module2.exports = {
-      _from: "@aws-sdk/client-ssm",
-      _id: "@aws-sdk/client-ssm@3.272.0",
-      _inBundle: false,
-      _integrity: "sha512-CPIv2EC8i7vskbtjrD0Onr/ezudBdTTU297HeMUfO+SbyvMTRDw68cZYD3VYcnX5GFLqn7LoPU+QjlIEQrJ/rA==",
-      _location: "/@aws-sdk/client-ssm",
-      _phantomChildren: {},
-      _requested: {
-        type: "tag",
-        registry: true,
-        raw: "@aws-sdk/client-ssm",
-        name: "@aws-sdk/client-ssm",
-        escapedName: "@aws-sdk%2fclient-ssm",
-        scope: "@aws-sdk",
-        rawSpec: "",
-        saveSpec: null,
-        fetchSpec: "latest"
+      name: "@aws-sdk/client-ssm",
+      description: "AWS SDK for JavaScript Ssm Client for Node.js, Browser and React Native",
+      version: "3.272.0",
+      scripts: {
+        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:docs": "typedoc",
+        "build:es": "tsc -p tsconfig.es.json",
+        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
+        "build:types": "tsc -p tsconfig.types.json",
+        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
+        "generate:client": "node ../../scripts/generate-clients/single-service --solo ssm"
       },
-      _requiredBy: [
-        "#USER",
-        "/"
-      ],
-      _resolved: "https://registry.npmjs.org/@aws-sdk/client-ssm/-/client-ssm-3.272.0.tgz",
-      _shasum: "5ba42098084c30f3db825eb24e80f8ea9e860e4f",
-      _spec: "@aws-sdk/client-ssm",
-      _where: "/home/dmitriy/Projects/lcm/massgov/mds-terraform-common/webhook-converters/github-to-teams/lambda",
-      author: {
-        name: "AWS SDK for JavaScript Team",
-        url: "https://aws.amazon.com/javascript/"
-      },
-      browser: {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-      },
-      bugs: {
-        url: "https://github.com/aws/aws-sdk-js-v3/issues"
-      },
-      bundleDependencies: false,
+      main: "./dist-cjs/index.js",
+      types: "./dist-types/index.d.ts",
+      module: "./dist-es/index.js",
+      sideEffects: false,
       dependencies: {
         "@aws-crypto/sha256-browser": "3.0.0",
         "@aws-crypto/sha256-js": "3.0.0",
@@ -31743,8 +31715,6 @@ var require_package = __commonJS({
         tslib: "^2.3.1",
         uuid: "^8.3.2"
       },
-      deprecated: false,
-      description: "AWS SDK for JavaScript Ssm Client for Node.js, Browser and React Native",
       devDependencies: {
         "@aws-sdk/service-client-documentation-generator": "3.208.0",
         "@tsconfig/node14": "1.0.3",
@@ -31756,43 +31726,14 @@ var require_package = __commonJS({
         typedoc: "0.19.2",
         typescript: "~4.6.2"
       },
-      engines: {
-        node: ">=14.0.0"
-      },
-      files: [
-        "dist-*"
-      ],
-      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-ssm",
-      license: "Apache-2.0",
-      main: "./dist-cjs/index.js",
-      module: "./dist-es/index.js",
-      name: "@aws-sdk/client-ssm",
       overrides: {
         typedoc: {
           typescript: "~4.6.2"
         }
       },
-      "react-native": {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      engines: {
+        node: ">=14.0.0"
       },
-      repository: {
-        type: "git",
-        url: "git+https://github.com/aws/aws-sdk-js-v3.git",
-        directory: "clients/client-ssm"
-      },
-      scripts: {
-        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
-        "build:cjs": "tsc -p tsconfig.cjs.json",
-        "build:docs": "typedoc",
-        "build:es": "tsc -p tsconfig.es.json",
-        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
-        "build:types": "tsc -p tsconfig.types.json",
-        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
-        "generate:client": "node ../../scripts/generate-clients/single-service --solo ssm"
-      },
-      sideEffects: false,
-      types: "./dist-types/index.d.ts",
       typesVersions: {
         "<4.0": {
           "dist-types/*": [
@@ -31800,7 +31741,26 @@ var require_package = __commonJS({
           ]
         }
       },
-      version: "3.272.0"
+      files: [
+        "dist-*"
+      ],
+      author: {
+        name: "AWS SDK for JavaScript Team",
+        url: "https://aws.amazon.com/javascript/"
+      },
+      license: "Apache-2.0",
+      browser: {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+      },
+      "react-native": {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      },
+      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-ssm",
+      repository: {
+        type: "git",
+        url: "https://github.com/aws/aws-sdk-js-v3.git",
+        directory: "clients/client-ssm"
+      }
     };
   }
 });
@@ -34594,15 +34554,12 @@ var require_Aws_query = __commonJS({
       }
       return contents;
     };
-    var deserializeMetadata = (output) => {
-      var _a, _b;
-      return {
-        httpStatusCode: output.statusCode,
-        requestId: (_b = (_a = output.headers["x-amzn-requestid"]) != null ? _a : output.headers["x-amzn-request-id"]) != null ? _b : output.headers["x-amz-request-id"],
-        extendedRequestId: output.headers["x-amz-id-2"],
-        cfId: output.headers["x-amz-cf-id"]
-      };
-    };
+    var deserializeMetadata = (output) => ({
+      httpStatusCode: output.statusCode,
+      requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+      extendedRequestId: output.headers["x-amz-id-2"],
+      cfId: output.headers["x-amz-cf-id"]
+    });
     var collectBody = (streamBody = new Uint8Array(), context) => {
       if (streamBody instanceof Uint8Array) {
         return Promise.resolve(streamBody);
@@ -34654,10 +34611,9 @@ var require_Aws_query = __commonJS({
       return {};
     });
     var parseErrorBody = async (errorBody, context) => {
-      var _a;
       const value = await parseBody(errorBody, context);
       if (value.Error) {
-        value.Error.message = (_a = value.Error.message) != null ? _a : value.Error.Message;
+        value.Error.message = value.Error.message ?? value.Error.Message;
       }
       return value;
     };
@@ -35132,12 +35088,11 @@ var require_EndpointParameters2 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resolveClientEndpointParameters = void 0;
     var resolveClientEndpointParameters = (options) => {
-      var _a, _b, _c;
       return {
         ...options,
-        useDualstackEndpoint: (_a = options.useDualstackEndpoint) != null ? _a : false,
-        useFipsEndpoint: (_b = options.useFipsEndpoint) != null ? _b : false,
-        useGlobalEndpoint: (_c = options.useGlobalEndpoint) != null ? _c : false,
+        useDualstackEndpoint: options.useDualstackEndpoint ?? false,
+        useFipsEndpoint: options.useFipsEndpoint ?? false,
+        useGlobalEndpoint: options.useGlobalEndpoint ?? false,
         defaultSigningName: "sts"
       };
     };
@@ -35149,41 +35104,26 @@ var require_EndpointParameters2 = __commonJS({
 var require_package2 = __commonJS({
   "node_modules/@aws-sdk/client-sts/package.json"(exports, module2) {
     module2.exports = {
-      _from: "@aws-sdk/client-sts@3.272.0",
-      _id: "@aws-sdk/client-sts@3.272.0",
-      _inBundle: false,
-      _integrity: "sha512-kigxCxURp3WupufGaL/LABMb7UQfzAQkKcj9royizL3ItJ0vw5kW/JFrPje5IW1mfLgdPF7PI9ShOjE0fCLTqA==",
-      _location: "/@aws-sdk/client-sts",
-      _phantomChildren: {},
-      _requested: {
-        type: "version",
-        registry: true,
-        raw: "@aws-sdk/client-sts@3.272.0",
-        name: "@aws-sdk/client-sts",
-        escapedName: "@aws-sdk%2fclient-sts",
-        scope: "@aws-sdk",
-        rawSpec: "3.272.0",
-        saveSpec: null,
-        fetchSpec: "3.272.0"
+      name: "@aws-sdk/client-sts",
+      description: "AWS SDK for JavaScript Sts Client for Node.js, Browser and React Native",
+      version: "3.272.0",
+      scripts: {
+        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:docs": "typedoc",
+        "build:es": "tsc -p tsconfig.es.json",
+        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
+        "build:types": "tsc -p tsconfig.types.json",
+        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
+        "generate:client": "node ../../scripts/generate-clients/single-service --solo sts",
+        test: "yarn test:unit",
+        "test:unit": "jest"
       },
-      _requiredBy: [
-        "/@aws-sdk/client-ssm"
-      ],
-      _resolved: "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.272.0.tgz",
-      _shasum: "a63993d53ca7243f8dadc715b539afdcfa482abf",
-      _spec: "@aws-sdk/client-sts@3.272.0",
-      _where: "/home/dmitriy/Projects/lcm/massgov/mds-terraform-common/webhook-converters/github-to-teams/lambda/node_modules/@aws-sdk/client-ssm",
-      author: {
-        name: "AWS SDK for JavaScript Team",
-        url: "https://aws.amazon.com/javascript/"
-      },
-      browser: {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-      },
-      bugs: {
-        url: "https://github.com/aws/aws-sdk-js-v3/issues"
-      },
-      bundleDependencies: false,
+      main: "./dist-cjs/index.js",
+      types: "./dist-types/index.d.ts",
+      module: "./dist-es/index.js",
+      sideEffects: false,
       dependencies: {
         "@aws-crypto/sha256-browser": "3.0.0",
         "@aws-crypto/sha256-js": "3.0.0",
@@ -35222,8 +35162,6 @@ var require_package2 = __commonJS({
         "fast-xml-parser": "4.0.11",
         tslib: "^2.3.1"
       },
-      deprecated: false,
-      description: "AWS SDK for JavaScript Sts Client for Node.js, Browser and React Native",
       devDependencies: {
         "@aws-sdk/service-client-documentation-generator": "3.208.0",
         "@tsconfig/node14": "1.0.3",
@@ -35234,45 +35172,14 @@ var require_package2 = __commonJS({
         typedoc: "0.19.2",
         typescript: "~4.6.2"
       },
-      engines: {
-        node: ">=14.0.0"
-      },
-      files: [
-        "dist-*"
-      ],
-      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sts",
-      license: "Apache-2.0",
-      main: "./dist-cjs/index.js",
-      module: "./dist-es/index.js",
-      name: "@aws-sdk/client-sts",
       overrides: {
         typedoc: {
           typescript: "~4.6.2"
         }
       },
-      "react-native": {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      engines: {
+        node: ">=14.0.0"
       },
-      repository: {
-        type: "git",
-        url: "git+https://github.com/aws/aws-sdk-js-v3.git",
-        directory: "clients/client-sts"
-      },
-      scripts: {
-        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
-        "build:cjs": "tsc -p tsconfig.cjs.json",
-        "build:docs": "typedoc",
-        "build:es": "tsc -p tsconfig.es.json",
-        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
-        "build:types": "tsc -p tsconfig.types.json",
-        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
-        "generate:client": "node ../../scripts/generate-clients/single-service --solo sts",
-        test: "yarn test:unit",
-        "test:unit": "jest"
-      },
-      sideEffects: false,
-      types: "./dist-types/index.d.ts",
       typesVersions: {
         "<4.0": {
           "dist-types/*": [
@@ -35280,7 +35187,26 @@ var require_package2 = __commonJS({
           ]
         }
       },
-      version: "3.272.0"
+      files: [
+        "dist-*"
+      ],
+      author: {
+        name: "AWS SDK for JavaScript Team",
+        url: "https://aws.amazon.com/javascript/"
+      },
+      license: "Apache-2.0",
+      browser: {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+      },
+      "react-native": {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      },
+      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sts",
+      repository: {
+        type: "git",
+        url: "https://github.com/aws/aws-sdk-js-v3.git",
+        directory: "clients/client-sts"
+      }
     };
   }
 });
@@ -36890,15 +36816,12 @@ var require_Aws_restJson1 = __commonJS({
       });
       return retVal;
     };
-    var deserializeMetadata = (output) => {
-      var _a, _b;
-      return {
-        httpStatusCode: output.statusCode,
-        requestId: (_b = (_a = output.headers["x-amzn-requestid"]) != null ? _a : output.headers["x-amzn-request-id"]) != null ? _b : output.headers["x-amz-request-id"],
-        extendedRequestId: output.headers["x-amz-id-2"],
-        cfId: output.headers["x-amz-cf-id"]
-      };
-    };
+    var deserializeMetadata = (output) => ({
+      httpStatusCode: output.statusCode,
+      requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+      extendedRequestId: output.headers["x-amz-id-2"],
+      cfId: output.headers["x-amz-cf-id"]
+    });
     var collectBody = (streamBody = new Uint8Array(), context) => {
       if (streamBody instanceof Uint8Array) {
         return Promise.resolve(streamBody);
@@ -36914,9 +36837,8 @@ var require_Aws_restJson1 = __commonJS({
       return {};
     });
     var parseErrorBody = async (errorBody, context) => {
-      var _a;
       const value = await parseBody(errorBody, context);
-      value.message = (_a = value.message) != null ? _a : value.Message;
+      value.message = value.message ?? value.Message;
       return value;
     };
     var loadRestJsonErrorCode = (output, data) => {
@@ -37166,11 +37088,10 @@ var require_EndpointParameters3 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resolveClientEndpointParameters = void 0;
     var resolveClientEndpointParameters = (options) => {
-      var _a, _b;
       return {
         ...options,
-        useDualstackEndpoint: (_a = options.useDualstackEndpoint) != null ? _a : false,
-        useFipsEndpoint: (_b = options.useFipsEndpoint) != null ? _b : false,
+        useDualstackEndpoint: options.useDualstackEndpoint ?? false,
+        useFipsEndpoint: options.useFipsEndpoint ?? false,
         defaultSigningName: "awsssoportal"
       };
     };
@@ -37182,41 +37103,24 @@ var require_EndpointParameters3 = __commonJS({
 var require_package3 = __commonJS({
   "node_modules/@aws-sdk/client-sso/package.json"(exports, module2) {
     module2.exports = {
-      _from: "@aws-sdk/client-sso@3.272.0",
-      _id: "@aws-sdk/client-sso@3.272.0",
-      _inBundle: false,
-      _integrity: "sha512-xn9a0IGONwQIARmngThoRhF1lLGjHAD67sUaShgIMaIMc6ipVYN6alWG1VuUpoUQ6iiwMEt0CHdfCyLyUV/fTA==",
-      _location: "/@aws-sdk/client-sso",
-      _phantomChildren: {},
-      _requested: {
-        type: "version",
-        registry: true,
-        raw: "@aws-sdk/client-sso@3.272.0",
-        name: "@aws-sdk/client-sso",
-        escapedName: "@aws-sdk%2fclient-sso",
-        scope: "@aws-sdk",
-        rawSpec: "3.272.0",
-        saveSpec: null,
-        fetchSpec: "3.272.0"
+      name: "@aws-sdk/client-sso",
+      description: "AWS SDK for JavaScript Sso Client for Node.js, Browser and React Native",
+      version: "3.272.0",
+      scripts: {
+        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:docs": "typedoc",
+        "build:es": "tsc -p tsconfig.es.json",
+        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
+        "build:types": "tsc -p tsconfig.types.json",
+        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
+        "generate:client": "node ../../scripts/generate-clients/single-service --solo sso"
       },
-      _requiredBy: [
-        "/@aws-sdk/credential-provider-sso"
-      ],
-      _resolved: "https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.272.0.tgz",
-      _shasum: "6dedf03e5c1d31ef745e72091868082b10c0bca5",
-      _spec: "@aws-sdk/client-sso@3.272.0",
-      _where: "/home/dmitriy/Projects/lcm/massgov/mds-terraform-common/webhook-converters/github-to-teams/lambda/node_modules/@aws-sdk/credential-provider-sso",
-      author: {
-        name: "AWS SDK for JavaScript Team",
-        url: "https://aws.amazon.com/javascript/"
-      },
-      browser: {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-      },
-      bugs: {
-        url: "https://github.com/aws/aws-sdk-js-v3/issues"
-      },
-      bundleDependencies: false,
+      main: "./dist-cjs/index.js",
+      types: "./dist-types/index.d.ts",
+      module: "./dist-es/index.js",
+      sideEffects: false,
       dependencies: {
         "@aws-crypto/sha256-browser": "3.0.0",
         "@aws-crypto/sha256-js": "3.0.0",
@@ -37251,8 +37155,6 @@ var require_package3 = __commonJS({
         "@aws-sdk/util-utf8": "3.254.0",
         tslib: "^2.3.1"
       },
-      deprecated: false,
-      description: "AWS SDK for JavaScript Sso Client for Node.js, Browser and React Native",
       devDependencies: {
         "@aws-sdk/service-client-documentation-generator": "3.208.0",
         "@tsconfig/node14": "1.0.3",
@@ -37263,43 +37165,14 @@ var require_package3 = __commonJS({
         typedoc: "0.19.2",
         typescript: "~4.6.2"
       },
-      engines: {
-        node: ">=14.0.0"
-      },
-      files: [
-        "dist-*"
-      ],
-      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sso",
-      license: "Apache-2.0",
-      main: "./dist-cjs/index.js",
-      module: "./dist-es/index.js",
-      name: "@aws-sdk/client-sso",
       overrides: {
         typedoc: {
           typescript: "~4.6.2"
         }
       },
-      "react-native": {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      engines: {
+        node: ">=14.0.0"
       },
-      repository: {
-        type: "git",
-        url: "git+https://github.com/aws/aws-sdk-js-v3.git",
-        directory: "clients/client-sso"
-      },
-      scripts: {
-        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
-        "build:cjs": "tsc -p tsconfig.cjs.json",
-        "build:docs": "typedoc",
-        "build:es": "tsc -p tsconfig.es.json",
-        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
-        "build:types": "tsc -p tsconfig.types.json",
-        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
-        "generate:client": "node ../../scripts/generate-clients/single-service --solo sso"
-      },
-      sideEffects: false,
-      types: "./dist-types/index.d.ts",
       typesVersions: {
         "<4.0": {
           "dist-types/*": [
@@ -37307,7 +37180,26 @@ var require_package3 = __commonJS({
           ]
         }
       },
-      version: "3.272.0"
+      files: [
+        "dist-*"
+      ],
+      author: {
+        name: "AWS SDK for JavaScript Team",
+        url: "https://aws.amazon.com/javascript/"
+      },
+      license: "Apache-2.0",
+      browser: {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+      },
+      "react-native": {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      },
+      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sso",
+      repository: {
+        type: "git",
+        url: "https://github.com/aws/aws-sdk-js-v3.git",
+        directory: "clients/client-sso"
+      }
     };
   }
 });
@@ -39411,21 +39303,18 @@ var require_runtimeConfig_shared = __commonJS({
     var util_base64_1 = require_dist_cjs38();
     var util_utf8_1 = require_dist_cjs22();
     var endpointResolver_1 = require_endpointResolver();
-    var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-      return {
-        apiVersion: "2019-06-10",
-        base64Decoder: (_a = config == null ? void 0 : config.base64Decoder) != null ? _a : util_base64_1.fromBase64,
-        base64Encoder: (_b = config == null ? void 0 : config.base64Encoder) != null ? _b : util_base64_1.toBase64,
-        disableHostPrefix: (_c = config == null ? void 0 : config.disableHostPrefix) != null ? _c : false,
-        endpointProvider: (_d = config == null ? void 0 : config.endpointProvider) != null ? _d : endpointResolver_1.defaultEndpointResolver,
-        logger: (_e = config == null ? void 0 : config.logger) != null ? _e : new smithy_client_1.NoOpLogger(),
-        serviceId: (_f = config == null ? void 0 : config.serviceId) != null ? _f : "SSO",
-        urlParser: (_g = config == null ? void 0 : config.urlParser) != null ? _g : url_parser_1.parseUrl,
-        utf8Decoder: (_h = config == null ? void 0 : config.utf8Decoder) != null ? _h : util_utf8_1.fromUtf8,
-        utf8Encoder: (_i = config == null ? void 0 : config.utf8Encoder) != null ? _i : util_utf8_1.toUtf8
-      };
-    };
+    var getRuntimeConfig = (config) => ({
+      apiVersion: "2019-06-10",
+      base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
+      base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
+      disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
+      endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
+      logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
+      serviceId: (config == null ? void 0 : config.serviceId) ?? "SSO",
+      urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
+      utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
+      utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+    });
     exports.getRuntimeConfig = getRuntimeConfig;
   }
 });
@@ -39557,7 +39446,6 @@ var require_runtimeConfig = __commonJS({
     var util_defaults_mode_node_1 = require_dist_cjs41();
     var smithy_client_2 = require_dist_cjs7();
     var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
       (0, smithy_client_2.emitWarningIfUnsupportedVersion)(process.version);
       const defaultsMode = (0, util_defaults_mode_node_1.resolveDefaultsModeConfig)(config);
       const defaultConfigProvider = () => defaultsMode().then(smithy_client_1.loadConfigsForDefaultMode);
@@ -39567,19 +39455,19 @@ var require_runtimeConfig = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (_a = config == null ? void 0 : config.bodyLengthChecker) != null ? _a : util_body_length_node_1.calculateBodyLength,
-        defaultUserAgentProvider: (_b = config == null ? void 0 : config.defaultUserAgentProvider) != null ? _b : (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (_c = config == null ? void 0 : config.maxAttempts) != null ? _c : (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (_d = config == null ? void 0 : config.region) != null ? _d : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (_e = config == null ? void 0 : config.requestHandler) != null ? _e : new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (_f = config == null ? void 0 : config.retryMode) != null ? _f : (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
+        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (_g = config == null ? void 0 : config.sha256) != null ? _g : hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (_h = config == null ? void 0 : config.streamCollector) != null ? _h : node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (_i = config == null ? void 0 : config.useDualstackEndpoint) != null ? _i : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (_j = config == null ? void 0 : config.useFipsEndpoint) != null ? _j : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -40543,15 +40431,12 @@ var require_Aws_restJson12 = __commonJS({
         return entry;
       });
     };
-    var deserializeMetadata = (output) => {
-      var _a, _b;
-      return {
-        httpStatusCode: output.statusCode,
-        requestId: (_b = (_a = output.headers["x-amzn-requestid"]) != null ? _a : output.headers["x-amzn-request-id"]) != null ? _b : output.headers["x-amz-request-id"],
-        extendedRequestId: output.headers["x-amz-id-2"],
-        cfId: output.headers["x-amz-cf-id"]
-      };
-    };
+    var deserializeMetadata = (output) => ({
+      httpStatusCode: output.statusCode,
+      requestId: output.headers["x-amzn-requestid"] ?? output.headers["x-amzn-request-id"] ?? output.headers["x-amz-request-id"],
+      extendedRequestId: output.headers["x-amz-id-2"],
+      cfId: output.headers["x-amz-cf-id"]
+    });
     var collectBody = (streamBody = new Uint8Array(), context) => {
       if (streamBody instanceof Uint8Array) {
         return Promise.resolve(streamBody);
@@ -40566,9 +40451,8 @@ var require_Aws_restJson12 = __commonJS({
       return {};
     });
     var parseErrorBody = async (errorBody, context) => {
-      var _a;
       const value = await parseBody(errorBody, context);
-      value.message = (_a = value.message) != null ? _a : value.Message;
+      value.message = value.message ?? value.Message;
       return value;
     };
     var loadRestJsonErrorCode = (output, data) => {
@@ -40766,11 +40650,10 @@ var require_EndpointParameters4 = __commonJS({
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.resolveClientEndpointParameters = void 0;
     var resolveClientEndpointParameters = (options) => {
-      var _a, _b;
       return {
         ...options,
-        useDualstackEndpoint: (_a = options.useDualstackEndpoint) != null ? _a : false,
-        useFipsEndpoint: (_b = options.useFipsEndpoint) != null ? _b : false,
+        useDualstackEndpoint: options.useDualstackEndpoint ?? false,
+        useFipsEndpoint: options.useFipsEndpoint ?? false,
         defaultSigningName: "awsssooidc"
       };
     };
@@ -40782,41 +40665,24 @@ var require_EndpointParameters4 = __commonJS({
 var require_package4 = __commonJS({
   "node_modules/@aws-sdk/client-sso-oidc/package.json"(exports, module2) {
     module2.exports = {
-      _from: "@aws-sdk/client-sso-oidc@3.272.0",
-      _id: "@aws-sdk/client-sso-oidc@3.272.0",
-      _inBundle: false,
-      _integrity: "sha512-ECcXu3xoa1yggnGKMTh29eWNHiF/wC6r5Uqbla22eOOosyh0+Z6lkJ3JUSLOUKCkBXA4Cs/tJL9UDFBrKbSlvA==",
-      _location: "/@aws-sdk/client-sso-oidc",
-      _phantomChildren: {},
-      _requested: {
-        type: "version",
-        registry: true,
-        raw: "@aws-sdk/client-sso-oidc@3.272.0",
-        name: "@aws-sdk/client-sso-oidc",
-        escapedName: "@aws-sdk%2fclient-sso-oidc",
-        scope: "@aws-sdk",
-        rawSpec: "3.272.0",
-        saveSpec: null,
-        fetchSpec: "3.272.0"
+      name: "@aws-sdk/client-sso-oidc",
+      description: "AWS SDK for JavaScript Sso Oidc Client for Node.js, Browser and React Native",
+      version: "3.272.0",
+      scripts: {
+        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
+        "build:cjs": "tsc -p tsconfig.cjs.json",
+        "build:docs": "typedoc",
+        "build:es": "tsc -p tsconfig.es.json",
+        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
+        "build:types": "tsc -p tsconfig.types.json",
+        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
+        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
+        "generate:client": "node ../../scripts/generate-clients/single-service --solo sso-oidc"
       },
-      _requiredBy: [
-        "/@aws-sdk/token-providers"
-      ],
-      _resolved: "https://registry.npmjs.org/@aws-sdk/client-sso-oidc/-/client-sso-oidc-3.272.0.tgz",
-      _shasum: "32ec5d4bd4d1f343d642a5846dae6e1864cc890c",
-      _spec: "@aws-sdk/client-sso-oidc@3.272.0",
-      _where: "/home/dmitriy/Projects/lcm/massgov/mds-terraform-common/webhook-converters/github-to-teams/lambda/node_modules/@aws-sdk/token-providers",
-      author: {
-        name: "AWS SDK for JavaScript Team",
-        url: "https://aws.amazon.com/javascript/"
-      },
-      browser: {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
-      },
-      bugs: {
-        url: "https://github.com/aws/aws-sdk-js-v3/issues"
-      },
-      bundleDependencies: false,
+      main: "./dist-cjs/index.js",
+      types: "./dist-types/index.d.ts",
+      module: "./dist-es/index.js",
+      sideEffects: false,
       dependencies: {
         "@aws-crypto/sha256-browser": "3.0.0",
         "@aws-crypto/sha256-js": "3.0.0",
@@ -40851,8 +40717,6 @@ var require_package4 = __commonJS({
         "@aws-sdk/util-utf8": "3.254.0",
         tslib: "^2.3.1"
       },
-      deprecated: false,
-      description: "AWS SDK for JavaScript Sso Oidc Client for Node.js, Browser and React Native",
       devDependencies: {
         "@aws-sdk/service-client-documentation-generator": "3.208.0",
         "@tsconfig/node14": "1.0.3",
@@ -40863,43 +40727,14 @@ var require_package4 = __commonJS({
         typedoc: "0.19.2",
         typescript: "~4.6.2"
       },
-      engines: {
-        node: ">=14.0.0"
-      },
-      files: [
-        "dist-*"
-      ],
-      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sso-oidc",
-      license: "Apache-2.0",
-      main: "./dist-cjs/index.js",
-      module: "./dist-es/index.js",
-      name: "@aws-sdk/client-sso-oidc",
       overrides: {
         typedoc: {
           typescript: "~4.6.2"
         }
       },
-      "react-native": {
-        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      engines: {
+        node: ">=14.0.0"
       },
-      repository: {
-        type: "git",
-        url: "git+https://github.com/aws/aws-sdk-js-v3.git",
-        directory: "clients/client-sso-oidc"
-      },
-      scripts: {
-        build: "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
-        "build:cjs": "tsc -p tsconfig.cjs.json",
-        "build:docs": "typedoc",
-        "build:es": "tsc -p tsconfig.es.json",
-        "build:include:deps": "lerna run --scope $npm_package_name --include-dependencies build",
-        "build:types": "tsc -p tsconfig.types.json",
-        "build:types:downlevel": "downlevel-dts dist-types dist-types/ts3.4",
-        clean: "rimraf ./dist-* && rimraf *.tsbuildinfo",
-        "generate:client": "node ../../scripts/generate-clients/single-service --solo sso-oidc"
-      },
-      sideEffects: false,
-      types: "./dist-types/index.d.ts",
       typesVersions: {
         "<4.0": {
           "dist-types/*": [
@@ -40907,7 +40742,26 @@ var require_package4 = __commonJS({
           ]
         }
       },
-      version: "3.272.0"
+      files: [
+        "dist-*"
+      ],
+      author: {
+        name: "AWS SDK for JavaScript Team",
+        url: "https://aws.amazon.com/javascript/"
+      },
+      license: "Apache-2.0",
+      browser: {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.browser"
+      },
+      "react-native": {
+        "./dist-es/runtimeConfig": "./dist-es/runtimeConfig.native"
+      },
+      homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/clients/client-sso-oidc",
+      repository: {
+        type: "git",
+        url: "https://github.com/aws/aws-sdk-js-v3.git",
+        directory: "clients/client-sso-oidc"
+      }
     };
   }
 });
@@ -40971,21 +40825,18 @@ var require_runtimeConfig_shared2 = __commonJS({
     var util_base64_1 = require_dist_cjs38();
     var util_utf8_1 = require_dist_cjs22();
     var endpointResolver_1 = require_endpointResolver2();
-    var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-      return {
-        apiVersion: "2019-06-10",
-        base64Decoder: (_a = config == null ? void 0 : config.base64Decoder) != null ? _a : util_base64_1.fromBase64,
-        base64Encoder: (_b = config == null ? void 0 : config.base64Encoder) != null ? _b : util_base64_1.toBase64,
-        disableHostPrefix: (_c = config == null ? void 0 : config.disableHostPrefix) != null ? _c : false,
-        endpointProvider: (_d = config == null ? void 0 : config.endpointProvider) != null ? _d : endpointResolver_1.defaultEndpointResolver,
-        logger: (_e = config == null ? void 0 : config.logger) != null ? _e : new smithy_client_1.NoOpLogger(),
-        serviceId: (_f = config == null ? void 0 : config.serviceId) != null ? _f : "SSO OIDC",
-        urlParser: (_g = config == null ? void 0 : config.urlParser) != null ? _g : url_parser_1.parseUrl,
-        utf8Decoder: (_h = config == null ? void 0 : config.utf8Decoder) != null ? _h : util_utf8_1.fromUtf8,
-        utf8Encoder: (_i = config == null ? void 0 : config.utf8Encoder) != null ? _i : util_utf8_1.toUtf8
-      };
-    };
+    var getRuntimeConfig = (config) => ({
+      apiVersion: "2019-06-10",
+      base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
+      base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
+      disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
+      endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
+      logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
+      serviceId: (config == null ? void 0 : config.serviceId) ?? "SSO OIDC",
+      urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
+      utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
+      utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+    });
     exports.getRuntimeConfig = getRuntimeConfig;
   }
 });
@@ -41011,7 +40862,6 @@ var require_runtimeConfig2 = __commonJS({
     var util_defaults_mode_node_1 = require_dist_cjs41();
     var smithy_client_2 = require_dist_cjs7();
     var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
       (0, smithy_client_2.emitWarningIfUnsupportedVersion)(process.version);
       const defaultsMode = (0, util_defaults_mode_node_1.resolveDefaultsModeConfig)(config);
       const defaultConfigProvider = () => defaultsMode().then(smithy_client_1.loadConfigsForDefaultMode);
@@ -41021,19 +40871,19 @@ var require_runtimeConfig2 = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (_a = config == null ? void 0 : config.bodyLengthChecker) != null ? _a : util_body_length_node_1.calculateBodyLength,
-        defaultUserAgentProvider: (_b = config == null ? void 0 : config.defaultUserAgentProvider) != null ? _b : (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (_c = config == null ? void 0 : config.maxAttempts) != null ? _c : (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (_d = config == null ? void 0 : config.region) != null ? _d : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (_e = config == null ? void 0 : config.requestHandler) != null ? _e : new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (_f = config == null ? void 0 : config.retryMode) != null ? _f : (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
+        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (_g = config == null ? void 0 : config.sha256) != null ? _g : hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (_h = config == null ? void 0 : config.streamCollector) != null ? _h : node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (_i = config == null ? void 0 : config.useDualstackEndpoint) != null ? _i : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (_j = config == null ? void 0 : config.useFipsEndpoint) != null ? _j : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -41887,21 +41737,18 @@ var require_runtimeConfig_shared3 = __commonJS({
     var util_base64_1 = require_dist_cjs38();
     var util_utf8_1 = require_dist_cjs22();
     var endpointResolver_1 = require_endpointResolver3();
-    var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-      return {
-        apiVersion: "2011-06-15",
-        base64Decoder: (_a = config == null ? void 0 : config.base64Decoder) != null ? _a : util_base64_1.fromBase64,
-        base64Encoder: (_b = config == null ? void 0 : config.base64Encoder) != null ? _b : util_base64_1.toBase64,
-        disableHostPrefix: (_c = config == null ? void 0 : config.disableHostPrefix) != null ? _c : false,
-        endpointProvider: (_d = config == null ? void 0 : config.endpointProvider) != null ? _d : endpointResolver_1.defaultEndpointResolver,
-        logger: (_e = config == null ? void 0 : config.logger) != null ? _e : new smithy_client_1.NoOpLogger(),
-        serviceId: (_f = config == null ? void 0 : config.serviceId) != null ? _f : "STS",
-        urlParser: (_g = config == null ? void 0 : config.urlParser) != null ? _g : url_parser_1.parseUrl,
-        utf8Decoder: (_h = config == null ? void 0 : config.utf8Decoder) != null ? _h : util_utf8_1.fromUtf8,
-        utf8Encoder: (_i = config == null ? void 0 : config.utf8Encoder) != null ? _i : util_utf8_1.toUtf8
-      };
-    };
+    var getRuntimeConfig = (config) => ({
+      apiVersion: "2011-06-15",
+      base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
+      base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
+      disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
+      endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
+      logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
+      serviceId: (config == null ? void 0 : config.serviceId) ?? "STS",
+      urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
+      utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
+      utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+    });
     exports.getRuntimeConfig = getRuntimeConfig;
   }
 });
@@ -41929,7 +41776,6 @@ var require_runtimeConfig3 = __commonJS({
     var util_defaults_mode_node_1 = require_dist_cjs41();
     var smithy_client_2 = require_dist_cjs7();
     var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
       (0, smithy_client_2.emitWarningIfUnsupportedVersion)(process.version);
       const defaultsMode = (0, util_defaults_mode_node_1.resolveDefaultsModeConfig)(config);
       const defaultConfigProvider = () => defaultsMode().then(smithy_client_1.loadConfigsForDefaultMode);
@@ -41939,20 +41785,20 @@ var require_runtimeConfig3 = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (_a = config == null ? void 0 : config.bodyLengthChecker) != null ? _a : util_body_length_node_1.calculateBodyLength,
-        credentialDefaultProvider: (_b = config == null ? void 0 : config.credentialDefaultProvider) != null ? _b : (0, defaultStsRoleAssumers_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
-        defaultUserAgentProvider: (_c = config == null ? void 0 : config.defaultUserAgentProvider) != null ? _c : (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (_d = config == null ? void 0 : config.maxAttempts) != null ? _d : (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (_e = config == null ? void 0 : config.region) != null ? _e : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (_f = config == null ? void 0 : config.requestHandler) != null ? _f : new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (_g = config == null ? void 0 : config.retryMode) != null ? _g : (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
+        credentialDefaultProvider: (config == null ? void 0 : config.credentialDefaultProvider) ?? (0, defaultStsRoleAssumers_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
+        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (_h = config == null ? void 0 : config.sha256) != null ? _h : hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (_i = config == null ? void 0 : config.streamCollector) != null ? _i : node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (_j = config == null ? void 0 : config.useDualstackEndpoint) != null ? _j : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (_k = config == null ? void 0 : config.useFipsEndpoint) != null ? _k : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -42263,21 +42109,18 @@ var require_runtimeConfig_shared4 = __commonJS({
     var util_base64_1 = require_dist_cjs38();
     var util_utf8_1 = require_dist_cjs22();
     var endpointResolver_1 = require_endpointResolver4();
-    var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-      return {
-        apiVersion: "2014-11-06",
-        base64Decoder: (_a = config == null ? void 0 : config.base64Decoder) != null ? _a : util_base64_1.fromBase64,
-        base64Encoder: (_b = config == null ? void 0 : config.base64Encoder) != null ? _b : util_base64_1.toBase64,
-        disableHostPrefix: (_c = config == null ? void 0 : config.disableHostPrefix) != null ? _c : false,
-        endpointProvider: (_d = config == null ? void 0 : config.endpointProvider) != null ? _d : endpointResolver_1.defaultEndpointResolver,
-        logger: (_e = config == null ? void 0 : config.logger) != null ? _e : new smithy_client_1.NoOpLogger(),
-        serviceId: (_f = config == null ? void 0 : config.serviceId) != null ? _f : "SSM",
-        urlParser: (_g = config == null ? void 0 : config.urlParser) != null ? _g : url_parser_1.parseUrl,
-        utf8Decoder: (_h = config == null ? void 0 : config.utf8Decoder) != null ? _h : util_utf8_1.fromUtf8,
-        utf8Encoder: (_i = config == null ? void 0 : config.utf8Encoder) != null ? _i : util_utf8_1.toUtf8
-      };
-    };
+    var getRuntimeConfig = (config) => ({
+      apiVersion: "2014-11-06",
+      base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
+      base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
+      disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
+      endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
+      logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
+      serviceId: (config == null ? void 0 : config.serviceId) ?? "SSM",
+      urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
+      utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
+      utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+    });
     exports.getRuntimeConfig = getRuntimeConfig;
   }
 });
@@ -42305,7 +42148,6 @@ var require_runtimeConfig4 = __commonJS({
     var util_defaults_mode_node_1 = require_dist_cjs41();
     var smithy_client_2 = require_dist_cjs7();
     var getRuntimeConfig = (config) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
       (0, smithy_client_2.emitWarningIfUnsupportedVersion)(process.version);
       const defaultsMode = (0, util_defaults_mode_node_1.resolveDefaultsModeConfig)(config);
       const defaultConfigProvider = () => defaultsMode().then(smithy_client_1.loadConfigsForDefaultMode);
@@ -42315,20 +42157,20 @@ var require_runtimeConfig4 = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (_a = config == null ? void 0 : config.bodyLengthChecker) != null ? _a : util_body_length_node_1.calculateBodyLength,
-        credentialDefaultProvider: (_b = config == null ? void 0 : config.credentialDefaultProvider) != null ? _b : (0, client_sts_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
-        defaultUserAgentProvider: (_c = config == null ? void 0 : config.defaultUserAgentProvider) != null ? _c : (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (_d = config == null ? void 0 : config.maxAttempts) != null ? _d : (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (_e = config == null ? void 0 : config.region) != null ? _e : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (_f = config == null ? void 0 : config.requestHandler) != null ? _f : new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (_g = config == null ? void 0 : config.retryMode) != null ? _g : (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
+        credentialDefaultProvider: (config == null ? void 0 : config.credentialDefaultProvider) ?? (0, client_sts_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
+        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (_h = config == null ? void 0 : config.sha256) != null ? _h : hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (_i = config == null ? void 0 : config.streamCollector) != null ? _i : node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (_j = config == null ? void 0 : config.useDualstackEndpoint) != null ? _j : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (_k = config == null ? void 0 : config.useFipsEndpoint) != null ? _k : (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -48201,50 +48043,38 @@ var require_follow_redirects = __commonJS({
 var require_package5 = __commonJS({
   "node_modules/axios/package.json"(exports, module2) {
     module2.exports = {
-      _from: "axios@^0.21.1",
-      _id: "axios@0.21.4",
-      _inBundle: false,
-      _integrity: "sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==",
-      _location: "/axios",
-      _phantomChildren: {},
-      _requested: {
-        type: "range",
-        registry: true,
-        raw: "axios@^0.21.1",
-        name: "axios",
-        escapedName: "axios",
-        rawSpec: "^0.21.1",
-        saveSpec: null,
-        fetchSpec: "^0.21.1"
+      name: "axios",
+      version: "0.21.4",
+      description: "Promise based HTTP client for the browser and node.js",
+      main: "index.js",
+      scripts: {
+        test: "grunt test",
+        start: "node ./sandbox/server.js",
+        build: "NODE_ENV=production grunt build",
+        preversion: "npm test",
+        version: "npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json",
+        postversion: "git push && git push --tags",
+        examples: "node ./examples/server.js",
+        coveralls: "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+        fix: "eslint --fix lib/**/*.js"
       },
-      _requiredBy: [
-        "/ms-teams-webhook"
+      repository: {
+        type: "git",
+        url: "https://github.com/axios/axios.git"
+      },
+      keywords: [
+        "xhr",
+        "http",
+        "ajax",
+        "promise",
+        "node"
       ],
-      _resolved: "https://registry.npmjs.org/axios/-/axios-0.21.4.tgz",
-      _shasum: "c67b90dc0568e5c1cf2b0b858c43ba28e2eda575",
-      _spec: "axios@^0.21.1",
-      _where: "/home/dmitriy/Projects/lcm/massgov/mds-terraform-common/webhook-converters/github-to-teams/lambda/node_modules/ms-teams-webhook",
-      author: {
-        name: "Matt Zabriskie"
-      },
-      browser: {
-        "./lib/adapters/http.js": "./lib/adapters/xhr.js"
-      },
+      author: "Matt Zabriskie",
+      license: "MIT",
       bugs: {
         url: "https://github.com/axios/axios/issues"
       },
-      bundleDependencies: false,
-      bundlesize: [
-        {
-          path: "./dist/axios.min.js",
-          threshold: "5kB"
-        }
-      ],
-      dependencies: {
-        "follow-redirects": "^1.14.0"
-      },
-      deprecated: false,
-      description: "Promise based HTTP client for the browser and node.js",
+      homepage: "https://axios-http.com",
       devDependencies: {
         coveralls: "^3.0.0",
         "es6-promise": "^4.2.4",
@@ -48280,36 +48110,21 @@ var require_package5 = __commonJS({
         webpack: "^4.44.2",
         "webpack-dev-server": "^3.11.0"
       },
-      homepage: "https://axios-http.com",
+      browser: {
+        "./lib/adapters/http.js": "./lib/adapters/xhr.js"
+      },
       jsdelivr: "dist/axios.min.js",
-      keywords: [
-        "xhr",
-        "http",
-        "ajax",
-        "promise",
-        "node"
-      ],
-      license: "MIT",
-      main: "index.js",
-      name: "axios",
-      repository: {
-        type: "git",
-        url: "git+https://github.com/axios/axios.git"
-      },
-      scripts: {
-        build: "NODE_ENV=production grunt build",
-        coveralls: "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-        examples: "node ./examples/server.js",
-        fix: "eslint --fix lib/**/*.js",
-        postversion: "git push && git push --tags",
-        preversion: "npm test",
-        start: "node ./sandbox/server.js",
-        test: "grunt test",
-        version: "npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"
-      },
-      typings: "./index.d.ts",
       unpkg: "dist/axios.min.js",
-      version: "0.21.4"
+      typings: "./index.d.ts",
+      dependencies: {
+        "follow-redirects": "^1.14.0"
+      },
+      bundlesize: [
+        {
+          path: "./dist/axios.min.js",
+          threshold: "5kB"
+        }
+      ]
     };
   }
 });
