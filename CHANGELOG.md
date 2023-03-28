@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.47] - 2023-03-28
+
+ - [Github to Teams] Upgrade to node16 runtime
+ - [SNS to Slack] Upgrade to node16 runtime, convert to typescript 
+
 ## [1.0.46] - 2023-03-17
 
 - [Entrypoint Monitor] Upgrade to node16 runtime, aws provider 4.8.0

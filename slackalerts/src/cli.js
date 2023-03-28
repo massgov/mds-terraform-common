@@ -1,5 +1,4 @@
-
-const {handler} = require('./');
+const { handler } = require('./');
 
 const record = {
     "Records": [
