@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.48] - 2023-04-18
+
+ - [Static Site] Remove AWS provider from module.
+
 ## [1.0.47] - 2023-03-28
 
  - [Github to Teams] Upgrade to node16 runtime
