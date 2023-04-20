@@ -13,10 +13,9 @@ import assert from "assert";
 
 type TopicInfo = Pick<TopicMap[number], "icon_url" | "human_name">;
 
-// This strange order of control characters looks weird but experimenting in
-// Microsoft's message card playground (https://messagecardplayground.azurewebsites.net/)
-// has proven that this is what produces a newline
-const MESSAGE_CARD_NEWLINE = "\n\r";
+// A single \n won't work here:
+// https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cconnector-html#newlines-for-adaptive-cards
+const MESSAGE_CARD_NEWLINE = "\n\n";
 const MAYFLOWER_DUCKLING_YELLOW = "F6C51B";
 const DEFAULT_TOPIC_INFO: TopicInfo = {
   icon_url: "https://img.icons8.com/color/100/general-warning-sign.png", // ⚠️
