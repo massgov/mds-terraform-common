@@ -45,9 +45,16 @@ export interface WithMessageCard {
   hasMappedTopic: boolean;
 }
 
+export type PublishResult =
+  | {
+      success: true;
+      error: null;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
 export type WithPublishResult = WithMessageCard & {
-  publishResult: {
-    success: boolean;
-    error: string | null;
-  };
+  publishResult: PublishResult;
 };
