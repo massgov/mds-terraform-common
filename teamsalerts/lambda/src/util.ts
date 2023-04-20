@@ -3,14 +3,19 @@ import { AnyIterable, batch } from "streaming-iterables";
 import {
   MessageCard,
   MessageCardSection,
+  PublishResult,
   TopicMap,
   WithMessageCard,
   WithPublishResult,
 } from "./types";
 import { IncomingWebhook } from "ms-teams-webhook";
+import assert from "assert";
 
 type TopicInfo = Pick<TopicMap[number], "icon_url" | "human_name">;
 
+// A single \n won't work here:
+// https://learn.microsoft.com/en-us/microsoftteams/platform/task-modules-and-cards/cards/cards-format?tabs=adaptive-md%2Cdesktop%2Cconnector-html#newlines-for-adaptive-cards
+const MESSAGE_CARD_NEWLINE = "\n\n";
 const MAYFLOWER_DUCKLING_YELLOW = "F6C51B";
 const DEFAULT_TOPIC_INFO: TopicInfo = {
   icon_url: "https://img.icons8.com/color/100/general-warning-sign.png", // ⚠️
@@ -19,9 +24,45 @@ const DEFAULT_TOPIC_INFO: TopicInfo = {
 
 const formatMessagePart = (value: unknown): string => {
   if (typeof value === "object") {
-    return "`" + JSON.stringify(value) + "`";
+    return (
+      "`" +
+      JSON.stringify(value, undefined, 1).replace(
+        /\n ?/g,
+        `\`${MESSAGE_CARD_NEWLINE}\``
+      ) +
+      "`"
+    );
   }
-  return `${value}`;
+  return wrapText(`${value}`);
+};
+
+const wrapText = (value: string, maxLineLength = 100): string => {
+  return value.split(" ").reduce((acc, word): string => {
+    const lastLineBreakIndex = acc.lastIndexOf(MESSAGE_CARD_NEWLINE);
+    const lastLine =
+      lastLineBreakIndex === -1 ? acc : acc.slice(lastLineBreakIndex);
+    if (acc.length === 0) {
+      return word;
+    }
+    if (lastLine.length + word.length < maxLineLength) {
+      return `${acc} ${word}`;
+    }
+    return `${acc}${MESSAGE_CARD_NEWLINE}${word}`;
+  }, "");
+};
+
+const getLogStreamConsoleURI = (context: Context): string => {
+  assert(typeof process.env.AWS_REGION === "string");
+
+  // for some reason, log group and log stream names need to be double-encoded
+  // and then have the percent signs replaced with dollar signs
+  const logGroupPart = encodeURIComponent(
+    encodeURIComponent(context.logGroupName)
+  ).replace("%", "$");
+  const logStreamPart = encodeURIComponent(
+    encodeURIComponent(context.logStreamName)
+  ).replace("%", "$");
+  return `https://${process.env.AWS_REGION}.console.aws.amazon.com/cloudwatch/home?region=${process.env.AWS_REGION}#logsV2:log-groups/log-group/${logGroupPart}/log-events/${logStreamPart}`;
 };
 
 export const enrichWithMessageCards = async function* (
@@ -77,7 +118,7 @@ export const enrichWithMessageCards = async function* (
         facts: Object.entries(MessageAttributes).map(
           ([name, { Type, Value }]) => ({
             name,
-            value: `${Type} - ${Value}`,
+            value: wrapText(`${Type} - ${Value}`),
           })
         ),
       });
@@ -97,7 +138,7 @@ export const enrichWithMessageCards = async function* (
           targets: [
             {
               os: "default",
-              uri: `https://console.aws.amazon.com/cloudwatch/home#logsV2:log-groups/log-group/${context.logGroupName}/log-events/${context.logStreamName}`,
+              uri: getLogStreamConsoleURI(context),
             },
           ],
         },
@@ -129,7 +170,7 @@ export const publishToTeams = async function* (
   const webhook = new IncomingWebhook(webhookUrl);
   for await (const chunk of batch(10, records)) {
     const promises = chunk.map(async (record) => {
-      let publishResult;
+      let publishResult: PublishResult;
       try {
         await webhook.send(record.messageCard);
         publishResult = {

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.50] - 2023-04-20
+
+ - [SNS To Teams] Fixed some message formatting issues, made 'View Logs' button work
+
 ## [1.0.49] - 2023-04-18
 
  - [Private Bucket] Add a module to contain our commonly duplicated private bucket code.
