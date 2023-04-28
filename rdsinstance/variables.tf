@@ -161,3 +161,15 @@ variable "snapshot_identifier" {
   type        = string
   default     = null
 }
+
+variable "enable_manual_snapshots" {
+  description = "If set to true, will periodically create manual DB backups which get retained for at least 90 days"
+  type = bool
+  default = false
+}
+
+variable "manual_snapshot_schedule" {
+  description = "A Lambda schedule object dictating when manual DB backups should be created"
+  type        = map(string)
+  default     = {}
+}

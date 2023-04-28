@@ -107,3 +107,76 @@ resource "aws_security_group_rule" "accessor_egress_to_db_mysql" {
   source_security_group_id = aws_security_group.db.id
 }
 
+data "aws_iam_policy_document" "rds_snapshot_create" {
+  count = var.enable_manual_snapshots ? 1 : 0
+  statement {
+    effect = "Allow"
+    resources = [
+      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:*",
+      aws_db_instance.default.arn
+    ]
+    actions = ["rds:CreateDBSnapshot"]
+  }
+}
+
+data "aws_iam_policy_document" "rds_snapshot_delete" {
+  statement {
+    effect = "Allow"
+    resources = [
+      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:*",
+      aws_db_instance.default.arn
+    ]
+    actions = ["rds:DeleteDBSnapshot"]
+  }
+}
+
+module "backup_lambda" {
+  count   = var.enable_manual_snapshots ? 1 : 0
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.47"
+  name    = "${aws_db_instance.default.id}-manual-snapshot-lambda"
+  package = "${path.module}/dist/backup_lambda.zip"
+  handler = "index.handler"
+  runtime = "nodejs16.x"
+  timeout = 300
+  iam_policies = [
+    data.aws_iam_policy_document.rds_snapshot_create[count.index].json
+  ]
+  environment = {
+    variables = {
+      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.id}"
+    }
+  }
+  schedule = var.manual_snapshot_schedule
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "${aws_db_instance.default.id}-manual-snapshot-lambda"
+    }
+  )
+}
+
+module "cleanup_lambda" {
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.47"
+  name    = "${aws_db_instance.default.id}-manual-snapshot-cleanup-lambda"
+  package = "${path.module}/dist/cleanup_lambda.zip"
+  handler = "index.handler"
+  runtime = "nodejs16.x"
+  timeout = 300
+  iam_policies = [
+    data.aws_iam_policy_document.rds_snapshot_delete.json
+  ]
+  environment = {
+    variables = {
+      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.id}"
+    }
+  }
+  schedule = {
+    first_monday_of_month = "cron(0 23 ? * 2#1 *)"
+  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "${aws_db_instance.default.id}-manual-snapshot-cleanup-lambda"
+    }
+  )
+}
