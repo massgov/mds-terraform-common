@@ -16,7 +16,7 @@ type Event = Partial<ScheduledEvent> & RunOpts;
 const handler: Handler<Event> = async (event: Event) => {
   assert(process.env.RDS_INSTANCE_IDENTIFIER);
 
-  const dryRun = event.dryRun ?? true;
+  const dryRun = event.dryRun ?? false;
   const instanceIds = [process.env.RDS_INSTANCE_IDENTIFIER];
 
   await pipeline(

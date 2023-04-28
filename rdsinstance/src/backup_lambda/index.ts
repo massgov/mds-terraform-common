@@ -13,6 +13,7 @@ type Event = Partial<ScheduledEvent> & RunOpts;
 const handler: Handler<Event> = async (event: Event) => {
   assert(process.env.RDS_INSTANCE_IDENTIFIER);
 
+  const dryRun = event.dryRun ?? false;
   const snapshotTimeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
   const instanceIds = [process.env.RDS_INSTANCE_IDENTIFIER];
 
@@ -28,7 +29,7 @@ const handler: Handler<Event> = async (event: Event) => {
 
   return Promise.all(
     params.map((param) => {
-      return event.dryRun
+      return dryRun
         ? console.log(
             `CreateDBSnapshotMessage: ${JSON.stringify(param)}`
           )
