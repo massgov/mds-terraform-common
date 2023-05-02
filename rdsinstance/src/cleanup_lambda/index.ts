@@ -84,9 +84,6 @@ async function* deleteSnapshots(dryRun: boolean, snapshots: AsyncIterable<DBSnap
   }
 }
 
-const cleanupOldSnapShots = async (instances: Array<string>, dryRun = true): Promise<void> => {
-};
-
 export {
   handler
 };
