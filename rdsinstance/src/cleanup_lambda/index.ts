@@ -10,14 +10,19 @@ const RETENTION_PERIOD_DAYS = 90;
 
 type RunOpts = {
   dryRun?: boolean;
+  rdsIdentifier?: string;
 };
 type Event = Partial<ScheduledEvent> & RunOpts;
 
 const handler: Handler<Event> = async (event: Event) => {
-  assert(process.env.RDS_INSTANCE_IDENTIFIER);
+  const identifier = event.rdsIdentifier ?? process.env.RDS_INSTANCE_IDENTIFIER;
+  assert(
+    identifier,
+    "Must specify a DB instance via the Lambda event body or env['RDS_INSTANCE_IDENTIFIER']"
+  );
 
   const dryRun = event.dryRun ?? false;
-  const instanceIds = [process.env.RDS_INSTANCE_IDENTIFIER];
+  const instanceIds = [identifier];
 
   await pipeline(
     () => instanceIds,

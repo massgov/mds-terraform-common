@@ -1,9 +1,9 @@
+import assert from "assert";
 import { handler } from "./index";
 
-const run = async () => {
-  process.env.RDS_INSTANCE_IDENTIFIER = process.env.RDS_INSTANCE_IDENTIFIER ?? 'itd-pr-pdg-reportingdata';
+const run = async (rdsIdentifier: string) => {
   await handler(
-    { dryRun: true },
+    { dryRun: true, rdsIdentifier },
     {
       callbackWaitsForEmptyEventLoop: false,
       functionName: "",
@@ -22,4 +22,11 @@ const run = async () => {
   );
 };
 
-run();
+if (require.main === module) {
+  const identifier = process.argv[2];
+  assert(
+    typeof identifier === 'string',
+    'Usage: npx ts-node backup_lambda/cli.ts <rds_db_identifier>'
+  );
+  run(identifier);
+}
