@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.51] - 2023-05-02
+
+ - [RDS] Implemented manual snapshot backup/cleanup functionality
+
 ## [1.0.50] - 2023-04-20
 
  - [SNS To Teams] Fixed some message formatting issues, made 'View Logs' button work
