@@ -20,7 +20,7 @@ resource "aws_wafv2_web_acl" "default" {
   }
 
   rule {
-    name     = "${name_prefix}-restrict-blocked-contries"
+    name     = "${var.name_prefix}-restrict-blocked-contries"
     priority = 1
 
     action {
@@ -42,7 +42,7 @@ resource "aws_wafv2_web_acl" "default" {
   tags = merge(
     var.tags,
     {
-      Name = "${name_prefix}-web-acl"
+      Name = "${var.name_prefix}-web-acl"
     }
   )
 
