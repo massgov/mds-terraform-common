@@ -7,7 +7,6 @@ resource "aws_wafv2_web_acl" "default" {
   name        = "${var.name_prefix}-web-acl"
   description = "Web ACL that rejects requests to Cloudfront from blocked countries"
   scope       = "CLOUDFRONT"
-  capacity    = 1 // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statements-list.html
 
   custom_response_body {
     key          = "custom-response-forbidden"
