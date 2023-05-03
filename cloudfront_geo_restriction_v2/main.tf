@@ -36,6 +36,12 @@ resource "aws_wafv2_web_acl" "default" {
         country_codes = module.cf_geo_restriction.locations
       }
     }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = var.enable_cloudwatch_metrics
+      metric_name                = "${var.name_prefix}-restrict-blocked-countries-metrics"
+      sampled_requests_enabled   = false
+    }
   }
 
   tags = merge(
