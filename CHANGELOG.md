@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.52] - 2023-05-03
+
+ - [CloudFront Geo-Restriction V2] Implements geo-fencing as a WAFv2 web ACL
+ - [Cloudfront] Add argument enabling users to attach WAF web ACL to distribution
+
 ## [1.0.51] - 2023-05-02
 
  - [RDS] Implemented manual snapshot backup/cleanup functionality
