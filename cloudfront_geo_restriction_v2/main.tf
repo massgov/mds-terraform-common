@@ -1,6 +1,6 @@
 module "cf_geo_restriction" {
   source  = "github.com/massgov/mds-terraform-common//cloudfront_geo_restriction?ref=1.0.51"
-  enabled = var.geo_restriction
+  enabled = true
 }
 
 resource "aws_wafv2_web_acl" "default" {
