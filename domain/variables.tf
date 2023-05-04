@@ -56,7 +56,13 @@ variable "tags" {
 }
 
 variable "geo_restriction" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enables geo-restriction of the CloudFront distribution."
+}
+
+variable "web_acl_id" {
+  type        = string
+  description = "Specifies the web ACL to apply to the distribution. For WAFv2, use the ACL ARN. Otherwise, use the ACL ID."
+  default     = null
 }

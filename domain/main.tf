@@ -97,6 +97,7 @@ resource "aws_cloudfront_distribution" "dashboards" {
   aliases         = [var.domain_name]
   is_ipv6_enabled = true
   comment         = var.comment
+  web_acl_id      = var.web_acl_id
 
   origin {
     domain_name = var.origin
