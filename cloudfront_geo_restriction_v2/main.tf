@@ -18,31 +18,33 @@ resource "aws_wafv2_web_acl" "default" {
     allow {}
   }
 
-  rule {
+  dynamic "rule" {
     // wafv2 doesn't support country code lists larger than 50 codes
-    for_each = { for i, chunk in chunklist(module.cf_geo_restriction.locations, 50) : chunk => i }
-    name     = "${var.name_prefix}-restrict-countries-rule-${each.value}"
-    priority = 1
+    for_each = { for i, chunk in chunklist(module.cf_geo_restriction.locations, 50) : i => chunk }
+    content {
+      name     = "${var.name_prefix}-restrict-countries-rule-${rule.key}"
+      priority = 1
 
-    action {
-      block {
-        custom_response {
-          response_code            = 403
-          custom_response_body_key = "custom-response-forbidden"
+      action {
+        block {
+          custom_response {
+            response_code            = 403
+            custom_response_body_key = "custom-response-forbidden"
+          }
         }
       }
-    }
 
-    statement {
-      geo_match_statement {
-        country_codes = each.key
+      statement {
+        geo_match_statement {
+          country_codes = rule.value
+        }
       }
-    }
 
-    visibility_config {
-      cloudwatch_metrics_enabled = var.enable_cloudwatch_metrics
-      metric_name                = "${var.name_prefix}-restrict-countries-rule-${each.value}"
-      sampled_requests_enabled   = false
+      visibility_config {
+        cloudwatch_metrics_enabled = var.enable_cloudwatch_metrics
+        metric_name                = "${var.name_prefix}-restrict-countries-rule-${rule.key}"
+        sampled_requests_enabled   = false
+      }
     }
   }
 
