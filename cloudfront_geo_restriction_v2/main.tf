@@ -19,7 +19,7 @@ resource "aws_wafv2_web_acl" "default" {
   }
 
   rule {
-    name     = "${var.name_prefix}-restrict-contries"
+    name     = "${var.name_prefix}-restrict-countries-rule"
     priority = 1
 
     action {
@@ -39,7 +39,7 @@ resource "aws_wafv2_web_acl" "default" {
 
     visibility_config {
       cloudwatch_metrics_enabled = var.enable_cloudwatch_metrics
-      metric_name                = "${var.name_prefix}-restrict-contries-metrics"
+      metric_name                = "${var.name_prefix}-restrict-countries-rule"
       sampled_requests_enabled   = false
     }
   }
@@ -53,7 +53,7 @@ resource "aws_wafv2_web_acl" "default" {
 
   visibility_config {
     cloudwatch_metrics_enabled = var.enable_cloudwatch_metrics
-    metric_name                = "${var.name_prefix}-web-acl-metrics"
+    metric_name                = "${var.name_prefix}-web-acl"
     sampled_requests_enabled   = false
   }
 }
