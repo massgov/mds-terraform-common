@@ -23,7 +23,7 @@ resource "aws_wafv2_web_acl" "default" {
     for_each = { for i, chunk in chunklist(module.cf_geo_restriction.locations, 50) : i => chunk }
     content {
       name     = "${var.name_prefix}-restrict-countries-rule-${rule.key}"
-      priority = 1
+      priority = tonumber(rule.key)
 
       action {
         block {
