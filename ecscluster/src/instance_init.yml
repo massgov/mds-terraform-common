@@ -1,5 +1,16 @@
 #cloud-config
 
+runcmd:
+  # Commands from golden image userdata
+  - "yum -y update"
+  - "yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+  - "systemctl enable amazon-ssm-agent"
+  - "systemctl start amazon-ssm-agent"
+
+  # Commands from https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-install.html
+  - "sudo amazon-linux-extras disable docker"
+  - "sudo amazon-linux-extras install -y ecs; sudo systemctl enable --now ecs"
+
 write_files:
   - content: |
       ECS_CLUSTER=${cluster_name}

@@ -1,10 +1,14 @@
+data "aws_ssm_parameter" "golden_ami_latest" {
+  name = "/GoldenAMI/Linux/AWS2/latest"
+}
+
 module "asg" {
   source        = "../asg"
   name          = var.name
   keypair       = var.keypair
   capacity      = var.capacity
   instance_type = var.instance_type
-  ami           = var.ami
+  ami           = var.ami != "" ? var.ami : data.aws_ssm_parameter.golden_ami_latest.value
 
   security_groups = var.security_groups
 
