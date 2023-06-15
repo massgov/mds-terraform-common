@@ -9,11 +9,24 @@ runcmd:
 
   # Commands from https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-install.html
   - "sudo amazon-linux-extras disable docker"
-  - "sudo amazon-linux-extras install -y ecs; sudo systemctl enable --now ecs"
+  - "sudo amazon-linux-extras install -y ecs"
+
+  # The `--no-block` option is required because the ecs systemd service
+  # depends on the cloudinit systemd service. Without the `--no-block` option,
+  # ecs hangs and cloudinit never completes. Once that happens it can only be
+  # started by logging in, stopping the ecs service, and starting it again.
+  # See https://github.com/aws/amazon-ecs-agent/issues/1707
+  - "sudo systemctl enable --now --no-block ecs"
+
+  # Extra commands to match previous AMI - the Golden AMI has the ec2-user's
+  # shell set to `/sbin/nologin`. We typically use that user to access docker,
+  # which also requires the docker group.
+  - "sudo usermod -s /bin/bash ec2-user"
+  - "sudo usermod -a -G docker ec2-user"
+
 
 write_files:
   - content: |
       ECS_CLUSTER=${cluster_name}
       ECS_AVAILABLE_LOGGING_DRIVERS=["json-file", "awslogs"]
     path: /etc/ecs/ecs.config
-
