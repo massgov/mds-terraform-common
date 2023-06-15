@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.53] - 2023-06-15
+
+ - [ECS Cluster] Update module to use the Golden AMI by default.
+
 ## [1.0.52] - 2023-05-03
 
  - [CloudFront Geo-Restriction V2] Implements geo-fencing as a WAFv2 web ACL

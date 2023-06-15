@@ -94,8 +94,7 @@ variable "ami" {
   type        = string
   description = "AMI to use for cluster instances."
 
-  // Custom AMI based on AWS Linux 2 ECS optimized
-  // Also has SSM.  See packer build (/packer/ecs_ssm.json)
-  default = "ami-091cab3a7bddd87d9"
+  // If this is left empty, the latest version of the golden ami will be used.
+  default = ""
 }
 
