@@ -173,3 +173,9 @@ variable "manual_snapshot_schedule" {
   type        = map(string)
   default     = {}
 }
+
+variable "backup_error_topics" {
+  type        = list(string)
+  description = "An array of SNS topics to publish notifications to when backups error out"
+  default     = []
+}

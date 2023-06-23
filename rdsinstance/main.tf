@@ -167,6 +167,7 @@ module "backup_lambda" {
       "Name" = "${aws_db_instance.default.id}-backup-lambda"
     }
   )
+  error_topics = var.backup_error_topics
 }
 
 module "cleanup_lambda" {
@@ -193,4 +194,5 @@ module "cleanup_lambda" {
       "Name" = "${aws_db_instance.default.id}-cleanup-lambda"
     }
   )
+  error_topics = var.backup_error_topics
 }
