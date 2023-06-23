@@ -42,7 +42,7 @@ const handler: Handler<Event> = async (event: Event) => {
     (snapshots) => deleteSnapshots(dryRun, snapshots),
     tap(
       (deleteResult) => deleteResult?.DBSnapshot
-        ? console.log(`Successfully cleaned up ${deleteResult?.DBSnapshot}`)
+        ? console.log(`Successfully cleaned up ${deleteResult.DBSnapshot.DBSnapshotIdentifier}`)
         : undefined
     ),
     consume
