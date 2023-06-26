@@ -129,7 +129,18 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
       "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:*",
       aws_db_instance.default.arn
     ]
-    actions = ["rds:DeleteDBSnapshot"]
+    actions = [
+      "rds:DescribeDBSnapshots",
+    ]
+  }
+  statement {
+    effect = "Allow"
+    resources = [
+      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.id}*"
+    ]
+    actions = [
+      "rds:DeleteDBSnapshot"
+    ]
   }
 }
 
@@ -156,6 +167,7 @@ module "backup_lambda" {
       "Name" = "${aws_db_instance.default.id}-backup-lambda"
     }
   )
+  error_topics = var.backup_error_topics
 }
 
 module "cleanup_lambda" {
@@ -182,4 +194,5 @@ module "cleanup_lambda" {
       "Name" = "${aws_db_instance.default.id}-cleanup-lambda"
     }
   )
+  error_topics = var.backup_error_topics
 }

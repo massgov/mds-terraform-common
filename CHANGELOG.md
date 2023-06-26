@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.54] - 2023-06-26
+
+ - [RDS] Fix monthly snapshot cleanup
+
 ## [1.0.53] - 2023-06-15
 
  - [ECS Cluster] Update module to use the Golden AMI by default.
