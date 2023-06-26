@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.54] - 2023-06-23
+## [1.0.54] - 2023-06-26
 
  - [RDS] Fix monthly snapshot cleanup
 
