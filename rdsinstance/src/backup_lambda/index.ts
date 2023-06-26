@@ -19,7 +19,9 @@ const handler: Handler<Event> = async (event: Event) => {
   );
 
   const dryRun = event.dryRun ?? false;
-  const snapshotTimeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+  const snapshotTimeStamp = LocalDateTime.now().format(
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss")
+  );
   const instanceIds = [identifier];
 
   const params: Array<CreateDBSnapshotMessage> = instanceIds.map(
