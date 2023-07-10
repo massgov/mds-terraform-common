@@ -2,13 +2,25 @@ data "aws_ssm_parameter" "golden_ami_latest" {
   name = "/GoldenAMI/Linux/AWS2/latest"
 }
 
+locals {
+  ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
+
+  # Default list of devices to delete on termination
+  # If we're using the golden ami, we want to delete `/dev/sdf` on termination
+  ami_delete_on_termination_devices = var.ami == "" ? ["/dev/sdf"] : []
+
+  # If the user supplied their own list of devices, use that.
+  # Otherwise, if we're using the golden ami, use our default.
+  delete_on_termination_devices = coalescelist(var.delete_on_termination_devices, local.ami_delete_on_termination_devices)
+}
+
 module "asg" {
   source        = "../asg"
   name          = var.name
   keypair       = var.keypair
   capacity      = var.capacity
   instance_type = var.instance_type
-  ami           = var.ami != "" ? var.ami : data.aws_ssm_parameter.golden_ami_latest.value
+  ami           = local.ami
 
   security_groups = var.security_groups
 
@@ -23,6 +35,8 @@ module "asg" {
   schedule             = var.schedule
   schedule_down        = var.schedule_down
   schedule_up          = var.schedule_up
+
+  delete_on_termination_devices = local.delete_on_termination_devices
 
   tags = merge(
     var.tags,

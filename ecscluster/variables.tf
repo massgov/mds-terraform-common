@@ -98,3 +98,8 @@ variable "ami" {
   default = ""
 }
 
+variable "delete_on_termination_devices" {
+  type        = list(string)
+  description = "AMI devices for which to set the `delete_on_termination` setting to true."
+  default     = []
+}

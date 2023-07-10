@@ -21,6 +21,18 @@ resource "aws_launch_template" "default" {
     }
   }
 
+  dynamic "block_device_mappings" {
+    for_each = var.delete_on_termination_devices
+
+    content {
+      device_name = block_device_mappings.value
+
+      ebs {
+        delete_on_termination = "true"
+      }
+    }
+  }
+
   credit_specification {
     cpu_credits = "standard"
   }
