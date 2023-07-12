@@ -2,16 +2,40 @@ data "aws_ssm_parameter" "golden_ami_latest" {
   name = "/GoldenAMI/Linux/AWS2/latest"
 }
 
+# Look up AMI for `include_ami_device_names`
+data "aws_ami" "default" {
+  filter {
+    name = "image-id"
+    values = [local.ami]
+  }
+}
+
 locals {
   ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
 
-  # Default list of devices to delete on termination
-  # If we're using the golden ami, we want to delete `/dev/sdf` on termination
-  ami_delete_on_termination_devices = var.ami == "" ? ["/dev/sdf"] : []
+  ami_devices = [
+    for mapping in data.aws_ami.default.block_device_mappings :
+      # flatten object so there isn't a nested "ebs" object
+      merge(
+         {device_name = mapping.device_name},
+         mapping.ebs,
+         # overwrite delete_on_termination based on variable
+         var.ami_volumes_delete_on_termination ? { delete_on_termination = true } : {}
+      )
+      # Only include devices specified in `include_ami_device_names`.
+      if contains(var.include_ami_device_names, mapping.device_name)
+  ]
 
-  # If the user supplied their own list of devices, use that.
-  # Otherwise, if we're using the golden ami, use our default.
-  delete_on_termination_devices = coalescelist(var.delete_on_termination_devices, local.ami_delete_on_termination_devices)
+  default_devices = [ { device_name = "/dev/xvda",
+                        delete_on_termination = true,
+                        encrypted = var.volume_encryption,
+                        iops = null,
+                        snapshot_id = null,
+                        throughput = null,
+                        volume_size = var.volume_size,
+                        volume_type = null
+                      }
+                    ]
 }
 
 module "asg" {
@@ -36,7 +60,7 @@ module "asg" {
   schedule_down        = var.schedule_down
   schedule_up          = var.schedule_up
 
-  delete_on_termination_devices = local.delete_on_termination_devices
+  block_devices = concat(local.default_devices, local.ami_devices)
 
   tags = merge(
     var.tags,

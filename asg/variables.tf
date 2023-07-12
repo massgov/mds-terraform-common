@@ -117,9 +117,28 @@ variable "tags" {
   }
 }
 
-variable "delete_on_termination_devices" {
-  type        = list(string)
-  description = "AMI devices for which to set the `delete_on_termination` setting to true."
-  default     = []
+variable "block_devices" {
+  type         = list(object({
+                   device_name = string,
+                   delete_on_termination = bool,
+                   encrypted = bool,
+                   iops = number,
+                   snapshot_id = string,
+                   throughput = number,
+                   volume_size = number,
+                   volume_type = string
+                 }))
+  description = "List of block_device_mappings for the launch template. See the `block_device_mappings` block in the aws_launch_template resource for descriptions of the fields."
+  default = [
+    {
+      device_name = "/dev/xvda",
+      delete_on_termination = true,
+      encrypted = true,
+      iops = null,
+      snapshot_id = null,
+      throughput = null,
+      volume_size = 30,
+      volume_type = "gp2"
+    }
+  ]
 }
-

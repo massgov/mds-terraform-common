@@ -98,8 +98,13 @@ variable "ami" {
   default = ""
 }
 
-variable "delete_on_termination_devices" {
+variable "include_ami_device_names" {
   type        = list(string)
-  description = "AMI devices for which to set the `delete_on_termination` setting to true."
-  default     = []
+  description = "List of AMI devices for which to include in the `block_device_mappings`."
+}
+
+variable "ami_volumes_delete_on_termination" {
+  type        = bool
+  description = "Whether to set the `delete_on_termination` flag for volumes included from the AMI."
+  default     = true
 }
