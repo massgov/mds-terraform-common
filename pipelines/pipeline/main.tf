@@ -65,19 +65,6 @@ resource "aws_codebuild_webhook" "plan" {
       pattern = "^refs/heads/(?:master|main|develop)$"
     }
   }
-
-  filter_group {
-    filter {
-      type = "EVENT"
-      pattern = "PUSH"
-    }
-
-    filter {
-      type = "HEAD_REF"
-      pattern = "^refs/heads/(?:master|main|develop)$"
-      exclude_matched_pattern = true
-    }
-  }
 }
 
 resource "aws_codebuild_webhook" "apply_develop" {
