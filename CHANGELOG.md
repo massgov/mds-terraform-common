@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.55] - 2023-07-12
+
+ - [Pipelines] Correct pipeline trigger issues
+
 ## [1.0.54] - 2023-06-26
 
  - [RDS] Fix monthly snapshot cleanup

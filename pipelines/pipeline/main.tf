@@ -57,13 +57,12 @@ resource "aws_codebuild_webhook" "plan" {
   filter_group {
     filter {
       type = "EVENT"
-      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+      pattern = "PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED, PULL_REQUEST_REOPENED"
     }
 
     filter {
-      type = "HEAD_REF"
-      pattern = "^refs/heads/(?:master|develop)$"
-      exclude_matched_pattern = true
+      type = "BASE_REF"
+      pattern = "^refs/heads/(?:master|main|develop)$"
     }
   }
 }
@@ -74,7 +73,7 @@ resource "aws_codebuild_webhook" "apply_develop" {
   filter_group {
     filter {
       type = "EVENT"
-      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+      pattern = "PUSH"
     }
 
     filter {
@@ -147,12 +146,12 @@ resource "aws_codebuild_webhook" "apply_master" {
   filter_group {
     filter {
       type = "EVENT"
-      pattern = "PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED"
+      pattern = "PUSH"
     }
 
     filter {
       type = "HEAD_REF"
-      pattern = "^refs/heads/master$"
+      pattern = "^refs/heads/(?:master|main)$"
     }
   }
 
