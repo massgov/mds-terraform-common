@@ -2,13 +2,49 @@ data "aws_ssm_parameter" "golden_ami_latest" {
   name = "/GoldenAMI/Linux/AWS2/latest"
 }
 
+# Look up AMI for `include_ami_device_names`
+data "aws_ami" "default" {
+  filter {
+    name = "image-id"
+    values = [local.ami]
+  }
+}
+
+locals {
+  ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
+
+  ami_devices = [
+    for mapping in data.aws_ami.default.block_device_mappings :
+      # flatten object so there isn't a nested "ebs" object
+      merge(
+         {device_name = mapping.device_name},
+         mapping.ebs,
+         # overwrite delete_on_termination based on variable
+         var.ami_volumes_delete_on_termination ? { delete_on_termination = true } : {}
+      )
+      # Only include devices specified in `include_ami_device_names`.
+      if contains(var.include_ami_device_names, mapping.device_name)
+  ]
+
+  default_devices = [ { device_name = "/dev/xvda",
+                        delete_on_termination = true,
+                        encrypted = var.volume_encryption,
+                        iops = null,
+                        snapshot_id = null,
+                        throughput = null,
+                        volume_size = var.volume_size,
+                        volume_type = null
+                      }
+                    ]
+}
+
 module "asg" {
   source        = "../asg"
   name          = var.name
   keypair       = var.keypair
   capacity      = var.capacity
   instance_type = var.instance_type
-  ami           = var.ami != "" ? var.ami : data.aws_ssm_parameter.golden_ami_latest.value
+  ami           = local.ami
 
   security_groups = var.security_groups
 
@@ -23,6 +59,8 @@ module "asg" {
   schedule             = var.schedule
   schedule_down        = var.schedule_down
   schedule_up          = var.schedule_up
+
+  block_devices = concat(local.default_devices, local.ami_devices)
 
   tags = merge(
     var.tags,

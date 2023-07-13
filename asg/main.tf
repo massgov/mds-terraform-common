@@ -11,13 +11,21 @@ resource "aws_launch_template" "default" {
   user_data              = var.user_data
   ebs_optimized          = true
 
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size           = var.volume_size
-      volume_type           = "gp2"
-      delete_on_termination = "true"
-      encrypted             = var.volume_encryption
+  dynamic "block_device_mappings" {
+    for_each = var.block_devices
+
+    content {
+      device_name = block_device_mappings.value.device_name
+
+      ebs {
+        delete_on_termination = block_device_mappings.value.delete_on_termination
+        encrypted = block_device_mappings.value.encrypted
+        iops = block_device_mappings.value.iops
+        snapshot_id = block_device_mappings.value.snapshot_id
+        throughput = block_device_mappings.value.throughput
+        volume_size = block_device_mappings.value.volume_size
+        volume_type = block_device_mappings.value.volume_type
+      }
     }
   }
 
