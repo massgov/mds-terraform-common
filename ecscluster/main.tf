@@ -1,3 +1,4 @@
+# Default AMI to use when none is specified.
 data "aws_ssm_parameter" "golden_ami_latest" {
   name = "/GoldenAMI/Linux/AWS2/latest"
 }
