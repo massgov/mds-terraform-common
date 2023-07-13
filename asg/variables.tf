@@ -22,18 +22,6 @@ variable "instance_type" {
   default     = "t3.nano"
 }
 
-variable "volume_size" {
-  type        = string
-  description = "The EBS volume size to use for the root EBS volume"
-  default     = 30
-}
-
-variable "volume_encryption" {
-  type        = string
-  description = "A boolean indicating whether to encrypt the root EBS volume or not."
-  default     = false
-}
-
 variable "security_groups" {
   type        = list(string)
   description = "Security groups to apply to the instances."
