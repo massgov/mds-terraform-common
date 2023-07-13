@@ -121,7 +121,7 @@ variable "block_devices" {
     {
       device_name = "/dev/xvda",
       delete_on_termination = true,
-      encrypted = true,
+      encrypted = false,
       iops = null,
       snapshot_id = null,
       throughput = null,
