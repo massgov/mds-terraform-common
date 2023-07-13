@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.56] - 2023-07-13
+
+ - [ASG] Replace `volume_encryption` and `volume_size` variables with `block_devices` variable
+ - [ECS Cluster] Add `include_ami_device_names` variable to allow importing block device specifications from AMI.
+ - [ECS Cluster] Add `ami_volumes_delete_on_termination` variable to allow forcing `delete_on_termination` to true on block devices imported from AMI.
+
 ## [1.0.55] - 2023-07-12
 
  - [Pipelines] Correct pipeline trigger issues
