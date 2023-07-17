@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.57] - 2023-07-17
+
+ - [AMI Block Device Reader] Add a module to read and manipulate block devices from an AMI.
+ - [ECS Cluster] Replace block device lookup with new module.
+
 ## [1.0.56] - 2023-07-13
 
  - [ASG] Replace `volume_encryption` and `volume_size` variables with `block_devices` variable
