@@ -29,7 +29,7 @@ module "ami_devices" {
   source                      = "../ami-block-device-reader"
   ami                         = local.ami
   device_filter_type          = "include"
-  include_device_names        = var.include_ami_device_names
+  device_names                = var.include_ami_device_names
   force_delete_on_termination = var.ami_volumes_delete_on_termination
 }
 
