@@ -7,13 +7,13 @@ data "aws_ami" "default" {
 }
 
 locals {
-  exclude_root_list = var.exclude_root_device ? [data.aws_ami.default.root_device_name] : []
-  exclude_list = concat(local.exclude_root_list, var.exclude_device_names)
+  # If the filter type is `exclude` and `exclude_root_device` is set, add the root device name to the list
+  exclude_root_list = var.device_filter_type == "exclude" && var.exclude_root_device ? [data.aws_ami.default.root_device_name] : []
 
-  filter_list = var.device_filter_type == "include" ? var.include_device_names : local.exclude_list
+  filter_list = concat(local.exclude_root_list, var.device_names)
 
-  # If we're including, then `contains` should be true; for excluding, it should
-  # be false.
+  # If the filter type is `include`, then we want to include the volume only if it is contained in the list.
+  # If the filter type is `exclude`, then we want to include the volume only if it is NOT contained in the list.
   filter_contains_value = var.device_filter_type == "include" ? true : false
 
   block_devices = [
