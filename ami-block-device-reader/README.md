@@ -33,7 +33,7 @@ resource "aws_launch_template" "default" {
 
   # Redefine the block devices from the AMI in our launch template.
   dynamic "block_device_mappings" {
-    for_each = module.ami_devices.ami_devices
+    for_each = module.ami_devices.block_devices
 
     content {
       device_name = block_device_mappings.value.device_name
