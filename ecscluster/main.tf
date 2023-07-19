@@ -3,29 +3,8 @@ data "aws_ssm_parameter" "golden_ami_latest" {
   name = "/GoldenAMI/Linux/AWS2/latest"
 }
 
-# Look up AMI for `include_ami_device_names`
-data "aws_ami" "default" {
-  filter {
-    name = "image-id"
-    values = [local.ami]
-  }
-}
-
 locals {
   ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
-
-  ami_devices = [
-    for mapping in data.aws_ami.default.block_device_mappings :
-      # flatten object so there isn't a nested "ebs" object
-      merge(
-         {device_name = mapping.device_name},
-         mapping.ebs,
-         # overwrite delete_on_termination based on variable
-         var.ami_volumes_delete_on_termination ? { delete_on_termination = true } : {}
-      )
-      # Only include devices specified in `include_ami_device_names`.
-      if contains(var.include_ami_device_names, mapping.device_name)
-  ]
 
   default_devices = [ { device_name = "/dev/xvda",
                         delete_on_termination = true,
@@ -37,6 +16,21 @@ locals {
                         volume_type = null
                       }
                     ]
+}
+
+# TODO: Now that we have this module, I think the `exclude_root_device` option
+# makes more sense than the user providing device names to include. However,
+# we've already deployed the change using the include names to a bunch of
+# repos, so I don't think it makes sense to change this module. If we get a
+# good chance in the future (like if the golden image volume changes from
+# "/dev/sdf", for example), I think we should switch this to just exclude the
+# root volume instead.
+module "ami_devices" {
+  source                      = "../ami-block-device-reader"
+  ami                         = local.ami
+  device_filter_type          = "include"
+  device_names                = var.include_ami_device_names
+  force_delete_on_termination = var.ami_volumes_delete_on_termination
 }
 
 module "asg" {
@@ -59,7 +53,7 @@ module "asg" {
   schedule_down        = var.schedule_down
   schedule_up          = var.schedule_up
 
-  block_devices = concat(local.default_devices, local.ami_devices)
+  block_devices = concat(local.default_devices, module.ami_devices.block_devices)
 
   tags = merge(
     var.tags,
