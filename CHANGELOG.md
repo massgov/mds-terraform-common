@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.58] - 2023-07-21
+
+ - [ASG] Fix minimum aws provider version
+
 ## [1.0.57] - 2023-07-17
 
  - [AMI Block Device Reader] Add a module to read and manipulate block devices from an AMI.
