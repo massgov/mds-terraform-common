@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.58] - 2023-08-10
+
+ - [ECS Cluster] Update to use AMI ID parameter maintained by SSR team
+
 ## [1.0.57] - 2023-07-17
 
  - [AMI Block Device Reader] Add a module to read and manipulate block devices from an AMI.
