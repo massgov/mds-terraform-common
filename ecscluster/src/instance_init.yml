@@ -39,12 +39,15 @@ runcmd:
   - "sudo chown root:root /docker"
   - "sudo chmod 710 /docker"
   - "sudo systemctl restart docker"
+  # Restarting docker can sometimes take the ecs agent down - make sure it's started
+  - "sudo systemctl start ecs"
 
 
 write_files:
   - content: |
       {
-        "data-root":"/docker"
+        "data-root":"/docker",
+        "live-restore": true
       }
     path: /etc/docker/daemon.json
   - content: |
