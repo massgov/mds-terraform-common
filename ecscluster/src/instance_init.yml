@@ -7,6 +7,20 @@ runcmd:
   - "systemctl enable amazon-ssm-agent"
   - "systemctl start amazon-ssm-agent"
 
+  # Commands to re-configure the docker data directory
+  - |
+    if [ -d /var/lib/docker ]; then
+      sudo mv -f /var/lib/docker /docker
+      sudo ln -s /docker /var/lib/docker
+    fi
+  - |
+    if [ ! -d /docker ]; then
+      sudo mkdir /docker
+    fi
+  # Replicate owner and mode of default directory (/var/lib/docker)
+  - "sudo chown root:root /docker"
+  - "sudo chmod 710 /docker"
+
   # Commands from https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-agent-install.html
   - "sudo amazon-linux-extras disable docker"
   - "sudo amazon-linux-extras install -y ecs"
@@ -24,27 +38,11 @@ runcmd:
   - "sudo usermod -s /bin/bash ec2-user"
   - "sudo usermod -a -G docker ec2-user"
 
-  # Commands to re-configure the docker data directory
-  - "sudo systemctl stop docker"
-  - |
-    if [ -d /var/lib/docker ]; then
-      sudo mv -f /var/lib/docker /docker
-      sudo ln -s /docker /var/lib/docker
-    fi
-  - |
-    if [ ! -d /docker ]; then
-      sudo mkdir /docker
-    fi
-  # Replicate owner and mode of default directory (/var/lib/docker)
-  - "sudo chown root:root /docker"
-  - "sudo chmod 710 /docker"
-  - "sudo systemctl restart docker"
-
-
 write_files:
   - content: |
       {
-        "data-root":"/docker"
+        "data-root":"/docker",
+        "live-restore": true
       }
     path: /etc/docker/daemon.json
   - content: |
