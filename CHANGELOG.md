@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.59] - 2023-08-15
+
+ - [ECS Cluster] Update user data to reconfigure docker data dir off of the root EBS volume
+
 ## [1.0.58] - 2023-08-10
 
  - [ECS Cluster] Update to use AMI ID parameter maintained by SSR team
