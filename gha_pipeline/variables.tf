@@ -2,7 +2,7 @@
 variable "oidc_provider_arn" {
   type = string
 }
-variable "project_name" {
+variable "role_name" {
   type = string
 }
 variable "gh_org" {
