@@ -61,7 +61,7 @@ data "aws_iam_policy_document" "logging" {
     ]
     effect = "Allow"
     resources = [
-      "arn:aws:logs:*:*:log-group:/aws/codebuild/${var.project_name}*:*",
+      "arn:aws:logs:*:*:log-group:/aws/codebuild/${var.logging_namespace}*:*",
     ]
   }
 }

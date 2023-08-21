@@ -25,3 +25,9 @@ variable "account_id" {
   default = ""
 }
 
+variable "logging_namespace" {
+  type = string
+  description = "The logging namespace for logs."
+  default = ""
+}
+
