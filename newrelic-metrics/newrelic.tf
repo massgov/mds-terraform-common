@@ -8,6 +8,7 @@ resource "newrelic_cloud_aws_link_account" "default" {
 resource "aws_iam_role" "newrelic_integration_role" {
   name               = "${var.name_prefix}-newrelic-integration-role"
   assume_role_policy = data.aws_iam_policy_document.newrelic_integration_assume_role.json
+  tags               = var.tags
 }
 
 data "aws_iam_policy_document" "newrelic_integration_assume_role" {

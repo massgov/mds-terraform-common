@@ -3,6 +3,7 @@ resource "aws_cloudwatch_metric_stream" "default" {
   role_arn      = aws_iam_role.metric_stream_role.arn
   firehose_arn  = aws_kinesis_firehose_delivery_stream.default.arn
   output_format = "opentelemetry0.7"
+  tags          = var.tags
 
   dynamic "include_filter" {
     for_each = var.include_filters
@@ -19,6 +20,7 @@ resource "aws_cloudwatch_metric_stream" "default" {
 resource "aws_iam_role" "metric_stream_role" {
   name               = "${var.name_prefix}-newrelic-metric-stream-role"
   assume_role_policy = data.aws_iam_policy_document.metric_stream_assume_role.json
+  tags               = var.tags
 }
 
 data "aws_iam_policy_document" "metric_stream_assume_role" {

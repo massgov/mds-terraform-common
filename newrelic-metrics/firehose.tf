@@ -55,6 +55,7 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
 resource "aws_iam_role" "firehose_role" {
   name               = "${var.name_prefix}-newrelic-firehose-role"
   assume_role_policy = data.aws_iam_policy_document.firehose_assume_role.json
+  tags               = var.tags
 }
 
 data "aws_iam_policy_document" "firehose_assume_role" {
