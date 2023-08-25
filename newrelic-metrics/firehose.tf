@@ -31,7 +31,7 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
     cloudwatch_logging_options {
       enabled         = true
       log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_http.arn
+      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_http.name
     }
   }
 
@@ -44,7 +44,7 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
     cloudwatch_logging_options {
       enabled         = true
       log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.arn
+      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.name
     }
   }
 
