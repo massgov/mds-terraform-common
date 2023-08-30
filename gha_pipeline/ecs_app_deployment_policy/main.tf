@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "ecr" {
     ]
     effect = "Allow"
     resources = [
-      "*",
+      for ecr_resource in var.ecr_resources : "arn:aws:ecr:${local.region}:${local.account_id}:repository/${ecr_resource}"
     ]
   }
 }
