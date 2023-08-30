@@ -1,8 +1,13 @@
 # Changelog
 
+## [1.0.61] - 2023-08-30
+
+ - [GHA Pipeline] Add ability to restrict ECR policies to specific resources.
+
 ## [1.0.60] - 2023-08-21
 
  - [GHA Pipeline] Add module for deployment through GitHub Actions
+
 ## [1.0.59] - 2023-08-15
 
  - [ECS Cluster] Update user data to reconfigure docker data dir off of the root EBS volume
