@@ -37,8 +37,8 @@ resource "newrelic_nrql_alert_condition" "alert" {
   }
   fill_option = "none"
   aggregation_window = var.aggregation_window
-  aggregation_method = "event_flow"
-  aggregation_delay = 120
+  aggregation_method = "event_timer"
+  aggregation_timer = 300
   expiration_duration = 600
   open_violation_on_expiration = var.open_violation_on_expiration
   close_violations_on_expiration = false
