@@ -4,7 +4,7 @@ data "aws_caller_identity" "default" {
 
 
 module "firehose_bucket" {
-  source = "../private-bucket"
+  source = "../../private-bucket"
   bucket_name = "${var.name_prefix}-newrelic-firehose-data"
   tags = var.tags
 }
