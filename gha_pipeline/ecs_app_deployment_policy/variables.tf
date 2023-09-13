@@ -31,3 +31,8 @@ variable "logging_namespace" {
   default = ""
 }
 
+variable "ecr_resources" {
+  description = "Resource names for ECR repositories this policy will access."
+  type = list(string)
+  default = ["*"]
+}
