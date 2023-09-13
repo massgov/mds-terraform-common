@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.62] - 2023-09-13
+
+ - [New Relic] Add New Relic integration.
+ - [New Relic] Add generic alert condition for EC2.
+
 ## [1.0.61] - 2023-08-30
 
  - [GHA Pipeline] Add ability to restrict ECR policies to specific resources.
