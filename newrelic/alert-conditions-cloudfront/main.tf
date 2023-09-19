@@ -44,7 +44,7 @@ resource "newrelic_nrql_alert_condition" "throughput" {
   account_id = var.account_id
   policy_id = var.alert_policy_id
   type = "static"
-  name = "${var.name_prefix} - Error Rate"
+  name = "${var.name_prefix} - Throughput"
   enabled = true
   violation_time_limit_seconds = 259200
 
