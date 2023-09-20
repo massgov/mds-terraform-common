@@ -51,10 +51,22 @@ variable "cached_methods" {
   default = ["GET", "HEAD", "OPTIONS"]
 }
 
+variable "min_ttl" {
+  type = number
+  description = "The minimum amount of time, in seconds, that objects stay in the CloudFront's cache."
+  default = 0
+}
+
 variable "default_ttl" {
-  type = string
+  type = number
   description = "The cache TTL that will be used if no Cache-Control headers are present."
   default = 3600
+}
+
+variable "max_ttl" {
+  type = number
+  description = "The maximum amount of time, in seconds, that objects stay in CloudFront's cache."
+  default = 31536000 # one year
 }
 
 variable "enable_cors" {
