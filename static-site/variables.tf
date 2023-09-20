@@ -61,12 +61,20 @@ variable "default_ttl" {
   type = number
   description = "The cache TTL that will be used if no Cache-Control headers are present."
   default = 3600
+  validation {
+    condition     = var.default_ttl >= var.min_ttl
+    error_message = "Default TTL value must be greater than or equal to minimum TTL value"
+  }
 }
 
 variable "max_ttl" {
   type = number
   description = "The maximum amount of time, in seconds, that objects stay in CloudFront's cache."
   default = 31536000 # one year
+  validation {
+    condition     = var.max_ttl >= var.default_ttl
+    error_message = "Max TTL value must be greater than or equal to default TTL value"
+  }
 }
 
 variable "enable_cors" {
