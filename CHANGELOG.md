@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.63] - 2023-09-13
+
+ - [Static Site] Expose CloudFront min/max TTL variables
+
 ## [1.0.62] - 2023-09-13
 
  - [New Relic] Add New Relic integration.
