@@ -40,6 +40,40 @@ resource "newrelic_nrql_alert_condition" "alert" {
   aggregation_method = "event_timer"
   aggregation_timer = 300
   expiration_duration = 600
-  open_violation_on_expiration = var.open_violation_on_expiration
+  open_violation_on_expiration = false
+  close_violations_on_expiration = false
+}
+
+resource "newrelic_nrql_alert_condition" "loss_of_signal" {
+  count = (var.alert_loss_of_signal ? 1 : 0)
+
+  account_id = var.account_id
+  policy_id = var.alert_policy_id
+  type = "static"
+  name = "${var.name_prefix} - Loss of Signal"
+  enabled = true
+  violation_time_limit_seconds = 259200
+
+  nrql {
+    query = "SELECT average(aws.ec2.CPUUtilization) FROM Metric ${local.filter_subquery} FACET tags.Name"
+  }
+
+  critical {
+    operator = "above"
+    # This should never actually trigger, since CPUUtilization is a percent.
+    # We don't care about this condition, we're just using this alert to use
+    # the "open_violation_on_expiration" parameter to detect signal loss (by
+    # instance name instead of instance id). Otherwise, every instance refresh
+    # causes alerts/an "incident" in NR.
+    threshold = 101
+    threshold_duration = var.critical_threshold_duration
+    threshold_occurrences = "all"
+  }
+  fill_option = "none"
+  aggregation_window = var.aggregation_window
+  aggregation_method = "event_timer"
+  aggregation_timer = 300
+  expiration_duration = 600
+  open_violation_on_expiration = true
   close_violations_on_expiration = false
 }
