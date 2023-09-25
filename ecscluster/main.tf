@@ -6,16 +6,16 @@ data "aws_ssm_parameter" "golden_ami_latest" {
 locals {
   ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
 
-  default_devices = [ { device_name = "/dev/xvda",
-                        delete_on_termination = true,
-                        encrypted = var.volume_encryption,
-                        iops = null,
-                        snapshot_id = null,
-                        throughput = null,
-                        volume_size = var.volume_size,
-                        volume_type = null
-                      }
-                    ]
+  default_devices = [{ device_name = "/dev/xvda",
+    delete_on_termination = true,
+    encrypted             = var.volume_encryption,
+    iops                  = null,
+    snapshot_id           = null,
+    throughput            = null,
+    volume_size           = var.volume_size,
+    volume_type           = null
+    }
+  ]
 }
 
 # TODO: Now that we have this module, I think the `exclude_root_device` option
@@ -42,7 +42,7 @@ data "template_file" "instance_init" {
 }
 
 data "template_cloudinit_config" "config" {
-  gzip          = true
+  gzip          = false
   base64_encode = true
 
   part {
@@ -56,9 +56,9 @@ data "template_cloudinit_config" "config" {
 
     content {
       content_type = "text/cloud-config"
-      content = part.value
-      filename = "init_${part.key}.cfg"
-      merge_type = "list(append)+dict(no_replace, recurse_list)+str(append)"
+      content      = part.value
+      filename     = "init_${part.key}.cfg"
+      merge_type   = "list(append)+dict(no_replace, recurse_list)+str(append)"
     }
   }
 }
@@ -130,8 +130,8 @@ data "aws_iam_policy_document" "developer" {
     ]
     resources = ["*"]
     condition {
-      test = "ArnEquals"
-      values = [aws_ecs_cluster.cluster.arn]
+      test     = "ArnEquals"
+      values   = [aws_ecs_cluster.cluster.arn]
       variable = "ecs:cluster"
     }
   }
