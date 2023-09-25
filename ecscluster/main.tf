@@ -75,7 +75,7 @@ module "asg" {
 
   subnets              = var.subnets
   policies             = concat(["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"], var.policies)
-  user_data            = data.template_cloudinit_config.config.base64_encode
+  user_data            = data.template_cloudinit_config.config.rendered
   instance_schedule    = var.instance_schedule
   instance_patch_group = var.instance_patch_group
   instance_backup      = var.instance_backup
