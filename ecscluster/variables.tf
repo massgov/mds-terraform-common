@@ -108,3 +108,13 @@ variable "ami_volumes_delete_on_termination" {
   description = "Whether to set the `delete_on_termination` flag for volumes included from the AMI."
   default     = true
 }
+
+variable "additional_cloudinit_configs" {
+  type = list(string)
+  description = <<-DESC
+    Additional cloud-init configuration content to be included in the user_data provided to the cluster's autoscaling group. Additional
+    configs are merged with the default cloud-init file using the list(append)+dict(no_replace, recurse_list)+str(append)
+    strategy. See https://cloudinit.readthedocs.io/en/latest/reference/merging.html#built-in-mergers for more informaiton.
+  DESC
+  default = []
+}
