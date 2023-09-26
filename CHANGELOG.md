@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.64] - 2023-09-26
+
+ - [ECS Cluster] Expose custom cloud-init config variable
+
 ## [1.0.63] - 2023-09-21
 
  - [Static Site] Expose CloudFront min/max TTL variables
