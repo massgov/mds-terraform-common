@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.65] - 2023-09-28
+
+ - [ASG] Fix ASG AWS version bounds.
+ - [New Relic] Add New Relic CloudFront events.
+ - [New Relic] Split EC2 loss of signal into separate alert.
+
 ## [1.0.64] - 2023-09-26
 
  - [ECS Cluster] Expose custom cloud-init config variable

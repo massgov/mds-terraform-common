@@ -19,28 +19,16 @@ variable "filter_aws_accounts" {
   default     = []
 }
 
-variable "filter_instance_names" {
+variable "filter_distribution_names" {
   type        = list(string)
-  description = "List of EC2 instance names to monitor."
-  default     = []
-}
-
-variable "filter_asg_names" {
-  type        = list(string)
-  description = "List of asg names to monitor."
+  description = "List of CloudFront distributions to monitor."
   default     = []
 }
 
 variable "aggregation_window" {
   type        = number
   description = "See newrelic_nrql_alert_condition.aggregation_window."
-  default     = 300
-}
-
-variable "critical_threshold" {
-  type        = number
-  description = "See newrelic_nrql_alert_condition.critical.threshold."
-  default     = 90
+  default     = 60
 }
 
 variable "critical_threshold_duration" {
@@ -49,8 +37,20 @@ variable "critical_threshold_duration" {
   default     = 300
 }
 
-variable "alert_loss_of_signal" {
+variable "error_rate_threshold" {
+  type        = number
+  description = "Maximum percentage of error requests required to trigger alert."
+  default     = 5
+}
+
+variable "throughput_enabled" {
   type        = bool
-  description = "Create an alert when metrics from an instance name stop."
-  default     = false
+  description = "Whether to enable the throughput alert. (Doesn't make sense for dev sites)"
+  default     = true
+}
+
+variable "throughput_threshold" {
+  type        = number
+  description = "Minimum number of requests per minute before triggering throughput alert."
+  default     = 5
 }
