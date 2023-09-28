@@ -49,8 +49,8 @@ variable "critical_threshold_duration" {
   default     = 300
 }
 
-variable "open_violation_on_expiration" {
+variable "alert_loss_of_signal" {
   type        = bool
-  description = "See newrelic_nrql_alert_condition.open_violation_on_expiration."
+  description = "Create an alert when metrics from an instance name stop."
   default     = false
 }
