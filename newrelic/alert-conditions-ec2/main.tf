@@ -128,7 +128,7 @@ resource "newrelic_nrql_alert_condition" "storage" {
   violation_time_limit_seconds = 259200
 
   nrql {
-    query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET entityAndMountPoint"
+    query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET `tags.Name`, mountPoint"
   }
 
   critical {
