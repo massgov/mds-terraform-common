@@ -1,10 +1,12 @@
 # Default AMI to use when none is specified.
-data "aws_ssm_parameter" "golden_ami_latest" {
-  name = "/infrastructure/amis/golden_aws_linux"
+data "aws_ami" "golden_ami" {
+  most_recent = true
+  name_regex  = "^eotss-aws2-cis-lvm_"
+  owners      = ["704819628235"]
 }
 
 locals {
-  ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
+  ami = coalesce(var.ami, data.aws_ami.arn)
 
   default_devices = [{ device_name = "/dev/xvda",
     delete_on_termination = true,
