@@ -1,13 +1,4 @@
-# Default AMI to use when none is specified.
-data "aws_ami" "golden_ami" {
-  most_recent = true
-  name_regex  = "^eotss-aws2-cis-lvm_"
-  owners      = ["704819628235"]
-}
-
 locals {
-  ami = coalesce(var.ami, data.aws_ami.arn)
-
   default_devices = [{ device_name = "/dev/xvda",
     delete_on_termination = true,
     encrypted             = var.volume_encryption,
@@ -29,7 +20,7 @@ locals {
 # root volume instead.
 module "ami_devices" {
   source                      = "../ami-block-device-reader"
-  ami                         = local.ami
+  ami                         = var.ami
   device_filter_type          = "include"
   device_names                = var.include_ami_device_names
   force_delete_on_termination = var.ami_volumes_delete_on_termination
@@ -71,7 +62,7 @@ module "asg" {
   keypair       = var.keypair
   capacity      = var.capacity
   instance_type = var.instance_type
-  ami           = local.ami
+  ami           = var.ami
 
   security_groups = var.security_groups
 

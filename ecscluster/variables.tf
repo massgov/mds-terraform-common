@@ -93,9 +93,6 @@ variable "instance_patch_group" {
 variable "ami" {
   type        = string
   description = "AMI to use for cluster instances."
-
-  // If this is left empty, the latest version of the golden ami will be used.
-  default = ""
 }
 
 variable "include_ami_device_names" {
