@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.67] - 2023-10-16
+
+ - [New Relic] Add New Relic ECS Cluster alerts.
+
 ## [1.0.66] - 2023-10-11
 
  - [ECS Cluster] Remove default ami.
