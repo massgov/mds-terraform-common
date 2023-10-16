@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.66] - 2023-10-11
+
+ - [ECS Cluster] Remove default ami.
+ - [Golden AMI Lookup] Add module to look up golden ami id.
+
 ## [1.0.65] - 2023-09-28
 
  - [ASG] Fix ASG AWS version bounds.
