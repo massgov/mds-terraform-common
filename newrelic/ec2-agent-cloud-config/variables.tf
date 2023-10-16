@@ -3,7 +3,7 @@ variable "name_prefix" {
   description = "The name prefix to use in the hostname."
 }
 
-variable "nr_infra_agent_license_key" {
+variable "new_relic_license_key" {
   type        = string
   description = "New Relic License Key."
 }
