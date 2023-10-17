@@ -1,0 +1,20 @@
+#cloud-config
+
+bootcmd:
+  # since this will be running as part of an ASG, we've got to configure a unique
+  # hostname or else the new relic agent will get confused
+  - hostname_prefix='${name_prefix}'
+  # reach out to the metadata service for the instance ID
+  - instance_id=$( curl -s http://169.254.169.254/latest/meta-data/instance-id )
+  - sudo echo "$hostname_prefix-$instance_id" > /etc/hostname
+  - sudo hostname -F /etc/hostname
+runcmd:
+  - sudo curl -o /etc/yum.repos.d/newrelic-infra.repo https://download.newrelic.com/infrastructure_agent/linux/yum/amazonlinux/2/x86_64/newrelic-infra.repo
+  - sudo yum -q makecache -y --disablerepo='*' --enablerepo='newrelic-infra'
+  - sudo yum install newrelic-infra -y
+write_files:
+  - content: |
+      license_key: ${new_relic_license_key}
+      fedramp: true
+    owner: root:root
+    path: /etc/newrelic-infra.yml

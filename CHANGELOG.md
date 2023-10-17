@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.68] - 2023-10-17
+
+ - [New Relic] Add New Relic EC2 agent cloudconfig template.
+
 ## [1.0.67] - 2023-10-16
 
  - [New Relic] Add New Relic ECS Cluster alerts.
