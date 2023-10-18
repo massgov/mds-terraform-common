@@ -6,8 +6,8 @@ bootcmd:
   - hostname_prefix='${name_prefix}'
   # reach out to the metadata service for the instance ID
   - instance_id=$( curl -s http://169.254.169.254/latest/meta-data/instance-id )
-  - sudo echo "$hostname_prefix-$instance_id" > /etc/hostname
-  - sudo hostname -F /etc/hostname
+  - 'sudo echo "display_name: $hostname_prefix-$instance_id" >> /etc/newrelic-infra.yml'
+  - 'sudo echo "override_hostname: $hostname_prefix-$instance_id" >> /etc/newrelic-infra.yml'
 runcmd:
   - sudo curl -o /etc/yum.repos.d/newrelic-infra.repo https://download.newrelic.com/infrastructure_agent/linux/yum/amazonlinux/2/x86_64/newrelic-infra.repo
   - sudo yum -q makecache -y --disablerepo='*' --enablerepo='newrelic-infra'
