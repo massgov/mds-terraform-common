@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.69] - 2023-10-18
+
+ - [New Relic] Fix EC2 cloudconfig template.
+
 ## [1.0.68] - 2023-10-17
 
  - [New Relic] Add New Relic EC2 agent cloudconfig template.
