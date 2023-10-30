@@ -50,13 +50,13 @@ resource "newrelic_nrql_alert_condition" "restarts" {
   # The `restartCount` value in NR is always 0. But we can mimic restart count
   # by counting the number of unique ARNs for each ECS task.
   nrql {
-    query = "SELECT uniqueCount(ecsTaskArn) FROM ContainerSample ${local.filter_subquery} FACET ecsTaskDefinitionFamily"
+    query = "SELECT uniqueCount(ecsTaskArn) FROM ContainerSample ${local.filter_subquery} FACET ecsClusterName, ecsContainerName"
   }
 
   critical {
     operator = "above"
     threshold = 5
-    threshold_duration = 3600
+    threshold_duration = 7200
     threshold_occurrences = "all"
   }
 
@@ -66,5 +66,4 @@ resource "newrelic_nrql_alert_condition" "restarts" {
   aggregation_window = 7200
   aggregation_method = "event_flow"
   aggregation_delay = 120
-  slide_by = 3600
 }
