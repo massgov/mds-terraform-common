@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.70] - 2023.11-02
+
+ - [New Relic] Add option to use NR agent metrics for EC2 alerts.
+
 ## [1.0.69] - 2023-10-18
 
  - [New Relic] Fix EC2 cloudconfig template.
