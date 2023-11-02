@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.69] - 2023-10-18
+
+ - [New Relic] Fix EC2 cloudconfig template.
+
+## [1.0.68] - 2023-10-17
+
+ - [New Relic] Add New Relic EC2 agent cloudconfig template.
+
+## [1.0.67] - 2023-10-16
+
+ - [New Relic] Add New Relic ECS Cluster alerts.
+
+## [1.0.66] - 2023-10-11
+
+ - [ECS Cluster] Remove default ami.
+ - [Golden AMI Lookup] Add module to look up golden ami id.
+
 ## [1.0.65] - 2023-09-28
 
  - [ASG] Fix ASG AWS version bounds.
