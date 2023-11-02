@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.0.70] - 2023.11-02
+## [1.0.71] - 2023-11-02
+
+ - [New Relic] Add ECS Container alerts
+ - [New Relic] Add RDS Database alerts
+
+## [1.0.70] - 2023-11-02
 
  - [New Relic] Add option to use NR agent metrics for EC2 alerts.
 
