@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.73] - 2023-11-03
+
+ - [Github to Teams] Upgrade vulnerable package versions
+
 ## [1.0.71] - 2023-11-02
 
  - [New Relic] Add ECS Container alerts
