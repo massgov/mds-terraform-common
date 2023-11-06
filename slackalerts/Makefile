@@ -1,5 +1,10 @@
+.PHONY: build check_types test
 
-.PHONY: build
+build: check_types test
+	npm run build
 
-build:
-	pushd src && npm run build && popd
+check_types:
+	npm run tsc
+
+test:
+	npm test

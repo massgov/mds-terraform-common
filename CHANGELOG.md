@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.74] - 2023-11-06
+
+ - [Slack Alerts] Upgrade vulnerable package versions
+
 ## [1.0.73] - 2023-11-03
 
  - [Github to Teams] Upgrade vulnerable package versions

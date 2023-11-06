@@ -2,26 +2,31 @@
   "name": "@massds/cloudwatch-alerts",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx ts-node build.ts"
+    "test": "npx jest",
+    "build": "npx ts-node ./bin/build.ts",
+    "tsc": "npx tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@lastcall/sns-slack-alerts-consumer": "^0.0.6",
-    "assert": "^2.0.0"
+    "assert": "^2.1.0"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node16": "^16.1.1",
     "@types/archiver": "^5.3.2",
+    "@types/assert": "^1.5.8",
     "@types/aws-lambda": "^8.10.114",
+    "@types/jest": "^29.5.7",
+    "@types/node": "^20.8.10",
     "archiver": "^5.3.1",
     "esbuild": "^0.17.14",
-    "jest": "^23.6.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
+    "typescript": "^5.2.2"
   },
   "volta": {
     "node": "16.19.1"

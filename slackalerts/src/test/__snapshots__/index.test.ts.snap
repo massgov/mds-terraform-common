@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handler correctly transforms the SNS event(s) 1`] = `
+{
+  "as_user": true,
+  "channel": "#alerts",
+  "text": "*example subject*
+example message",
+}
+`;
