@@ -21,7 +21,6 @@ beforeEach(() => {
 });
 
 describe('handler', () => {
-
     const context: Context = {
         callbackWaitsForEmptyEventLoop: false,
         functionName: '',
@@ -36,9 +35,8 @@ describe('handler', () => {
         fail: () => {},
         succeed: () => {}
     };
-
-    it('correctly transforms the SNS event', async (): Promise<void> => {
-        const record: SNSEvent = {
+    const events: Array<SNSEvent> = [
+        {
             "Records": [
                 {
                     "EventSource": "aws:sns",
@@ -59,17 +57,8 @@ describe('handler', () => {
                     }
                 }
             ]
-        };
-        await handler(
-            record,
-            context,
-            () => {}
-        );
-        expect(mockMessage).toMatchSnapshot();
-    });
-
-    it('correctly transforms the ClamAV SNS event', async (): Promise<void> => {
-        const record: SNSEvent = {
+        },
+        {
             "Records": [
                 {
                     "EventSource": "aws:sns",
@@ -90,9 +79,12 @@ describe('handler', () => {
                     }
                 }
             ]
-        };
+        }
+    ]
+
+    it.each(events)('correctly transforms the SNS event', async (event): Promise<void> => {
         await handler(
-            record,
+            event,
             context,
             () => {}
         );
