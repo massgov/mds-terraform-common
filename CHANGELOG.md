@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.75] - 2023-11-07
+
+ - [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
+
 ## [1.0.73] - 2023-11-03
 
  - [Github to Teams] Upgrade vulnerable package versions
