@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`handler correctly transforms the SNS event 1`] = `
+{
+  "as_user": false,
+  "channel": "#my-cool-alerts",
+  "icon_emoji": ":robot:",
+  "text": "*subject*
+message",
+  "username": "@mds-ssr",
+}
+`;
+
+exports[`handler correctly transforms the SNS event 2`] = `
+{
+  "as_user": true,
+  "channel": "#alerts",
+  "text": "*ClamAV detected an infected file*
+ *Foo*: Bar
+*Bar*: Baz
+",
+}
+`;
