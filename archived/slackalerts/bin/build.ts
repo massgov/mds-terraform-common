@@ -11,11 +11,11 @@ const finishedp = promisify(finished);
 const run = async (): Promise<void> => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "slackalerts_build_"));
   await esbuild.build({
-    entryPoints: [path.join(__dirname, "index.ts")],
+    entryPoints: [path.join(__dirname, "..", "src", "index.ts")],
     bundle: true,
     platform: "node",
     target: "node16",
-    outfile: path.join(tmp, "index.js"),
+    outfile: path.join(tmp, "index.js")
   });
   const archivePath = path.join(__dirname, "..", "dist", "slackalerts.zip");
   const output = createWriteStream(archivePath);

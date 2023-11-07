@@ -3,6 +3,10 @@
 ## [1.0.75] - 2023-11-07
 
  - [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
+ 
+## [1.0.74] - 2023-11-06
+
+ - [Slack Alerts] Upgrade vulnerable package versions and archive
 
 ## [1.0.73] - 2023-11-03
 

@@ -1,3 +1,12 @@
+variable "ARCHIVED" {
+  type = bool
+  description = "The slackalerts module is no longer supported and has been archived."
+  validation {
+    condition = false
+    error_message = "The slackalerts module is no longer supported and has been archived."
+  }
+}
+
 variable "name" {
   type        = string
   description = "A descriptive name to use for created resources"

@@ -19,7 +19,10 @@
     "esModuleInterop": true,
     "strictPropertyInitialization": true,
     "useUnknownInCatchVariables": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
+    "paths": {
+      "@lastcall/sns-slack-alerts-consumer": ["./@types/index.d.ts"]
+    }
   },
   "exclude": ["node_modules"]
 }
