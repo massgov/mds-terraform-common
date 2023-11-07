@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.76] - 2023-11-07
+
+ - [Entrypoint Monitor] Upgrade vulnerable package versions
+
 ## [1.0.75] - 2023-11-07
 
  - [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
