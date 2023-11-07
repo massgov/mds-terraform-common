@@ -30,13 +30,15 @@ const handler: Handler<Event> = async (event: Event) => {
     isOlderThanRetentionPeriod,
     tap(
       (snapshot) => {
-        const snapshotAge = Duration.between(
-          nativeJs(snapshot.SnapshotCreateTime, ZoneId.UTC),
-          ZonedDateTime.now()
-        );
-        console.log(
-        `${snapshot.DBSnapshotIdentifier} is ${snapshotAge.toDays()} day(s) old - deleting`
-        );
+        if (snapshot.SnapshotCreateTime) {
+          const snapshotAge = Duration.between(
+            nativeJs(snapshot.SnapshotCreateTime, ZoneId.UTC),
+            ZonedDateTime.now()
+          );
+          console.log(
+            `${snapshot.DBSnapshotIdentifier} is ${snapshotAge.toDays()} day(s) old - deleting`
+          );
+        }
       }
     ),
     (snapshots) => deleteSnapshots(dryRun, snapshots),
@@ -67,10 +69,11 @@ async function* getSnapshots(instanceIds: AnyIterable<string>): AsyncIterable<DB
   }
 }
 const isOlderThanRetentionPeriod = filter((snapshot: DBSnapshot) => 
-  !snapshot.InstanceCreateTime ||
-    nativeJs(snapshot.InstanceCreateTime).isBefore(
+  Boolean(snapshot.SnapshotCreateTime &&
+    nativeJs(snapshot.SnapshotCreateTime).isBefore(
       ZonedDateTime.now().minusDays(RETENTION_PERIOD_DAYS)
     )
+  )
 );
 
 async function* deleteSnapshots(dryRun: boolean, snapshots: AsyncIterable<DBSnapshot>): AsyncIterable<DeleteDBSnapshotResult | null> {
