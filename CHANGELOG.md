@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.0.76] - 2023-11-07
+
+ - [Entrypoint Monitor] Upgrade vulnerable package versions
+
+## [1.0.75] - 2023-11-07
+
+ - [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
+ 
+## [1.0.74] - 2023-11-06
+
+ - [Slack Alerts] Upgrade vulnerable package versions and archive
+
+## [1.0.73] - 2023-11-03
+
+ - [Github to Teams] Upgrade vulnerable package versions
+
+## [1.0.71] - 2023-11-02
+
+ - [New Relic] Add ECS Container alerts
+ - [New Relic] Add RDS Database alerts
+
+## [1.0.70] - 2023-11-02
+
+ - [New Relic] Add option to use NR agent metrics for EC2 alerts.
+
+## [1.0.69] - 2023-10-18
+
+ - [New Relic] Fix EC2 cloudconfig template.
+
+## [1.0.68] - 2023-10-17
+
+ - [New Relic] Add New Relic EC2 agent cloudconfig template.
+
+## [1.0.67] - 2023-10-16
+
+ - [New Relic] Add New Relic ECS Cluster alerts.
+
+## [1.0.66] - 2023-10-11
+
+ - [ECS Cluster] Remove default ami.
+ - [Golden AMI Lookup] Add module to look up golden ami id.
+
+## [1.0.65] - 2023-09-28
+
+ - [ASG] Fix ASG AWS version bounds.
+ - [New Relic] Add New Relic CloudFront events.
+ - [New Relic] Split EC2 loss of signal into separate alert.
+
+## [1.0.64] - 2023-09-26
+
+ - [ECS Cluster] Expose custom cloud-init config variable
+
+## [1.0.63] - 2023-09-21
+
+ - [Static Site] Expose CloudFront min/max TTL variables
+
+## [1.0.62] - 2023-09-13
+
+ - [New Relic] Add New Relic integration.
+ - [New Relic] Add generic alert condition for EC2.
+
 ## [1.0.61] - 2023-08-30
 
  - [GHA Pipeline] Add ability to restrict ECR policies to specific resources.

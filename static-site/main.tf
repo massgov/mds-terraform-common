@@ -176,7 +176,9 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     allowed_methods        = var.allowed_methods
     cached_methods         = var.cached_methods
     target_origin_id       = "default"
-    default_ttl = var.default_ttl
+    min_ttl                = var.min_ttl
+    default_ttl            = var.default_ttl
+    max_ttl                = var.max_ttl
 
     // There is no backend processing in this case, so we can skip forwarding
     // things like query string and cookies. CORS headers are forwarded, if

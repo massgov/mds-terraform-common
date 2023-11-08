@@ -1,21 +1,14 @@
-# Default AMI to use when none is specified.
-data "aws_ssm_parameter" "golden_ami_latest" {
-  name = "/infrastructure/amis/golden_aws_linux"
-}
-
 locals {
-  ami = coalesce(var.ami, data.aws_ssm_parameter.golden_ami_latest.value)
-
-  default_devices = [ { device_name = "/dev/xvda",
-                        delete_on_termination = true,
-                        encrypted = var.volume_encryption,
-                        iops = null,
-                        snapshot_id = null,
-                        throughput = null,
-                        volume_size = var.volume_size,
-                        volume_type = null
-                      }
-                    ]
+  default_devices = [{ device_name = "/dev/xvda",
+    delete_on_termination = true,
+    encrypted             = var.volume_encryption,
+    iops                  = null,
+    snapshot_id           = null,
+    throughput            = null,
+    volume_size           = var.volume_size,
+    volume_type           = null
+    }
+  ]
 }
 
 # TODO: Now that we have this module, I think the `exclude_root_device` option
@@ -27,10 +20,40 @@ locals {
 # root volume instead.
 module "ami_devices" {
   source                      = "../ami-block-device-reader"
-  ami                         = local.ami
+  ami                         = var.ami
   device_filter_type          = "include"
   device_names                = var.include_ami_device_names
   force_delete_on_termination = var.ami_volumes_delete_on_termination
+}
+
+data "template_file" "instance_init" {
+  template = file("${path.module}/src/instance_init.yml")
+
+  vars = {
+    cluster_name = aws_ecs_cluster.cluster.name
+  }
+}
+
+data "template_cloudinit_config" "config" {
+  gzip          = false
+  base64_encode = true
+
+  part {
+    filename     = "init.cfg"
+    content_type = "text/cloud-config"
+    content      = "${data.template_file.instance_init.rendered}"
+  }
+
+  dynamic "part" {
+    for_each = var.additional_cloudinit_configs
+
+    content {
+      content_type = "text/cloud-config"
+      content      = part.value
+      filename     = "init_${part.key}.cfg"
+      merge_type   = "list(append)+dict(no_replace, recurse_list)+str(append)"
+    }
+  }
 }
 
 module "asg" {
@@ -39,13 +62,13 @@ module "asg" {
   keypair       = var.keypair
   capacity      = var.capacity
   instance_type = var.instance_type
-  ami           = local.ami
+  ami           = var.ami
 
   security_groups = var.security_groups
 
   subnets              = var.subnets
   policies             = concat(["arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"], var.policies)
-  user_data            = base64encode(data.template_file.instance_init.rendered)
+  user_data            = data.template_cloudinit_config.config.rendered
   instance_schedule    = var.instance_schedule
   instance_patch_group = var.instance_patch_group
   instance_backup      = var.instance_backup
@@ -65,14 +88,6 @@ module "asg" {
 
 resource "aws_ecs_cluster" "cluster" {
   name = var.name
-}
-
-data "template_file" "instance_init" {
-  template = file("${path.module}/src/instance_init.yml")
-
-  vars = {
-    cluster_name = aws_ecs_cluster.cluster.name
-  }
 }
 
 data "aws_iam_policy_document" "developer" {
@@ -108,8 +123,8 @@ data "aws_iam_policy_document" "developer" {
     ]
     resources = ["*"]
     condition {
-      test = "ArnEquals"
-      values = [aws_ecs_cluster.cluster.arn]
+      test     = "ArnEquals"
+      values   = [aws_ecs_cluster.cluster.arn]
       variable = "ecs:cluster"
     }
   }

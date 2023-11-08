@@ -16,7 +16,7 @@ An example of using this module:
 
 ```terraform
 module "ami_devices" {
-  source                      = "github.com/massgov/mds-terraform-common//aws-block-device-reader?ref=1.0.57"
+  source                      = "github.com/massgov/mds-terraform-common//ami-block-device-reader?ref=1.0.57"
   ami                         = "ami-12345"
 
   # Only include the "/dev/sdf" device
