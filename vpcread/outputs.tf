@@ -3,14 +3,14 @@ output "vpc" {
 }
 
 output "public_subnets" {
-  value = data.aws_subnet_ids.public.ids
+  value = data.aws_subnets.public.ids
 }
 
 output "private_subnets" {
-  value = data.aws_subnet_ids.private.ids
+  value = data.aws_subnets.private.ids
 }
 
 output "db_subnets" {
-  value = data.aws_subnet_ids.db.ids
+  value = data.aws_subnets.db.ids
 }
 

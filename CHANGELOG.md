@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.77] - 2023-11-08
+
+ - [VPC Read] Upgrade to latest syntax for subnet ID lists
+
 ## [1.0.76] - 2023-11-07
 
  - [Entrypoint Monitor] Upgrade vulnerable package versions
