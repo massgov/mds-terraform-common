@@ -81,7 +81,7 @@ resource "newrelic_nrql_alert_condition" "duration" {
   violation_time_limit_seconds = 259200
 
   nrql {
-    query = "SELECT sum(`aws.lambda.Duration.byFunction`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
+    query = "SELECT average(`aws.lambda.Duration.byFunction`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
   }
 
   critical {
