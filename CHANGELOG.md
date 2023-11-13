@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.78] - 2023-11-13
+
+ - [RDS] Allow consumers to turn off cleanup lambda
+
 ## [1.0.77] - 2023-11-08
 
  - [VPC Read] Upgrade to latest syntax for subnet ID lists
