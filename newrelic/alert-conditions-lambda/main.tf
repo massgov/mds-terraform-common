@@ -86,7 +86,7 @@ resource "newrelic_nrql_alert_condition" "duration" {
 
   critical {
     operator = "above"
-    threshold = var.events_dropped_threshold
+    threshold = var.duration_threshold
     threshold_duration = var.critical_threshold_duration
     threshold_occurrences = "all"
   }
