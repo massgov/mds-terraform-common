@@ -25,6 +25,12 @@ variable "filter_function_names" {
   default     = []
 }
 
+variable "exclude_function_names" {
+  type        = list(string)
+  description = "List of Lambda Function names to NOT monitor (all others will be monitored)."
+  default     = []
+}
+
 variable "aggregation_window" {
   type        = number
   description = "See newrelic_nrql_alert_condition.aggregation_window."

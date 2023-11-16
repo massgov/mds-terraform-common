@@ -5,7 +5,10 @@ locals {
   function_names_quoted = join(", ", formatlist("'%s'", var.filter_function_names))
   function_names_subquery = length(var.filter_function_names) == 0 ? "" : "`aws.lambda.FunctionName` IN (${local.function_names_quoted})"
 
-  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.function_names_subquery]))
+  function_names_exclude_quoted = join(", ", formatlist("'%s'", var.exclude_function_names))
+  function_names_exclude_subquery = length(var.exclude_function_names) == 0 ? "" : "`aws.lambda.FunctionName` NOT IN (${local.function_names_exclude_quoted})"
+
+  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.function_names_subquery, local.function_names_exclude_subquery]))
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 }
