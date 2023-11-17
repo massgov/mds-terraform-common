@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.79] - 2023-11-17
+
+ - [Static Site] Use domain-certificate module (DRY)
+
 ## [1.0.78] - 2023-11-13
 
  - [RDS] Allow consumers to turn off cleanup lambda
