@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.80] - 2023-11-21
+
+ - [New Relic] Add Lambda alerts
+
 ## [1.0.79] - 2023-11-17
 
  - [Static Site] Use domain-certificate module (DRY)
