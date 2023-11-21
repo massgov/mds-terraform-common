@@ -3,8 +3,6 @@ locals {
     for environment in var.environments:
           environment.domain
   ]
-  primary_domain = local.domains[0]
-  alternate_domains = slice(local.domains, 1, length(local.domains))
 }
 
 // S3
@@ -69,54 +67,13 @@ resource "aws_s3_bucket_policy" "default" {
   policy = data.aws_iam_policy_document.oai_read.json
 }
 
-// AWS Certificate Manager
-// TLS/SSL certificate for the new domain
-// @todo Switch to `domain-certificate` module some day with help of
-//   `terraform state mv` to avoid certificate re-creation.
-//   NOTE: I tried switching this for 1.0.45, but doing it alongside a
-//   terraform 0.13 version upgrade makes terraform get confused about the
-//   provider name. So once things are updated to this 0.13, we should
-//   be able to swap this out no problem.
-resource "aws_acm_certificate" "default" {
-  domain_name = local.primary_domain
-  subject_alternative_names = local.alternate_domains
-  // rely on a DNS entry for validating the certificate
-  validation_method = "DNS"
-  tags = merge(var.tags, {
-    "Name": var.name
-  })
-  // Replace certificate that is currently in use
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-// Route 53
-// dns record to use for certificate validation
-// create the DNS entry in th relevant zone
-resource "aws_route53_record" "verification" {
-  for_each = {
-    for dvo in aws_acm_certificate.default.domain_validation_options : dvo.domain_name => {
-      name = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type = dvo.resource_record_type
-    }
-  }
-
-  name    = each.value.name
-  type    = each.value.type
-  records = [each.value.record]
+module "aws_acm_site_certificate" {
+  source = "../domain-certificate"
+  name = var.name
+  tags = var.tags
   zone_id = var.zone_id
-  ttl     = "60"
+  domain_names = local.domains
 }
-
-// Route 53
-// validate the certificate with dns entry
-resource "aws_acm_certificate_validation" "default" {
-  certificate_arn         = aws_acm_certificate.default.arn
-  validation_record_fqdns = [for v in aws_route53_record.verification : v.fqdn]
-}
-
 
 //// Route 53
 //// Add CNAME entry for domain
@@ -213,7 +170,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
   // serve with cert
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.default.arn
+    acm_certificate_arn      = module.aws_acm_site_certificate.certificate_arn
     minimum_protocol_version = "TLSv1.1_2016"
     ssl_support_method       = "sni-only"
   }

@@ -171,6 +171,7 @@ module "backup_lambda" {
 }
 
 module "cleanup_lambda" {
+  count   = var.enable_manual_snapshots ? 1 : 0
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.47"
   name    = "${aws_db_instance.default.id}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
