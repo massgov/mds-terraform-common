@@ -3,7 +3,11 @@ import { EventBridgeHandler } from "aws-lambda";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import assert from "assert";
-import { CopyImageCommand, EC2Client } from "@aws-sdk/client-ec2";
+import {
+  CopyImageCommand,
+  EC2Client,
+  waitUntilImageExists,
+} from "@aws-sdk/client-ec2";
 import dayjs from "dayjs";
 import { randomUUID } from "crypto";
 
@@ -127,32 +131,57 @@ const handler: Handler = async (event, context, callback): Promise<void> => {
     return handleError(msg);
   }
 
-  try {
-    const nonce = randomUUID().slice(0, 8);
-    const backupImageName = `${DEST_IMAGE_PREFIX}-${dayjs().format(
-      "YYYY-MM-DD",
-    )}-${nonce}`;
-    logger.debug(`Backing up Golden AMI to '${backupImageName}'`);
+  const dateStamp = dayjs().format("YYYY-MM-DD");
+  const nonce = randomUUID().slice(0, 8);
+  const backupImageName = `${DEST_IMAGE_PREFIX}-${dateStamp}-${nonce}`;
+  logger.debug(`Backing up Golden AMI to '${backupImageName}'`);
 
-    const copyImageResult = await ec2Client.send(
-      new CopyImageCommand({
-        Name: backupImageName,
-        SourceImageId: goldenAmiId,
-        SourceRegion: "us-east-1",
-        KmsKeyId: REENCRYPTION_KEY_ID,
-        Encrypted: true,
-      }),
-    );
-    if (!copyImageResult.ImageId) {
-      const msg =
-        "CopyImage command failed to return new image ID when copying source image";
-      return handleError(msg);
-    }
-  } catch (err) {
+  const copyImageResult = await ec2Client.send(
+    new CopyImageCommand({
+      Name: backupImageName,
+      Description: `DS SSR Golden AMI (source image: ${goldenAmiId})`,
+      SourceImageId: goldenAmiId,
+      SourceRegion: "us-east-1",
+      KmsKeyId: REENCRYPTION_KEY_ID,
+      Encrypted: true,
+    }),
+  );
+  if (!copyImageResult.ImageId) {
     const msg =
-      err instanceof Error ? [`Error: ${err.name}`, err.message] : `${err}`;
+      "CopyImage command failed to return new image ID when copying source image";
     return handleError(msg);
   }
+  logger.info(`Successfully initiated creation of ${copyImageResult.ImageId}`);
+
+  try {
+    const result = await waitUntilImageExists(
+      {
+        client: ec2Client,
+        maxWaitTime: 600,
+      },
+      {
+        ImageIds: [copyImageResult.ImageId],
+        Filters: [
+          {
+            Name: "state",
+            Values: ["available"],
+          },
+        ],
+      },
+    );
+    assert(result.state === "SUCCESS", result.reason);
+    logger.info(`Image backup '${copyImageResult.ImageId}' is available`);
+  } catch (err) {
+    const msg =
+      err instanceof Error
+        ? [
+            `Error waiting for image to become available: ${err.name}`,
+            err.message,
+          ]
+        : `${err}`;
+    return handleError(msg);
+  }
+
   return;
 };
 

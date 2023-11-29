@@ -66,14 +66,9 @@ data "aws_iam_policy_document" "copy_image" {
       data.aws_kms_alias.ebs.target_key_arn
     ]
     condition {
-      test     = "StringEquals"
-      variable = "kms:GranteePrincipal"
-      values   = ["ec2.us-east-1.amazonaws.com"]
-    }
-    condition {
-      test     = "ForAllValues:StringEquals"
-      variable = "kms:GrantOperations"
-      values   = ["Encrypt", "Decrypt"]
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = ["true"]
     }
   }
   statement {
