@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.81] - 2023-11-29
+
+ - [Golden AMI Backup] Adds a reusable Lambda function for making automated copies of Golden AMIs
+
 ## [1.0.80] - 2023-11-21
 
  - [New Relic] Add Lambda alerts
