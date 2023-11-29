@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "read_parameter" {
       data.aws_kms_alias.parameter_store.target_key_arn
     ]
     condition {
-      test     = "StringLike"
+      test     = "StringEquals"
       variable = "kms:EncryptionContext:PARAMETER_ARN"
       values = [
         var.source_image_parameter_arn
@@ -89,9 +89,7 @@ data "aws_iam_policy_document" "copy_image" {
   statement {
     effect  = "Allow"
     actions = ["ec2:CopyImage"]
-    resources = [
-      "arn:aws:ec2:*::image/eotss-aws2-cis-*"
-    ]
+    resources = ["*"]
   }
 }
 
@@ -110,7 +108,7 @@ resource "aws_iam_policy" "copy_image" {
   policy = data.aws_iam_policy_document.copy_image.json
 }
 
-module "ssr_ami_backups" {
+module "golden_ami_backups" {
   source     = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.78"
   package    = local.lambda_function_package
   name       = "${var.name_prefix}-backup-lambda"
@@ -140,7 +138,7 @@ module "ssr_ami_backups" {
   )
 }
 
-resource "aws_cloudwatch_event_rule" "ssr_ami_backups" {
+resource "aws_cloudwatch_event_rule" "golden_ami_backups" {
   name        = "${var.name_prefix}-parameter-updates"
   description = "Listen for updates to the Golden AMI parameter"
 
@@ -151,15 +149,15 @@ resource "aws_cloudwatch_event_rule" "ssr_ami_backups" {
   })
 }
 
-resource "aws_cloudwatch_event_target" "ssr_ami_backups" {
-  rule = aws_cloudwatch_event_rule.ssr_ami_backups.name
-  arn  = module.ssr_ami_backups.function_arn
+resource "aws_cloudwatch_event_target" "golden_ami_backups" {
+  rule = aws_cloudwatch_event_rule.golden_ami_backups.name
+  arn  = module.golden_ami_backups.function_arn
 }
 
-resource "aws_lambda_permission" "ssr_ami_backups" {
+resource "aws_lambda_permission" "golden_ami_backups" {
   statement_id  = "${var.name_prefix}-allow-cloudwatch-execution"
   action        = "lambda:InvokeFunction"
-  function_name = module.ssr_ami_backups.function_name
+  function_name = module.golden_ami_backups.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.ssr_ami_backups.arn
+  source_arn    = aws_cloudwatch_event_rule.golden_ami_backups.arn
 }
