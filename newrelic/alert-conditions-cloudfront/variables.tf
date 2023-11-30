@@ -54,3 +54,9 @@ variable "throughput_threshold" {
   description = "Minimum number of requests per minute before triggering throughput alert."
   default     = 5
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags to apply to the alert conditions."
+  default     = {}
+}
