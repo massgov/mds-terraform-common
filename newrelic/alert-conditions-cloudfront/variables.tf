@@ -56,7 +56,7 @@ variable "throughput_threshold" {
 }
 
 variable "tags" {
-  type        = map(string)
+  type        = map(any)
   description = "Tags to apply to the alert conditions."
   default     = {}
 }
