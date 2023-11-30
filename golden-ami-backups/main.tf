@@ -70,6 +70,16 @@ data "aws_iam_policy_document" "copy_image" {
       variable = "kms:GrantIsForAWSResource"
       values   = ["true"]
     }
+    condition {
+      test     = "ForAllValues:StringEquals"
+      variable = "kms:GrantOperations"
+      values   = ["Decrypt", "Encrypt"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "kms:GrantConstraintType"
+      values   = ["EncryptionContextEquals"]
+    }
   }
   statement {
     effect = "Allow"
@@ -82,8 +92,11 @@ data "aws_iam_policy_document" "copy_image" {
     ]
   }
   statement {
-    effect  = "Allow"
-    actions = ["ec2:CopyImage"]
+    effect    = "Allow"
+    actions   = [
+      "ec2:CopyImage",
+      "ec2:DescribeImages"
+    ]
     resources = ["*"]
   }
 }

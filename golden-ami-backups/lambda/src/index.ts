@@ -6,7 +6,7 @@ import assert from "assert";
 import {
   CopyImageCommand,
   EC2Client,
-  waitUntilImageExists,
+  waitUntilImageAvailable,
 } from "@aws-sdk/client-ec2";
 import dayjs from "dayjs";
 import { randomUUID } from "crypto";
@@ -33,6 +33,8 @@ const defaultLogger = pino({ level: process.env.LOG_LEVEL ?? "debug" });
 const ssmClient = new SSMClient();
 const snsClient = new SNSClient();
 const ec2Client = new EC2Client();
+
+const MAX_COPY_WAIT_TIME_MINUTES = 10;
 
 const getEnv = (): Env => {
   const {
@@ -63,6 +65,10 @@ const getEnv = (): Env => {
   };
 };
 
+const arrayOf = <T>(val: T | Array<T>): Array<T> => {
+  return Array.isArray(val) ? val : [val];
+};
+
 const handler: Handler = async (event, context, callback): Promise<void> => {
   const {
     SOURCE_IMAGE_PARAMETER_ARN,
@@ -79,11 +85,11 @@ const handler: Handler = async (event, context, callback): Promise<void> => {
   const handleError = async (
     messageOrMessageParts: string | Array<string>,
   ): Promise<void> => {
-    const message = Array.isArray(messageOrMessageParts)
-      ? messageOrMessageParts.join("\n")
-      : messageOrMessageParts;
+    logger.error(arrayOf(messageOrMessageParts).join(","));
 
-    logger.error(message);
+    const messageParts = ["### Golden AMI backup automation has failed"];
+    messageParts.push(...arrayOf(messageOrMessageParts));
+    const message = messageParts.join("\n\n");
     await snsClient.send(
       new PublishCommand({
         TopicArn: ERROR_TOPIC_ARN,
@@ -98,7 +104,7 @@ const handler: Handler = async (event, context, callback): Promise<void> => {
   );
 
   if (event.detail.operation === "Delete") {
-    logger.info(
+    logger.warn(
       `Received a trigger from an unexpected parameter change type: '${event.detail.operation}'`,
     );
     return;
@@ -151,37 +157,37 @@ const handler: Handler = async (event, context, callback): Promise<void> => {
       "CopyImage command failed to return new image ID when copying source image";
     return handleError(msg);
   }
-  logger.info(`Successfully initiated creation of ${copyImageResult.ImageId}`);
+  logger.info(
+    `Initiated creation of backup image '${copyImageResult.ImageId}'`,
+  );
 
   try {
-    const result = await waitUntilImageExists(
+    logger.debug(
+      `Waiting ${MAX_COPY_WAIT_TIME_MINUTES} minutes for ${copyImageResult.ImageId} to become available`,
+    );
+    const result = await waitUntilImageAvailable(
       {
         client: ec2Client,
-        maxWaitTime: 600,
+        maxDelay: 30,
+        maxWaitTime: 60 * MAX_COPY_WAIT_TIME_MINUTES,
       },
       {
         ImageIds: [copyImageResult.ImageId],
-        Filters: [
-          {
-            Name: "state",
-            Values: ["available"],
-          },
-        ],
       },
     );
-    assert(result.state === "SUCCESS", result.reason);
-    logger.info(`Image backup '${copyImageResult.ImageId}' is available`);
+    assert(
+      result.state === "SUCCESS",
+      `Backup image failed to become available after ${MAX_COPY_WAIT_TIME_MINUTES} minutes: ${result.reason}`,
+    );
   } catch (err) {
     const msg =
-      err instanceof Error
-        ? [
-            `Error waiting for image to become available: ${err.name}`,
-            err.message,
-          ]
-        : `${err}`;
+      err instanceof Error ? [`Error: ${err.name}`, err.message] : `${err}`;
     return handleError(msg);
   }
 
+  logger.info(
+    `Image backup '${copyImageResult.ImageId}' has been successfully created`,
+  );
   return;
 };
 
