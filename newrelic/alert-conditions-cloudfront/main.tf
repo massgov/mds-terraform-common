@@ -9,6 +9,7 @@ locals {
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 
+  throughput_count = var.throughput_enabled ? 1 : 0
 }
 
 resource "newrelic_nrql_alert_condition" "error_rate" {
@@ -38,6 +39,20 @@ resource "newrelic_nrql_alert_condition" "error_rate" {
   close_violations_on_expiration = false
 }
 
+resource "newrelic_entity_tags" "error_rate_tags" {
+  count = length(var.tags) > 0 ? 1 : 0
+  guid = newrelic_nrql_alert_condition.error_rate.entity_guid
+
+  dynamic "tag" {
+    for_each = var.tags
+
+    content {
+      key    = tag.key
+      values = try(tolist(tag.value), [tostring(tag.value)])
+    }
+  }
+}
+
 resource "newrelic_nrql_alert_condition" "throughput" {
   count = (var.throughput_enabled ? 1 : 0)
 
@@ -65,4 +80,18 @@ resource "newrelic_nrql_alert_condition" "throughput" {
 
   open_violation_on_expiration = false
   close_violations_on_expiration = false
+}
+
+resource "newrelic_entity_tags" "throughput_tags" {
+  count = length(var.tags) > 0 ? local.throughput_count : 0
+  guid = newrelic_nrql_alert_condition.throughput[count.index].entity_guid
+
+  dynamic "tag" {
+    for_each = var.tags
+
+    content {
+      key    = tag.key
+      values = try(tolist(tag.value), [tostring(tag.value)])
+    }
+  }
 }
