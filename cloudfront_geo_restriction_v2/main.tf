@@ -1,5 +1,5 @@
 module "cf_geo_restriction" {
-  source  = "github.com/massgov/mds-terraform-common//cloudfront_geo_restriction?ref=1.0.51"
+  source  = "../cloudfront_geo_restriction"
   enabled = true
 }
 

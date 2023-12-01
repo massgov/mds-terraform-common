@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.82] - 2023-12-01
+
+ - [CloudFront Geo Restriction] Mark country codes as nonsensitive in terraform.
+
 ## [1.0.81] - 2023-11-29
 
  - [Golden AMI Backup] Adds a reusable Lambda function for making automated copies of Golden AMIs
