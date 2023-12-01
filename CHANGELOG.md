@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.83] - 2023-12-04
+
+ - [SSR Automation Documents] Centralize/modularize SSR's SSM automation documents
+
 ## [1.0.82] - 2023-12-01
 
  - [CloudFront Geo Restriction] Mark country codes as nonsensitive in terraform.

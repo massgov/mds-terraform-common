@@ -1,0 +1,146 @@
+description: |-
+  ### Purpose
+  Checks the number of days til tableau license expires
+  ### Usage
+  #### Parameters
+    - `AutomationAssumeRole` - (required, string); ARN of role to assume while performing this automation
+    - `InstanceIds` - (required, list<string>); EC2 instances on which automation should check licenses
+    - `AlertsTopicArn` - (optional, string); the ARN of the SNS Topic to which results should be pushed (default: `${alerts_topic_arn}`)
+    - `DaysTilLicenseExpirationThreshold` - (optional, number); number of days left until tableau license expires before automation should send an alert (default: 7)
+schemaVersion: '0.3'
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  InstanceIds:
+    type: 'List<AWS::EC2::Instance::Id>'
+  AlertsTopicArn:
+    type: String
+    default: ${alerts_topic_arn}
+  DaysTilLicenseExpirationThreshold:
+    type: Integer
+    default: 7
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+mainSteps:
+  - name: PerformLicenseCheck
+    action: 'aws:runCommand'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      DocumentName: AWS-RunShellScript
+      InstanceIds:
+        - '{{InstanceIds}}'
+      ServiceRoleArn: '{{AutomationAssumeRole}}'
+      MaxErrors: '1'
+      Parameters:
+        commands:
+          - sudo su
+          - 'if [[ -z $TABLEAU_SERVER_DATA_DIR_VERSION ]]; then source /etc/opt/tableau/tableau_server/environment.bash; fi'
+          - /opt/tableau/tableau_server/packages/customer-bin.$TABLEAU_SERVER_DATA_DIR_VERSION/tsm license list | grep -oP "\d\d?\/\d\d?\/\d\d"
+    outputs:
+      - Name: commandId
+        Selector: $.CommandId
+        Type: String
+  - name: EvaluateLicenseCheckOutput
+    action: 'aws:executeScript'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Runtime: python3.8
+      Handler: check_license_expiration
+      Script: |
+        import boto3
+        from datetime import datetime, timedelta
+
+        ssm_client = boto3.client('ssm')
+
+        def check_license_expiration(events, context):
+          instance_ids = events["instance_ids"]
+          license_list_command_id = events["license_list_command_id"]
+          days_til_license_expiration_threshold = events["days_til_license_expiration_threshold"]
+
+          now = datetime.now()
+
+          send_message = False
+          message_parts = [
+            f"Automated Tableau maintenance was performed at {now.strftime('%d %b %Y %H:%M')} UTC.",
+            "Results:"
+          ]
+
+          for instance_id in instance_ids:
+            license_list_command_invocation = ssm_client.get_command_invocation(
+              CommandId=license_list_command_id,
+              InstanceId=instance_id
+            )
+            
+            send_message_for_instance = False
+            instance_message_parts = []
+
+            if (license_list_command_invocation["Status"] != "Success"):
+              send_message_for_instance = True
+              command_url = f"https://${region}.console.aws.amazon.com/systems-manager/run-command/{license_list_command_id}?region=${region}"
+              instance_message_parts = [
+                f"- Command to check Tableau license status on EC2 instance `{instance_id}` "
+                + f"unexpectedly returned a `{license_list_command_invocation['Status']}` status. "
+                + f"(Command results: {command_url})"
+              ]
+            else:
+              license_list_command_output = license_list_command_invocation["StandardOutputContent"]
+
+              [expiration_date_string, *_] = license_list_command_output.split("\n")
+              expiration_date = datetime.strptime(expiration_date_string, "%m/%d/%y")
+              
+              send_message_for_instance = expiration_date <= (now + timedelta(days=days_til_license_expiration_threshold))
+              if (send_message_for_instance):
+                instance_message_parts = [
+                  f"- Tableau license on EC2 instance `{instance_id}` expires on {expiration_date.date().strftime('%b %-d %Y')}",
+                ]
+                
+            send_message = send_message or send_message_for_instance
+            message_parts.extend(instance_message_parts)
+
+          message = "\n".join(message_parts)
+
+          return {
+            "message": message,
+            "send_message": "True" if send_message else "False"
+          }
+      InputPayload:
+        instance_ids: '{{InstanceIds}}'
+        license_list_command_id: '{{ PerformLicenseCheck.commandId}}'
+        days_til_license_expiration_threshold: '{{DaysTilLicenseExpirationThreshold}}'
+    outputs:
+      - Name: message
+        Selector: $.Payload.message
+        Type: String
+      - Name: sendMessage
+        Selector: $.Payload.send_message
+        Type: String
+  - name: BranchOnLicenseCheck
+    action: 'aws:branch'
+    inputs:
+      Choices:
+        - NextStep: NotifyResults
+          Variable: '{{EvaluateLicenseCheckOutput.sendMessage}}'
+          StringEquals: 'True'
+      Default: Exit
+  - name: NotifyResults
+    action: 'aws:executeAutomation'
+    isEnd: true
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: '{{EvaluateLicenseCheckOutput.message}}'
+  - name: Exit
+    action: 'aws:sleep'
+    isEnd: true
+    inputs:
+      Duration: PT5S
+  - name: AlertOnError
+    action: 'aws:executeAutomation'
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      DocumentVersion: $LATEST
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: 'There was an error running `SSR-CheckTableauLicenses` automation'
+    description: Alert
+    isEnd: true

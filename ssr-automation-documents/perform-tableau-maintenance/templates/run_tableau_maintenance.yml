@@ -1,0 +1,72 @@
+description: |-
+  ### Purpose
+  Runs `tsm maintenance cleanup` command
+  ### Usage
+  #### Parameters
+    - `AutomationAssumeRole` - (required, string); ARN of role to assume while performing this automation
+    - `InstanceIds` - (required, list<string>); EC2 instances on which automation should perform maintenance
+    - `AlertsTopicArn` - (optional, string); the ARN of the SNS Topic to which results should be pushed (default: `${alerts_topic_arn}`)
+schemaVersion: '0.3'
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  InstanceIds:
+    type: 'List<AWS::EC2::Instance::Id>'
+  AlertsTopicArn:
+    type: String
+    default: '${alerts_topic_arn}'
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+mainSteps:
+  - name: DescribeInstances
+    action: 'aws:executeAwsApi'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Service: ec2
+      Api: DescribeInstances
+      InstanceIds:
+        - '{{InstanceIds}}'
+    outputs:
+      - Name: instanceId
+        Selector: '$.Reservations[0].Instances[0].InstanceId'
+        Type: String
+  - name: PerformTableauMaintenance
+    action: 'aws:runCommand'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      DocumentName: AWS-RunShellScript
+      InstanceIds:
+        - '{{InstanceIds}}'
+      ServiceRoleArn: '{{AutomationAssumeRole}}'
+      MaxErrors: '1'
+      Parameters:
+        commands:
+          - sudo su
+          - 'if [[ -z $TABLEAU_SERVER_DATA_DIR_VERSION ]]; then source /etc/opt/tableau/tableau_server/environment.bash; fi'
+          - /opt/tableau/tableau_server/packages/customer-bin.$TABLEAU_SERVER_DATA_DIR_VERSION/tsm maintenance cleanup
+    outputs:
+      - Name: commandId
+        Selector: $.CommandId
+        Type: String
+  - name: WaitForMaintenanceCommand
+    action: 'aws:waitForAwsResourceProperty'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Service: ssm
+      Api: GetCommandInvocation
+      PropertySelector: $.StatusDetails
+      DesiredValues:
+        - Success
+      CommandId: '{{PerformTableauMaintenance.commandId}}'
+      InstanceId: '{{DescribeInstances.instanceId}}'
+    timeoutSeconds: 90
+    isEnd: true
+  - name: AlertOnError
+    action: 'aws:executeAutomation'
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      DocumentVersion: $LATEST
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: 'Error running `SSR-RunTableauMaintenance` automation: `tsm maintenance cleanup` command failed on at least one EC2 instance'
+    description: Alert
+    isEnd: true

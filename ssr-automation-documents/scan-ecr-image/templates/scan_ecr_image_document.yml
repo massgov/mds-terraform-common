@@ -1,0 +1,164 @@
+description: |-
+  ### Purpose
+  This automation initiates an image scan for a particular ECR repository and image tag and publishes the result to the specified SNS Topic
+  ### Usage
+  #### Parameters
+  - `AutomationAssumeRole` - (required) role to assume while performing this automation
+  - `RepositoryName` - (string, required); the ECR repository containing the target image
+  - `AlertsTopicArn` - (string, optional); the ARN of the SNS Topic to which results should be pushed (default: `${alerts_topic_arn}`)
+  - `ImageTag` - (string, optional); the target image tag (default: `latest`)
+  - `AlertingSeverityLevelThreshold` - (string, optional); if vulnerabilities are found at this level or above, an alert will be sent to `AlertsTopicArn` (default: `HIGH`)
+schemaVersion: '0.3'
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  RepositoryName:
+    type: String
+    description: Name of the ECR repository
+  AlertsTopicArn:
+    type: String
+    default: '${alerts_topic_arn}'
+    description: ARN of SNS topic
+  ImageTag:
+    type: String
+    default: latest
+    description: ECR tag to use when initiating scan
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+    description: Role to assume
+  AlertingSeverityLevelThreshold:
+    type: String
+    default: HIGH
+    description: Severity level threshold after which an alert will be sent
+    allowedValues:
+      - INFORMATIONAL
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+mainSteps:
+  - name: StartImageScan
+    action: 'aws:executeAwsApi'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Service: ecr
+      Api: StartImageScan
+      repositoryName: '{{RepositoryName}}'
+      imageId:
+        imageTag: '{{ImageTag}}'
+  - name: Wait
+    action: 'aws:waitForAwsResourceProperty'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Service: ecr
+      Api: DescribeImageScanFindings
+      PropertySelector: '$.imageScanStatus.status'
+      DesiredValues:
+        - COMPLETE
+      repositoryName: '{{RepositoryName}}'
+      imageId:
+        imageTag: '{{ImageTag}}'
+    timeoutSeconds: 30
+    maxAttempts: 10
+  - name: GetImageScanResults
+    action: 'aws:executeAwsApi'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Service: ecr
+      Api: DescribeImageScanFindings
+      repositoryName: '{{RepositoryName}}'
+      imageId:
+        imageTag: '{{ImageTag}}'
+    outputs:
+      - Name: severityFindings
+        Selector: '$.imageScanFindings.findingSeverityCounts'
+        Type: StringMap
+      - Name: imageDigest
+        Selector: '$.imageId.imageDigest'
+        Type: String
+  - name: TransformResults
+    action: 'aws:executeScript'
+    onFailure: 'step:AlertOnError'
+    inputs:
+      Handler: handler
+      Runtime: python3.8
+      InputPayload:
+        repository_name: '{{RepositoryName}}'
+        image_digest: '{{GetImageScanResults.imageDigest}}'
+        severity_findings: '{{GetImageScanResults.severityFindings}}'
+        alerting_severity_level_threshold: '{{AlertingSeverityLevelThreshold}}'
+      Script: |-
+        from datetime import datetime
+
+        SORTED_SEVERITY_LEVELS = [
+          'INFORMATIONAL',
+          'LOW',
+          'MEDIUM',
+          'HIGH',
+          'CRITICAL'
+        ]
+
+        def handler(events, context):
+          alerting_severity_level_threshold = events["alerting_severity_level_threshold"]
+          repository_name = events["repository_name"]
+          image_digest = events["image_digest"]
+          severity_findings = events["severity_findings"]
+
+          now = datetime.utcnow()
+          scan_results_uri = f'https://${region}.console.aws.amazon.com/ecr/repositories/private/${account_id}/{repository_name}/_/image/{image_digest}/scan-results?region=${region}'
+
+          message = "\n".join([
+            f'An automated ECR scan on {repository_name}:{image_digest} was performed at {now.strftime("%d %b %Y %H:%M")} UTC.',
+            'Number of findings, by severity category:',
+            *[f'- {level.title()}: {severity_findings[level]}' for level in SORTED_SEVERITY_LEVELS],
+            "\n",
+            f'The full results of the scan can be found here: {scan_results_uri}',
+          ])
+          
+          threshold_index = SORTED_SEVERITY_LEVELS.index(alerting_severity_level_threshold)
+          target_severities = SORTED_SEVERITY_LEVELS[threshold_index::]
+          send_message = any([
+            True for severity in target_severities if (severity in severity_findings and severity_findings[severity] > 0)
+          ])
+
+          return {
+            'send_message': 'True' if send_message else 'False',
+            'message': message
+          }
+    outputs:
+      - Name: message
+        Selector: '$.Payload.message'
+        Type: String
+      - Name: sendMessage
+        Type: String
+        Selector: '$.Payload.send_message'
+  - name: CheckTransformedResults
+    action: 'aws:branch'
+    inputs:
+      Choices:
+        - NextStep: NotifyResults
+          Variable: '{{TransformResults.sendMessage}}'
+          StringEquals: 'True'
+      Default: Exit
+  - name: NotifyResults
+    action: 'aws:executeAutomation'
+    isEnd: true
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: '{{TransformResults.message}}'
+  - name: Exit
+    action: 'aws:sleep'
+    isEnd: true
+    inputs:
+      Duration: PT5S
+  - name: AlertOnError
+    action: 'aws:executeAutomation'
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      DocumentVersion: $LATEST
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: 'There was an error running the `SSR-ScanECRImage` automation on {{RepositoryName}}:{{ImageTag}}'
+    description: Alert
+    isEnd: true
