@@ -1,4 +1,4 @@
 variable "default_alerting_topic" {
-  type        = "string"
+  type        = string
   description = "Default SNS topic to use for alerting"
 }
