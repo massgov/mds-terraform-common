@@ -27,121 +27,96 @@ locals {
   duration = var.critical_threshold_duration == null ? local.default_duration : var.critical_threshold_duration
 }
 
-resource "newrelic_nrql_alert_condition" "alert" {
+
+module "cpu" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - CPU"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - CPU utilization over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    local.duration
+  )
 
-  nrql {
-    query = "SELECT average(${local.metric_name}) FROM ${local.table_name} ${local.filter_subquery} FACET aws.ec2.InstanceId"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.critical_threshold
-    threshold_duration = local.duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  nrql_query = "SELECT average(${local.metric_name}) FROM ${local.table_name} ${local.filter_subquery} FACET aws.ec2.InstanceId"
+  critical_threshold = var.critical_threshold
+  critical_threshold_duration = local.duration
   aggregation_window = local.window
   aggregation_method = "event_timer"
   aggregation_timer = local.timer
-  expiration_duration = 600
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "loss_of_signal" {
+module "loss_of_signal" {
   count = (var.alert_loss_of_signal ? 1 : 0)
+  source = "../nrql-alert"
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Loss of Signal"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - No metrics reported for at least %d seconds",
+    var.name_prefix,
+    600
+  )
 
-  nrql {
-    query = "SELECT average(aws.ec2.CPUUtilization) FROM Metric ${local.filter_subquery} FACET tags.Name"
-  }
-
-  critical {
-    operator = "above"
-    # This should never actually trigger, since CPUUtilization is a percent.
-    # We don't care about this condition, we're just using this alert to use
-    # the "open_violation_on_expiration" parameter to detect signal loss (by
-    # instance name instead of instance id). Otherwise, every instance refresh
-    # causes alerts/an "incident" in NR.
-    threshold = 101
-    threshold_duration = local.duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  nrql_query = "SELECT average(${local.metric_name}) FROM ${local.table_name} ${local.filter_subquery} FACET tags.Name"
+  # This should never actually trigger, since CPUUtilization is a percent.
+  # We don't care about this condition, we're just using this alert to use
+  # the "open_violation_on_expiration" parameter to detect signal loss (by
+  # instance name instead of instance id). Otherwise, every instance refresh
+  # causes alerts/an "incident" in NR.
+  critical_threshold = 101
+  critical_threshold_duration = local.duration
   aggregation_window = local.window
   aggregation_method = "event_timer"
   aggregation_timer = local.timer
   expiration_duration = 600
   open_violation_on_expiration = true
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "memory" {
+module "memory" {
   count = (var.use_agent_metrics ? 1 : 0)
+  source = "../nrql-alert"
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Memory"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Memory usage over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    local.duration
+  )
 
-  nrql {
-    query = "SELECT average(memoryUsedPercent) FROM SystemSample ${local.filter_subquery} FACET aws.ec2.InstanceId"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.critical_threshold
-    threshold_duration = local.duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
-  aggregation_window = local.window
+  nrql_query = "SELECT average(memoryUsedPercent) FROM SystemSample ${local.filter_subquery} FACET aws.ec2.InstanceId"
+  critical_threshold = var.critical_threshold
+  critical_threshold_duration = local.duration
   aggregation_method = "event_timer"
+  aggregation_window = local.window
   aggregation_timer = local.timer
-  expiration_duration = 600
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "storage" {
+module "storage" {
   count = (var.use_agent_metrics ? 1 : 0)
+  source = "../nrql-alert"
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Storage"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Storage usage over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    local.duration
+  )
 
-  nrql {
-    query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET `tags.Name`, mountPoint"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.critical_threshold
-    threshold_duration = local.duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
-  aggregation_window = local.window
+  nrql_query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET `tags.Name`, mountPoint"
+  critical_threshold = var.critical_threshold
+  critical_threshold_duration = local.duration
   aggregation_method = "event_timer"
+  aggregation_window = local.window
   aggregation_timer = local.timer
-  expiration_duration = 600
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }

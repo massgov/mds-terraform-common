@@ -53,3 +53,9 @@ variable "allocated_space_gb" {
   type        = number
   description = "Total amount of storage (in GB) the instance has available (AllocatedStorage in AWS)."
 }
+
+variable "tags" {
+  type        = map(any)
+  description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
+  default = {}
+}

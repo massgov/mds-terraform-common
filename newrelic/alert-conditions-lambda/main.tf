@@ -13,92 +13,69 @@ locals {
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 }
 
-resource "newrelic_nrql_alert_condition" "error_percent" {
+module "error_percent" {
+  source = "../nrql-alert"
   count = (var.error_percent_threshold == null ? 0 : 1)
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Error Percent"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Error percent over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.error_percent_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(`aws.lambda.Errors.byFunction`) * 100 FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.error_percent_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-
+  nrql_query = "SELECT average(`aws.lambda.Errors.byFunction`) * 100 FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
+  critical_threshold = var.error_percent_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   fill_option = "last_value"
   aggregation_window = var.aggregation_window
   aggregation_method = "event_timer"
   aggregation_timer = 60
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "events_dropped" {
+module "events_dropped" {
+  source = "../nrql-alert"
   count = (var.events_dropped_threshold == null ? 0 : 1)
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Events Dropped"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - More than %d events dropped in %d seconds",
+    var.name_prefix,
+    var.events_dropped_threshold,
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT sum(`aws.lambda.AsyncEventsDropped`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.events_dropped_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-
-  fill_option = "none"
+  nrql_query = "SELECT sum(`aws.lambda.AsyncEventsDropped`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
+  critical_threshold = var.events_dropped_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_timer"
   aggregation_timer = 60
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "duration" {
+module "duration" {
+  source = "../nrql-alert"
   count = (var.duration_threshold == null ? 0 : 1)
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Duration"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Average function duration greater than %s seconds for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.duration_threshold / 1000), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(`aws.lambda.Duration.byFunction`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.duration_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-
-  fill_option = "none"
+  nrql_query = "SELECT average(`aws.lambda.Duration.byFunction`) FROM Metric ${local.filter_subquery} FACET `aws.lambda.FunctionName`"
+  critical_threshold = var.duration_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_timer"
   aggregation_timer = 60
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
