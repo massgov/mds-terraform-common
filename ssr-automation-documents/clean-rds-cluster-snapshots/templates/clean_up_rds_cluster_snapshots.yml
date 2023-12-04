@@ -1,0 +1,104 @@
+description: |-
+  ### Purpose
+  This automation performs an RDS snapshot cleanup
+  ### Usage
+  #### Parameters
+  - `AutomationAssumeRole` - (required, string) role to assume while performing this automation
+  - `DBClusterIdentifier` -  (required, string) identifier of parent RDS cluster
+  - `RetentionPeriodDays` - (optional, Integer) number of days after which snapshots should be cleaned up (default: 90)
+  - `AlertsTopicArn` - (optional, string) the ARN of the SNS topic to alert in case of failure (default: `${alerts_topic_arn}`)
+schemaVersion: '0.3'
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+    description: Role to assume
+  DBClusterIdentifier:
+    type: String
+    description: Identifier of the parent RDS cluster
+  RetentionPeriodDays:
+    type: Integer
+    default: 90
+    description: 'number of days after which snapshots should be cleaned up '
+  AlertsTopicArn:
+    type: String
+    default: '${alerts_topic_arn}'
+mainSteps:
+  - name: DeleteDbClusterSnapshots
+    action: 'aws:executeScript'
+    description: |-
+      ## DeleteDbClusterSnapshots
+
+      Accepts an RDS cluster identifier and a retention period and deletes cluster snapshots
+      outside the retention period. If all snapshots are stale, the most recent will be
+      retained
+    timeoutSeconds: 300
+    onFailure: 'step:AlertOnError'
+    onCancel: Abort
+    inputs:
+      Runtime: python3.8
+      Handler: clean_up_db_snapshots
+      Script: |-
+        import boto3
+        from datetime import date
+
+        rds_client = boto3.client('rds', region_name='${region}')
+
+        def clean_up_db_snapshots(events, context):
+          db_cluster_identifier = events["db_cluster_identifier"]
+          retention_period_days = events["retention_period_days"]
+
+          describe_results = rds_client.describe_db_cluster_snapshots(
+            SnapshotType="manual",
+            DBClusterIdentifier=db_cluster_identifier,
+            IncludeShared=False,
+            IncludePublic=False
+          )
+
+          today = date.today()
+          deleted_snapshot_identifiers = []
+
+          snapshots_ascending = sorted(
+            describe_results["DBClusterSnapshots"],
+            key=(
+              lambda snapshot:
+                snapshot["SnapshotCreateTime"] if "SnapshotCreateTime" in snapshot
+                else snapshot["ClusterCreateTime"]
+            )
+          )
+
+          for snapshot in snapshots_ascending:
+            if snapshot["Status"] != "available":
+              continue
+            time_delta = today - snapshot["SnapshotCreateTime"].date()
+            if time_delta.days < retention_period_days:
+              continue
+            if not len(deleted_snapshot_identifiers) < len(snapshots_ascending) - 1:
+              # leave at least one snapshot, preferring the most recently created one
+              break
+
+            snapshot_identifier = snapshot["DBClusterSnapshotIdentifier"]
+            rds_client.delete_db_cluster_snapshot(
+              DBClusterSnapshotIdentifier=snapshot_identifier
+            )
+            deleted_snapshot_identifiers.append(snapshot_identifier)
+
+          return {'deleted_snapshot_identifiers': deleted_snapshot_identifiers}
+      InputPayload:
+        db_cluster_identifier: '{{DBClusterIdentifier}}'
+        retention_period_days: '{{RetentionPeriodDays}}'
+    outputs:
+      - Name: deletedClusterSnapshotIdentifiers
+        Selector: $.Payload.deleted_snapshot_identifiers
+        Type: StringList
+    isEnd: true
+  - name: AlertOnError
+    action: 'aws:executeAutomation'
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      DocumentVersion: $LATEST
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: 'Error running `SSR-CleanUpRDSSnapshots` automation: failed to delete `{{DBClusterIdentifier}}` snapshot(s)'
+    description: Alert
+    isEnd: true
