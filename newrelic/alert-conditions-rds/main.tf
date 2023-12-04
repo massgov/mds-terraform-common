@@ -12,59 +12,45 @@ locals {
   allocated_space_bytes = var.allocated_space_gb * pow(1024, 3)
 }
 
-resource "newrelic_nrql_alert_condition" "cpu" {
+module "cpu" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - CPU"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - CPU utilization over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.cpu_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(`aws.rds.CPUUtilization`) FROM Metric ${local.filter_subquery} FACET `aws.rds.DBInstanceIdentifier`"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.cpu_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-
-  fill_option = "none"
+  nrql_query = "SELECT average(`aws.rds.CPUUtilization`) FROM Metric ${local.filter_subquery} FACET `aws.rds.DBInstanceIdentifier`"
+  critical_threshold = var.cpu_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "free_space" {
+module "free_space" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Free Space"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Less than %s%% space free for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.free_space_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT (average(`aws.rds.FreeStorageSpace`) / ${local.allocated_space_bytes}) * 100 AS `FreeStoragePercent` FROM Metric ${local.filter_subquery} FACET `aws.rds.DBInstanceIdentifier`"
-  }
-
-  critical {
-    operator = "below"
-    threshold = var.free_space_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-
-  fill_option = "none"
-
+  nrql_query = "SELECT (average(`aws.rds.FreeStorageSpace`) / ${local.allocated_space_bytes}) * 100 AS `FreeStoragePercent` FROM Metric ${local.filter_subquery} FACET `aws.rds.DBInstanceIdentifier`"
+  critical_operator = "below"
+  critical_threshold = var.free_space_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }

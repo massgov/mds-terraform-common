@@ -48,3 +48,9 @@ variable "restart_count_threshold" {
   description = "Maximum number of unique task arns before triggering alert."
   default     = 5
 }
+
+variable "tags" {
+  type        = map(any)
+  description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
+  default = {}
+}
