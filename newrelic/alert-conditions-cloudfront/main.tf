@@ -11,58 +11,47 @@ locals {
 
 }
 
-resource "newrelic_nrql_alert_condition" "error_rate" {
+module "error_rate" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Error Rate"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Error rate over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.error_rate_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.error_rate_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  nrql_query = "SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name"
+  critical_threshold = var.error_rate_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "throughput" {
+module "throughput" {
+  source = "../nrql-alert"
   count = (var.throughput_enabled ? 1 : 0)
 
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Throughput"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format("%s - Less than %d requests per %d seconds for over %d seconds",
+    var.name_prefix,
+    var.throughput_threshold,
+    var.aggregation_window,
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name"
-  }
+  nrql_query = "SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name"
 
-  critical {
-    operator = "below"
-    threshold = var.throughput_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  critical_operator = "below"
+  critical_threshold = var.throughput_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }

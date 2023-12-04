@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.83] - 2023-12-04
+
+ - [New Relic] Improve naming for all alert conditions.
+
 ## [1.0.82] - 2023-12-01
 
  - [CloudFront Geo Restriction] Mark country codes as nonsensitive in terraform.

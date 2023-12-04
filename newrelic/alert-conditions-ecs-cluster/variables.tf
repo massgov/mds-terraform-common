@@ -48,3 +48,9 @@ variable "memory_threshold" {
   description = "Maximum memory percentage allowed before triggering alert."
   default     = 90
 }
+
+variable "tags" {
+  type        = map(any)
+  description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
+  default = {}
+}

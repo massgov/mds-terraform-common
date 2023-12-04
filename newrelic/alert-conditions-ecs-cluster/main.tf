@@ -8,59 +8,47 @@ locals {
   filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.cluster_names_subquery]))
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
-
 }
 
-resource "newrelic_nrql_alert_condition" "cpu" {
+module "cpu" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - CPU"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - CPU utilization over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.cpu_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(aws.ecs.CPUUtilization.byCluster) FROM Metric ${local.filter_subquery} FACET aws.ecs.ClusterName"
-  }
+  nrql_query = "SELECT average(aws.ecs.CPUUtilization.byCluster) FROM Metric ${local.filter_subquery} FACET aws.ecs.ClusterName"
 
-  critical {
-    operator = "above"
-    threshold = var.cpu_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  critical_threshold = var.cpu_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
 
-resource "newrelic_nrql_alert_condition" "memory" {
+module "memory" {
+  source = "../nrql-alert"
+
   account_id = var.account_id
   policy_id = var.alert_policy_id
-  type = "static"
-  name = "${var.name_prefix} - Memory"
-  enabled = true
-  violation_time_limit_seconds = 259200
+  name = format(
+    "%s - Memory usage over %s%% for at least %d seconds",
+    var.name_prefix,
+    replace(format("%f", var.memory_threshold), "/\\.0+$/", ""),
+    var.critical_threshold_duration
+  )
 
-  nrql {
-    query = "SELECT average(aws.ecs.MemoryUtilization.byCluster) FROM Metric ${local.filter_subquery} FACET aws.ecs.ClusterName"
-  }
-
-  critical {
-    operator = "above"
-    threshold = var.memory_threshold
-    threshold_duration = var.critical_threshold_duration
-    threshold_occurrences = "all"
-  }
-  fill_option = "none"
+  nrql_query = "SELECT average(aws.ecs.MemoryUtilization.byCluster) FROM Metric ${local.filter_subquery} FACET aws.ecs.ClusterName"
+  critical_threshold = var.memory_threshold
+  critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
   aggregation_method = "event_flow"
   aggregation_delay = 120
-
-  open_violation_on_expiration = false
-  close_violations_on_expiration = false
+  tags = var.tags
 }
