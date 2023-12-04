@@ -28,7 +28,7 @@ resource "newrelic_nrql_alert_condition" "default" {
   close_violations_on_expiration = var.close_violations_on_expiration
 }
 
-resource "newrelic_entity_tags" "error_rate_tags" {
+resource "newrelic_entity_tags" "tags" {
   count = length(var.tags) > 0 ? 1 : 0
   guid = newrelic_nrql_alert_condition.default.entity_guid
 
