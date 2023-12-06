@@ -37,10 +37,28 @@ variable "aggregation_window" {
   default     = null
 }
 
-variable "critical_threshold" {
+variable "cpu_threshold" {
   type        = number
   description = "See newrelic_nrql_alert_condition.critical.threshold."
   default     = 90
+}
+
+variable "memory_threshold" {
+  type        = number
+  description = "See newrelic_nrql_alert_condition.critical.threshold."
+  default     = 90
+}
+
+variable "storage_threshold" {
+  type        = number
+  description = "See newrelic_nrql_alert_condition.critical.threshold."
+  default     = 90
+}
+
+variable "loss_of_signal_time" {
+  type        = number
+  description = "See newrelic_nrql_alert_condition.expiration_duration."
+  default     = 600
 }
 
 variable "critical_threshold_duration" {

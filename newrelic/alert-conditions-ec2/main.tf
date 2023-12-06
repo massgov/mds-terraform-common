@@ -36,12 +36,12 @@ module "cpu" {
   name = format(
     "%s - CPU utilization over %s%% for at least %d seconds",
     var.name_prefix,
-    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    replace(format("%f", var.cpu_threshold), "/\\.0+$/", ""),
     local.duration
   )
 
   nrql_query = "SELECT average(${local.metric_name}) FROM ${local.table_name} ${local.filter_subquery} FACET aws.ec2.InstanceId"
-  critical_threshold = var.critical_threshold
+  critical_threshold = var.cpu_threshold
   critical_threshold_duration = local.duration
   aggregation_window = local.window
   aggregation_method = "event_timer"
@@ -58,7 +58,7 @@ module "loss_of_signal" {
   name = format(
     "%s - No metrics reported for at least %d seconds",
     var.name_prefix,
-    600
+    var.loss_of_signal_time
   )
 
   nrql_query = "SELECT average(${local.metric_name}) FROM ${local.table_name} ${local.filter_subquery} FACET tags.Name"
@@ -72,7 +72,7 @@ module "loss_of_signal" {
   aggregation_window = local.window
   aggregation_method = "event_timer"
   aggregation_timer = local.timer
-  expiration_duration = 600
+  expiration_duration = var.loss_of_signal_time
   open_violation_on_expiration = true
   tags = var.tags
 }
@@ -86,12 +86,12 @@ module "memory" {
   name = format(
     "%s - Memory usage over %s%% for at least %d seconds",
     var.name_prefix,
-    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    replace(format("%f", var.memory_threshold), "/\\.0+$/", ""),
     local.duration
   )
 
   nrql_query = "SELECT average(memoryUsedPercent) FROM SystemSample ${local.filter_subquery} FACET aws.ec2.InstanceId"
-  critical_threshold = var.critical_threshold
+  critical_threshold = var.memory_threshold
   critical_threshold_duration = local.duration
   aggregation_method = "event_timer"
   aggregation_window = local.window
@@ -108,12 +108,12 @@ module "storage" {
   name = format(
     "%s - Storage usage over %s%% for at least %d seconds",
     var.name_prefix,
-    replace(format("%f", var.critical_threshold), "/\\.0+$/", ""),
+    replace(format("%f", var.storage_threshold), "/\\.0+$/", ""),
     local.duration
   )
 
   nrql_query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET `tags.Name`, mountPoint"
-  critical_threshold = var.critical_threshold
+  critical_threshold = var.storage_threshold
   critical_threshold_duration = local.duration
   aggregation_method = "event_timer"
   aggregation_window = local.window
