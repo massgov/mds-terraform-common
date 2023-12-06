@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.84] - 2023-12-06
+
+ - [New Relic] Add separate thresholds for EC2 alert module.
+
 ## [1.0.83] - 2023-12-04
 
  - [New Relic] Improve naming for all alert conditions.
