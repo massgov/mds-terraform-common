@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.85] - 2023-12-20
+
+ - [New Relic] Fix memory alert for containers with soft memory limit.
+ - [New Relic] Allow excluding volumes from storage alert by mount point.
+
 ## [1.0.84] - 2023-12-06
 
  - [New Relic] Add separate thresholds for EC2 alert module.
