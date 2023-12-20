@@ -11,12 +11,17 @@ locals {
   asg_names_quoted = join(", ", formatlist("'%s'", var.filter_asg_names))
   asg_names_subquery = length(var.filter_asg_names) == 0 ? "" : "`tags.aws:autoscaling:groupName` IN (${local.asg_names_quoted})"
 
+  exclude_mount_points_quoted = join(", ", formatlist("'%s'", var.filter_exclude_mount_points))
+  exclude_mount_points_subquery = length(var.filter_exclude_mount_points) == 0 ? "" : "mountPoint NOT IN (${local.exclude_mount_points_quoted})"
+
   filter_subqueries = compact([local.instance_names_subquery, local.asg_names_subquery])
   filter_subqueries_or = join("", ["(", join(" OR ", local.filter_subqueries), ")"])
 
   filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.filter_subqueries_or]))
+  storage_filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.filter_subqueries_or, local.exclude_mount_points_subquery]))
 
   filter_subquery = length(local.filter_subqueries) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
+  storage_filter_subquery = local.storage_filter_subqueries_and == "" ? "" : "WHERE (${local.storage_filter_subqueries_and})"
 
   default_window = (var.use_agent_metrics ? 60 : 300)
   default_timer = local.default_window
@@ -112,7 +117,7 @@ module "storage" {
     local.duration
   )
 
-  nrql_query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.filter_subquery} FACET `tags.Name`, mountPoint"
+  nrql_query = "SELECT average(diskUsedPercent) FROM StorageSample ${local.storage_filter_subquery} FACET `tags.Name`, mountPoint"
   critical_threshold = var.storage_threshold
   critical_threshold_duration = local.duration
   aggregation_method = "event_timer"

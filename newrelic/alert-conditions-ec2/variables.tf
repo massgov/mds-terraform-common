@@ -31,6 +31,12 @@ variable "filter_asg_names" {
   default     = []
 }
 
+variable "filter_exclude_mount_points" {
+  type        = list(string)
+  description = "List of volume mount points to exclude."
+  default     = []
+}
+
 variable "aggregation_window" {
   type        = number
   description = "See newrelic_nrql_alert_condition.aggregation_window."

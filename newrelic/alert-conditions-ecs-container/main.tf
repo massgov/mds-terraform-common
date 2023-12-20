@@ -4,10 +4,13 @@ locals {
 
   container_names_quoted = join(", ", formatlist("'%s'", var.filter_container_names))
   container_names_subquery = length(var.filter_container_names) == 0 ? "" : "ecsTaskDefinitionFamily IN (${local.container_names_quoted})"
+  memory_container_names_subquery = length(var.filter_container_names) == 0 ? "" : "`aws.ecs.ServiceName` IN (${local.container_names_quoted})"
 
   filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.container_names_subquery]))
+  memory_filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.memory_container_names_subquery]))
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
+  memory_filter_subquery = length(local.memory_filter_subqueries_and) == 0 ? "" : "WHERE (${local.memory_filter_subqueries_and})"
 
   # This is the maximum aggregation window.
   restart_duration = 7200
@@ -25,7 +28,7 @@ module "memory" {
     var.critical_threshold_duration
   )
 
-  nrql_query = "SELECT average(memoryUsageLimitPercent) FROM ContainerSample ${local.filter_subquery} FACET ecsTaskDefinitionFamily"
+  nrql_query = "SELECT average(`aws.ecs.MemoryUtilization.byService`) FROM Metric ${local.memory_filter_subquery} FACET `aws.ecs.ServiceName`"
   critical_threshold = var.memory_threshold
   critical_threshold_duration = var.critical_threshold_duration
   aggregation_window = var.aggregation_window
