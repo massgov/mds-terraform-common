@@ -40,7 +40,7 @@ variable "treat_redirect_as_failure" {
 variable "validation_string" {
   type        = string
   description = "See newrelic_synthetics_monitor.validation_string."
-  default     = "success"
+  default     = ""
 }
 
 variable "headers" {
