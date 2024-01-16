@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.86] - 2024-01-16
+
+ - [New Relic] Added modules for synthetics alerts.
+
 ## [1.0.85] - 2023-12-20
 
  - [New Relic] Fix memory alert for containers with soft memory limit.
