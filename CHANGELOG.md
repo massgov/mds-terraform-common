@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.87] - 2024-01-17
+
+ - [New Relic] Add module for certificate check monitors.
+
 ## [1.0.86] - 2024-01-16
 
  - [New Relic] Added modules for synthetics alerts.
