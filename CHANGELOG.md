@@ -1,175 +1,179 @@
 # Changelog
 
+## [1.0.88] - 2024-01-20
+
+- [Golden AMI Lookup] Fix a an incorrectly quoted variable type.
+
 ## [1.0.87] - 2024-01-17
 
- - [New Relic] Add module for certificate check monitors.
+- [New Relic] Add module for certificate check monitors.
 
 ## [1.0.86] - 2024-01-16
 
- - [New Relic] Added modules for synthetics alerts.
+- [New Relic] Added modules for synthetics alerts.
 
 ## [1.0.85] - 2023-12-20
 
- - [New Relic] Fix memory alert for containers with soft memory limit.
- - [New Relic] Allow excluding volumes from storage alert by mount point.
+- [New Relic] Fix memory alert for containers with soft memory limit.
+- [New Relic] Allow excluding volumes from storage alert by mount point.
 
 ## [1.0.84] - 2023-12-06
 
- - [New Relic] Add separate thresholds for EC2 alert module.
+- [New Relic] Add separate thresholds for EC2 alert module.
 
 ## [1.0.83] - 2023-12-04
 
- - [New Relic] Improve naming for all alert conditions.
+- [New Relic] Improve naming for all alert conditions.
 
 ## [1.0.82] - 2023-12-01
 
- - [CloudFront Geo Restriction] Mark country codes as nonsensitive in terraform.
+- [CloudFront Geo Restriction] Mark country codes as nonsensitive in terraform.
 
 ## [1.0.81] - 2023-11-29
 
- - [Golden AMI Backup] Adds a reusable Lambda function for making automated copies of Golden AMIs
+- [Golden AMI Backup] Adds a reusable Lambda function for making automated copies of Golden AMIs
 
 ## [1.0.80] - 2023-11-21
 
- - [New Relic] Add Lambda alerts
+- [New Relic] Add Lambda alerts
 
 ## [1.0.79] - 2023-11-17
 
- - [Static Site] Use domain-certificate module (DRY)
+- [Static Site] Use domain-certificate module (DRY)
 
 ## [1.0.78] - 2023-11-13
 
- - [RDS] Allow consumers to turn off cleanup lambda
+- [RDS] Allow consumers to turn off cleanup lambda
 
 ## [1.0.77] - 2023-11-08
 
- - [VPC Read] Upgrade to latest syntax for subnet ID lists
+- [VPC Read] Upgrade to latest syntax for subnet ID lists
 
 ## [1.0.76] - 2023-11-07
 
- - [Entrypoint Monitor] Upgrade vulnerable package versions
+- [Entrypoint Monitor] Upgrade vulnerable package versions
 
 ## [1.0.75] - 2023-11-07
 
- - [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
- 
+- [RDS] Upgrade vulnerable package versions for backup and cleanup lambdas
+
 ## [1.0.74] - 2023-11-06
 
- - [Slack Alerts] Upgrade vulnerable package versions and archive
+- [Slack Alerts] Upgrade vulnerable package versions and archive
 
 ## [1.0.73] - 2023-11-03
 
- - [Github to Teams] Upgrade vulnerable package versions
+- [Github to Teams] Upgrade vulnerable package versions
 
 ## [1.0.71] - 2023-11-02
 
- - [New Relic] Add ECS Container alerts
- - [New Relic] Add RDS Database alerts
+- [New Relic] Add ECS Container alerts
+- [New Relic] Add RDS Database alerts
 
 ## [1.0.70] - 2023-11-02
 
- - [New Relic] Add option to use NR agent metrics for EC2 alerts.
+- [New Relic] Add option to use NR agent metrics for EC2 alerts.
 
 ## [1.0.69] - 2023-10-18
 
- - [New Relic] Fix EC2 cloudconfig template.
+- [New Relic] Fix EC2 cloudconfig template.
 
 ## [1.0.68] - 2023-10-17
 
- - [New Relic] Add New Relic EC2 agent cloudconfig template.
+- [New Relic] Add New Relic EC2 agent cloudconfig template.
 
 ## [1.0.67] - 2023-10-16
 
- - [New Relic] Add New Relic ECS Cluster alerts.
+- [New Relic] Add New Relic ECS Cluster alerts.
 
 ## [1.0.66] - 2023-10-11
 
- - [ECS Cluster] Remove default ami.
- - [Golden AMI Lookup] Add module to look up golden ami id.
+- [ECS Cluster] Remove default ami.
+- [Golden AMI Lookup] Add module to look up golden ami id.
 
 ## [1.0.65] - 2023-09-28
 
- - [ASG] Fix ASG AWS version bounds.
- - [New Relic] Add New Relic CloudFront events.
- - [New Relic] Split EC2 loss of signal into separate alert.
+- [ASG] Fix ASG AWS version bounds.
+- [New Relic] Add New Relic CloudFront events.
+- [New Relic] Split EC2 loss of signal into separate alert.
 
 ## [1.0.64] - 2023-09-26
 
- - [ECS Cluster] Expose custom cloud-init config variable
+- [ECS Cluster] Expose custom cloud-init config variable
 
 ## [1.0.63] - 2023-09-21
 
- - [Static Site] Expose CloudFront min/max TTL variables
+- [Static Site] Expose CloudFront min/max TTL variables
 
 ## [1.0.62] - 2023-09-13
 
- - [New Relic] Add New Relic integration.
- - [New Relic] Add generic alert condition for EC2.
+- [New Relic] Add New Relic integration.
+- [New Relic] Add generic alert condition for EC2.
 
 ## [1.0.61] - 2023-08-30
 
- - [GHA Pipeline] Add ability to restrict ECR policies to specific resources.
+- [GHA Pipeline] Add ability to restrict ECR policies to specific resources.
 
 ## [1.0.60] - 2023-08-21
 
- - [GHA Pipeline] Add module for deployment through GitHub Actions
+- [GHA Pipeline] Add module for deployment through GitHub Actions
 
 ## [1.0.59] - 2023-08-15
 
- - [ECS Cluster] Update user data to reconfigure docker data dir off of the root EBS volume
+- [ECS Cluster] Update user data to reconfigure docker data dir off of the root EBS volume
 
 ## [1.0.58] - 2023-08-10
 
- - [ECS Cluster] Update to use AMI ID parameter maintained by SSR team
+- [ECS Cluster] Update to use AMI ID parameter maintained by SSR team
 
 ## [1.0.57] - 2023-07-17
 
- - [AMI Block Device Reader] Add a module to read and manipulate block devices from an AMI.
- - [ECS Cluster] Replace block device lookup with new module.
+- [AMI Block Device Reader] Add a module to read and manipulate block devices from an AMI.
+- [ECS Cluster] Replace block device lookup with new module.
 
 ## [1.0.56] - 2023-07-13
 
- - [ASG] Replace `volume_encryption` and `volume_size` variables with `block_devices` variable
- - [ECS Cluster] Add `include_ami_device_names` variable to allow importing block device specifications from AMI.
- - [ECS Cluster] Add `ami_volumes_delete_on_termination` variable to allow forcing `delete_on_termination` to true on block devices imported from AMI.
+- [ASG] Replace `volume_encryption` and `volume_size` variables with `block_devices` variable
+- [ECS Cluster] Add `include_ami_device_names` variable to allow importing block device specifications from AMI.
+- [ECS Cluster] Add `ami_volumes_delete_on_termination` variable to allow forcing `delete_on_termination` to true on block devices imported from AMI.
 
 ## [1.0.55] - 2023-07-12
 
- - [Pipelines] Correct pipeline trigger issues
+- [Pipelines] Correct pipeline trigger issues
 
 ## [1.0.54] - 2023-06-26
 
- - [RDS] Fix monthly snapshot cleanup
+- [RDS] Fix monthly snapshot cleanup
 
 ## [1.0.53] - 2023-06-15
 
- - [ECS Cluster] Update module to use the Golden AMI by default.
+- [ECS Cluster] Update module to use the Golden AMI by default.
 
 ## [1.0.52] - 2023-05-03
 
- - [CloudFront Geo-Restriction V2] Implements geo-fencing as a WAFv2 web ACL
- - [Cloudfront] Add argument enabling users to attach WAF web ACL to distribution
+- [CloudFront Geo-Restriction V2] Implements geo-fencing as a WAFv2 web ACL
+- [Cloudfront] Add argument enabling users to attach WAF web ACL to distribution
 
 ## [1.0.51] - 2023-05-02
 
- - [RDS] Implemented manual snapshot backup/cleanup functionality
+- [RDS] Implemented manual snapshot backup/cleanup functionality
 
 ## [1.0.50] - 2023-04-20
 
- - [SNS To Teams] Fixed some message formatting issues, made 'View Logs' button work
+- [SNS To Teams] Fixed some message formatting issues, made 'View Logs' button work
 
 ## [1.0.49] - 2023-04-18
 
- - [Private Bucket] Add a module to contain our commonly duplicated private bucket code.
+- [Private Bucket] Add a module to contain our commonly duplicated private bucket code.
 
 ## [1.0.48] - 2023-04-18
 
- - [Static Site] Remove AWS provider from module.
+- [Static Site] Remove AWS provider from module.
 
 ## [1.0.47] - 2023-03-28
 
- - [Github to Teams] Upgrade to node16 runtime
- - [SNS to Slack] Upgrade to node16 runtime, convert to typescript 
+- [Github to Teams] Upgrade to node16 runtime
+- [SNS to Slack] Upgrade to node16 runtime, convert to typescript
 
 ## [1.0.46] - 2023-03-17
 
