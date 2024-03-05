@@ -5,7 +5,8 @@ runcmd:
   # hostname or else the new relic agent will get confused
   - hostname_prefix='${name_prefix}'
   # reach out to the metadata service for the instance ID
-  - instance_id=$( curl -s http://169.254.169.254/latest/meta-data/instance-id )
+  - token=$( curl -X PUT "http://169.254.169.254/latest/api/token" -H )
+  - 'instance_id=$( curl -H "X-aws-ec2-metadata-token: $token" -s http://169.254.169.254/latest/meta-data/instance-id )'
   - 'sudo echo "display_name: $hostname_prefix-$instance_id" >> /etc/newrelic-infra.yml'
   - 'sudo echo "override_hostname: $hostname_prefix-$instance_id" >> /etc/newrelic-infra.yml'
   - sudo curl -o /etc/yum.repos.d/newrelic-infra.repo https://download.newrelic.com/infrastructure_agent/linux/yum/amazonlinux/2/x86_64/newrelic-infra.repo
