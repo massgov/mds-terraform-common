@@ -135,7 +135,7 @@ variable "performance_insights_retention_period" {
 variable "backup_retention_period" {
   description = "Database backup retention period in days"
   type        = number
-  default     = 30
+  default     = 0
 }
 
 variable "deletion_protection" {
