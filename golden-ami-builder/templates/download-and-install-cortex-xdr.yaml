@@ -1,0 +1,38 @@
+name: download-and-install-cortex-xdr
+description: 'Simple component which downloads and installs Cortex XDR agent from distribution bucket'
+schemaVersion: 1.0
+phases:
+  - name: 'build'
+    steps:
+      - name: DownloadConfig
+        action: S3Download
+        timeoutSeconds: 60
+        onFailure: Abort
+        maxAttempts: 3
+        inputs:
+          - source: 's3://${distribution_bucket_id}/dist/cortex/latest/cortex.conf'
+            destination: '/var/tmp/cortex.conf'
+      - name: DownloadAgent
+        action: S3Download
+        timeoutSeconds: 60
+        onFailure: Abort
+        maxAttempts: 3
+        inputs:
+          - source: 's3://${distribution_bucket_id}/dist/cortex/latest/cortex-agent.rpm'
+            destination: '/var/tmp/cortex-agent.rpm'
+      - name: Install
+        action: ExecuteBash
+        onFailure: Continue
+        inputs:
+          commands:
+            - 'mkdir -p /etc/panw'
+            - 'cp {{ build.DownloadConfig.inputs[0].destination }} /etc/panw/cortex.conf'
+            - 'rpm -ivh {{ build.DownloadAgent.inputs[0].destination }}'
+      - name: DeleteConfig
+        action: DeleteFile
+        inputs:
+          - path: '{{ build.DownloadConfig.inputs[0].destination }}'
+      - name: DeleteAgent
+        action: DeleteFile
+        inputs:
+          - path: '{{ build.DownloadAgent.inputs[0].destination }}'
