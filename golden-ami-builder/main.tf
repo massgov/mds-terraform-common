@@ -54,24 +54,35 @@ data "aws_iam_policy_document" "instance_profile_read_dist_bucket" {
   }
 }
 
+data "aws_iam_policy_document" "instance_profile_create_eni" {
+  /* arn:aws:imagebuilder:us-east-1:aws:component/eni-attachment-test-linux/x.x.x description:
+   *
+   * To perform this test, an IAM policy with the following actions is required:
+   * ec2:AttachNetworkInterface, ec2:CreateNetworkInterface, ec2:CreateTags, ec2:DeleteNetworkInterface,
+   * ec2:DescribeNetworkInterfaces, ec2:DescribeNetworkInterfaceAttribute, and ec2:DetachNetworkInterface.
+  */
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:AttachNetworkInterface",
+      "ec2:CreateNetworkInterface",
+      "ec2:CreateTags",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DescribeNetworkInterfaceAttribute",
+      "ec2:DetachNetworkInterface"
+    ]
+    resources = ["*"]
+  }
+}
+
 resource "aws_iam_role" "instance_profile" {
   name               = module.golden_ami_lookup.ami_name_prefix
   assume_role_policy = data.aws_iam_policy_document.instance_profile_assume.json
-}
-
-resource "aws_iam_role_policy_attachment" "ssm" {
-  role       = aws_iam_role.instance_profile.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_role_policy_attachment" "image_builder" {
-  role       = aws_iam_role.instance_profile.name
-  policy_arn = "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilder"
-}
-
-resource "aws_iam_role_policy_attachment" "image_builder_container" {
-  role       = aws_iam_role.instance_profile.name
-  policy_arn = "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds"
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+    "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilder"
+  ]
 }
 
 resource "aws_iam_role_policy" "read_dist_bucket" {
@@ -79,12 +90,17 @@ resource "aws_iam_role_policy" "read_dist_bucket" {
   policy = data.aws_iam_policy_document.instance_profile_read_dist_bucket.json
 }
 
+resource "aws_iam_role_policy" "create_eni" {
+  role   = aws_iam_role.instance_profile.name
+  policy = data.aws_iam_policy_document.instance_profile_create_eni.json
+}
+
 resource "aws_security_group" "all_egress" {
   count = var.security_group_ids == null ? 1 : 0
 
   name        = "${module.golden_ami_lookup.ami_name_prefix}-image-builder"
   description = "Security group used by Image Builder instances. Allows no inbound traffic and all outbound traffic."
-  vpc_id = module.vpcread.vpc
+  vpc_id      = module.vpcread.vpc
 
   egress {
     protocol         = "-1"
@@ -92,7 +108,7 @@ resource "aws_security_group" "all_egress" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = var.tags 
+  tags = var.tags
 }
 
 resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
@@ -109,11 +125,11 @@ resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
 }
 
 resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
-  description                   = "Infrastructure configuration for Amazon-Linux-2-based golden AMI pipeline"
-  instance_profile_name         = aws_iam_role.instance_profile.id
-  instance_types                = ["t3.micro"]
-  name                          = "${module.golden_ami_lookup.ami_name_prefix}-infrastructure-configuration"
-  security_group_ids            = coalesce(
+  description           = "Infrastructure configuration for Amazon-Linux-2-based golden AMI pipeline"
+  instance_profile_name = aws_iam_role.instance_profile.id
+  instance_types        = ["t3.micro"]
+  name                  = "${module.golden_ami_lookup.ami_name_prefix}-infrastructure-configuration"
+  security_group_ids = coalesce(
     var.security_group_ids,
     [for sg in aws_aws_security_group.all_egress : sg.id]
   )
@@ -122,7 +138,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   terminate_instance_on_failure = true
 
   dynamic "logging" {
-    for_each = [for bucket in module.pipeline_logs: bucket.bucket_id]
+    for_each = [for bucket in module.pipeline_logs : bucket.bucket_id]
     iterator = "bucket_id"
 
     content {
@@ -198,7 +214,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/eni-attachment-test-linux/x.x.x"
     parameter {
-      name = "WorkingPath"
+      name  = "WorkingPath"
       value = "/var/tmp"
     }
   }
@@ -219,8 +235,8 @@ resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   name                             = "${module.golden_ami_lookup.ami_name_prefix}-pipeline"
 
   schedule {
-    schedule_expression = "cron(0 2 1 * ? *)" # First day of every month at 2AM eastern
-    timezone = "America/New_York"
+    schedule_expression                = "cron(0 2 1 * ? *)" # First day of every month at 2AM eastern
+    timezone                           = "America/New_York"
     pipeline_execution_start_condition = "EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE"
   }
 
