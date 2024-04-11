@@ -20,11 +20,11 @@ variable "security_group_ids" {
   default     = null
 }
 
-variable "disable_logging_bucket" {
-  description = "If true, Image Builder logs will only go to Cloudwatch and no logging bucket will be created in S3 (default: false)"
-  type        = bool
-  default     = false
-}
+# variable "disable_logging_bucket" {
+#   description = "If true, Image Builder logs will only go to Cloudwatch and no logging bucket will be created in S3 (default: false)"
+#   type        = bool
+#   default     = false
+# }
 
 variable "alerting_sns_topic_arn" {
   description = "ARN of the SNS topic to which pipeline alerts will be published (default: null)"

@@ -7,9 +7,9 @@ data "aws_kms_key" "volume_key" {
 }
 
 locals {
-  account_id    = data.aws_caller_identity.current.account_id
-  account_alias = data.aws_iam_account_alias.current.account_alias
-  region        = data.aws_region.current.name
+  account_id         = data.aws_caller_identity.current.account_id
+  account_alias      = data.aws_iam_account_alias.current.account_alias
+  region             = data.aws_region.current.name
 }
 
 module "golden_ami_lookup" {
@@ -22,8 +22,6 @@ module "vpcread" {
 }
 
 module "pipeline_logs" {
-  count = var.disable_logging_bucket ? 0 : 1
-
   source      = "github.com/massgov/mds-terraform-common//private-bucket?ref=1.0.88"
   bucket_name = "${local.account_alias}-${module.golden_ami_lookup.ami_name_prefix}-pipeline-logs"
   tags        = var.tags
@@ -139,14 +137,9 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   subnet_id                     = module.vpcread.private_subnets[0]
   terminate_instance_on_failure = true
 
-  dynamic "logging" {
-    for_each = var.disable_logging_bucket ? module.pipeline_logs : []
-    iterator = "bucket"
-
-    content {
-      s3_logs {
-        s3_bucket_name = bucket.value["bucket_id"]
-      }
+  logging {
+    s3_logs {
+      s3_bucket_name = module.pipeline_logs.bucket_id
     }
   }
 
