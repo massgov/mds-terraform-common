@@ -140,12 +140,12 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   terminate_instance_on_failure = true
 
   dynamic "logging" {
-    for_each = [for bucket in module.pipeline_logs : bucket.bucket_id]
-    iterator = "bucket_id"
+    for_each = var.disable_logging_bucket ? module.pipeline_logs : []
+    iterator = "bucket"
 
     content {
       s3_logs {
-        s3_bucket_name = bucket_id.value
+        s3_bucket_name = bucket.value["bucket_id"]
       }
     }
   }
