@@ -156,7 +156,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
 resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
   description = "Simple component which downloads and installs Cortex XDR agent from distribution bucket"
   data = templatefile(
-    "${path.module}/templates/download-and-install-cortex-xdr.tftpl",
+    "${path.module}/templates/download-and-install-cortex-xdr.yaml",
     {
       distribution_bucket_id = var.distribution_bucket_id
     }
