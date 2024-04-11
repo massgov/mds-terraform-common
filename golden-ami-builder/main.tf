@@ -103,6 +103,8 @@ resource "aws_security_group" "all_egress" {
   vpc_id      = module.vpcread.vpc
 
   egress {
+    from_port        = 0
+    to_port          = 0
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
@@ -131,7 +133,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   name                  = "${module.golden_ami_lookup.ami_name_prefix}-infrastructure-configuration"
   security_group_ids = coalesce(
     var.security_group_ids,
-    [for sg in aws_aws_security_group.all_egress : sg.id]
+    [for sg in aws_security_group.all_egress : sg.id]
   )
   sns_topic_arn                 = var.alerting_sns_topic_arn
   subnet_id                     = module.vpcread.private_subnets[0]
