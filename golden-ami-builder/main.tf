@@ -23,7 +23,7 @@ module "vpcread" {
 
 module "pipeline_logs" {
   source      = "github.com/massgov/mds-terraform-common//private-bucket?ref=1.0.88"
-  bucket_name = "${local.account_alias}-${module.golden_ami_lookup.ami_name_prefix}-pipeline-logs"
+  bucket_name = "${substr(local.account_alias, 0, 63 - length("-golden-ami-image-builder-logs"))}-golden-ami-image-builder-logs"
   tags        = var.tags
 }
 
