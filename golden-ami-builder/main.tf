@@ -13,7 +13,7 @@ locals {
 }
 
 module "golden_ami_lookup" {
-  source = "github.com/massgov/mds-terraform-common//golden-ami-lookup?ref=1.x"
+  source = "../golden-ami-lookup"
 }
 
 module "vpcread" {
