@@ -10,6 +10,10 @@ locals {
   account_id         = data.aws_caller_identity.current.account_id
   account_alias      = data.aws_iam_account_alias.current.account_alias
   region             = data.aws_region.current.name
+
+  # Bucket names can be max 63 characters log
+  logs_bucket_suffix = "-golden-ami-image-builder-logs"
+  logs_bucket_prefix = "${substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))}"
 }
 
 module "golden_ami_lookup" {
@@ -21,9 +25,9 @@ module "vpcread" {
   vpc_name = var.vpc_name
 }
 
-module "pipeline_logs" {
+module "image_builder_logs" {
   source      = "github.com/massgov/mds-terraform-common//private-bucket?ref=1.0.88"
-  bucket_name = "${substr(local.account_alias, 0, 63 - length("-golden-ami-image-builder-logs"))}-golden-ami-image-builder-logs"
+  bucket_name = "${local.logs_bucket_prefix}-${local.logs_bucket_suffix}"
   tags        = var.tags
 }
 
@@ -139,7 +143,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
 
   logging {
     s3_logs {
-      s3_bucket_name = module.pipeline_logs.bucket_id
+      s3_bucket_name = module.image_builder_logs.bucket_id
     }
   }
 

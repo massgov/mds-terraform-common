@@ -6,7 +6,7 @@ variable "distribution_bucket_id" {
 variable "volume_key_alias" {
   description = "Alias of KMS key used to encrypt EBS snapshots created by Image Builder pipeline"
   type        = string
-  default     = "aws/ebs"
+  default     = "alias/aws/ebs"
 }
 
 variable "vpc_name" {
