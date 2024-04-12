@@ -237,8 +237,7 @@ resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   name                             = "${module.golden_ami_lookup.ami_name_prefix}-pipeline"
 
   schedule {
-    schedule_expression                = "cron(0 2 1 * ? *)" # First day of every month at 2AM eastern
-    timezone                           = "America/New_York"
+    schedule_expression                = var.pipeline_schedule_expression
     pipeline_execution_start_condition = "EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE"
   }
 

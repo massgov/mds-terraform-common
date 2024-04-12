@@ -31,6 +31,12 @@ variable "alerting_sns_topic_arn" {
   default     = null
 }
 
+variable "pipeline_schedule_expression" {
+  description = "Cron expression of how often, in UTC, the Image Builder pipeline start condition is evaluated (default: 'cron(0 6 1 * ? *)')"
+  default     = "cron(0 6 1 * ? *)" # 6AM UTC
+  type        = string
+}
+
 variable "tags" {
   description = "Map of key-value pairs used to tag resources created by this module"
   type        = map(string)
