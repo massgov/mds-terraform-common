@@ -12,7 +12,7 @@ locals {
   region             = data.aws_region.current.name
 
   # Bucket names can be max 63 characters log
-  logs_bucket_suffix = "-golden-ami-image-builder-logs"
+  logs_bucket_suffix = "golden-ami-image-builder-logs"
   logs_bucket_prefix = "${substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))}"
 }
 
