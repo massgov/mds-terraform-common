@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "instance_profile_assume" {
   }
 }
 
-data "aws_iam_policy_document" "instance_profile_read_dist_bucket" {
+data "aws_iam_policy_document" "instance_profile" {
   statement {
     effect = "Allow"
     actions = [
@@ -54,18 +54,26 @@ data "aws_iam_policy_document" "instance_profile_read_dist_bucket" {
       "arn:aws:s3:::${var.distribution_bucket_id}/*"
     ]
   }
-}
-
-data "aws_iam_policy_document" "instance_profile_create_eni" {
-  /* arn:aws:imagebuilder:us-east-1:aws:component/eni-attachment-test-linux/x.x.x description:
-   *
-   * To perform this test, an IAM policy with the following actions is required:
-   * ec2:AttachNetworkInterface, ec2:CreateNetworkInterface, ec2:CreateTags, ec2:DeleteNetworkInterface,
-   * ec2:DescribeNetworkInterfaces, ec2:DescribeNetworkInterfaceAttribute, and ec2:DetachNetworkInterface.
-  */
   statement {
     effect = "Allow"
     actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = [
+      var.distribution_bucket_key_arn
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      /* arn:aws:imagebuilder:us-east-1:aws:component/eni-attachment-test-linux/x.x.x description:
+      *
+      * To perform this test, an IAM policy with the following actions is required:
+      * ec2:AttachNetworkInterface, ec2:CreateNetworkInterface, ec2:CreateTags, ec2:DeleteNetworkInterface,
+      * ec2:DescribeNetworkInterfaces, ec2:DescribeNetworkInterfaceAttribute, and ec2:DetachNetworkInterface.
+      */
       "ec2:AttachNetworkInterface",
       "ec2:CreateNetworkInterface",
       "ec2:CreateTags",
@@ -87,14 +95,9 @@ resource "aws_iam_role" "instance_profile" {
   ]
 }
 
-resource "aws_iam_role_policy" "read_dist_bucket" {
+resource "aws_iam_role_policy" "instance_profile" {
   role   = aws_iam_role.instance_profile.name
-  policy = data.aws_iam_policy_document.instance_profile_read_dist_bucket.json
-}
-
-resource "aws_iam_role_policy" "create_eni" {
-  role   = aws_iam_role.instance_profile.name
-  policy = data.aws_iam_policy_document.instance_profile_create_eni.json
+  policy = data.aws_iam_policy_document.instance_profile.json
 }
 
 resource "aws_security_group" "all_egress" {
