@@ -1,9 +1,9 @@
-variable "distribution_bucket_id" {
+variable "software_distribution_bucket_id" {
   description = "Identifier of the S3 bucket used to distribute software required by Image Builder pipeline"
   type        = string
 }
 
-variable "distribution_bucket_key_arn" {
+variable "software_distribution_bucket_key_arn" {
   description = "ARN of KMS key used to encrypt/decrypt files in the distribution bucket" 
   type        = string
 }
@@ -33,7 +33,7 @@ variable "alerting_sns_topic_arn" {
 
 variable "pipeline_schedule_expression" {
   description = "Cron expression of how often, in UTC, the Image Builder pipeline start condition is evaluated (default: 'cron(0 6 1 * ? *)')"
-  default     = "cron(0 6 1 * ? *)" # 6AM UTC
+  default     = "cron(0 6 1 * ? *)" # First day of every month, 6AM UTC
   type        = string
 }
 

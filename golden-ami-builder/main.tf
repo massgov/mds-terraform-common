@@ -7,13 +7,13 @@ data "aws_kms_key" "volume_key" {
 }
 
 locals {
-  account_id         = data.aws_caller_identity.current.account_id
-  account_alias      = data.aws_iam_account_alias.current.account_alias
-  region             = data.aws_region.current.name
+  account_id    = data.aws_caller_identity.current.account_id
+  account_alias = data.aws_iam_account_alias.current.account_alias
+  region        = data.aws_region.current.name
 
   # Bucket names can be max 63 characters log
   logs_bucket_suffix = "golden-ami-image-builder-logs"
-  logs_bucket_prefix = "${substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))}"
+  logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 }
 
 module "golden_ami_lookup" {
@@ -50,8 +50,8 @@ data "aws_iam_policy_document" "instance_profile" {
       "s3:GetObject"
     ]
     resources = [
-      "arn:aws:s3:::${var.distribution_bucket_id}",
-      "arn:aws:s3:::${var.distribution_bucket_id}/*"
+      "arn:aws:s3:::${var.software_distribution_bucket_id}",
+      "arn:aws:s3:::${var.software_distribution_bucket_id}/*"
     ]
   }
   statement {
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "instance_profile" {
       "kms:DescribeKey"
     ]
     resources = [
-      var.distribution_bucket_key_arn
+      var.software_distribution_bucket_key_arn
     ]
   }
   statement {
@@ -158,7 +158,7 @@ resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
   data = templatefile(
     "${path.module}/templates/download-and-install-cortex-xdr.yaml",
     {
-      distribution_bucket_id = var.distribution_bucket_id
+      software_distribution_bucket_id = var.software_distribution_bucket_id
     }
   )
   name     = "download-and-install-cortex-xdr"
