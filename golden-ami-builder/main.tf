@@ -14,6 +14,8 @@ locals {
   # Bucket names can be max 63 characters log
   logs_bucket_suffix = "golden-ami-image-builder-logs"
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
+
+  output_image_prefix = "ssr-golden-aws-linux-2"
 }
 
 module "golden_ami_lookup" {
@@ -76,7 +78,7 @@ data "aws_iam_policy_document" "instance_profile" {
 }
 
 resource "aws_iam_role" "instance_profile" {
-  name               = module.golden_ami_lookup.ami_name_prefix
+  name               = local.output_image_prefix
   assume_role_policy = data.aws_iam_policy_document.instance_profile_assume.json
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
@@ -98,7 +100,7 @@ resource "aws_kms_grant" "instance_profile" {
 resource "aws_security_group" "all_egress" {
   count = var.security_group_ids == null ? 1 : 0
 
-  name        = "${module.golden_ami_lookup.ami_name_prefix}-image-builder"
+  name        = "${local.output_image_prefix}-image-builder"
   description = "Security group used by Image Builder instances. Allows no inbound traffic and all outbound traffic."
   vpc_id      = module.vpcread.vpc
 
@@ -114,13 +116,13 @@ resource "aws_security_group" "all_egress" {
 }
 
 resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
-  name        = "${module.golden_ami_lookup.ami_name_prefix}-distribution-configuration"
+  name        = "${local.output_image_prefix}-distribution-configuration"
   description = "Distribution Configuration for Amazon-Linux-2-based Golden AMI"
 
   distribution {
     ami_distribution_configuration {
       ami_tags = var.tags
-      name     = "${module.golden_ami_lookup.ami_name_prefix}-{{ imagebuilder:buildDate }}"
+      name     = "${local.output_image_prefix}-{{ imagebuilder:buildDate }}"
     }
     region = local.region
   }
@@ -130,7 +132,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   description           = "Infrastructure configuration for Amazon-Linux-2-based golden AMI pipeline"
   instance_profile_name = aws_iam_role.instance_profile.id
   instance_types        = ["t3.micro"]
-  name                  = "${module.golden_ami_lookup.ami_name_prefix}-infrastructure-configuration"
+  name                  = "${local.output_image_prefix}-infrastructure-configuration"
   security_group_ids = coalesce(
     var.security_group_ids,
     [for sg in aws_security_group.all_egress : sg.id]
@@ -177,18 +179,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     }
   }
 
-  block_device_mapping {
-    device_name = "/dev/sdf"
-
-    ebs {
-      kms_key_id            = data.aws_kms_key.volume_key.arn
-      delete_on_termination = false
-      volume_size           = 250
-      volume_type           = "gp2"
-    }
-  }
-
-  working_directory = "/var/tmp"
+  working_directory = "/tmp"
 
   # Build components
   component {
@@ -212,14 +203,14 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/eni-attachment-test-linux/x.x.x"
     parameter {
       name  = "WorkingPath"
-      value = "/var/tmp"
+      value = "/tmp"
     }
   }
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/yum-repository-test-linux/x.x.x"
   }
 
-  name         = "${module.golden_ami_lookup.ami_name_prefix}-recipe"
+  name         = "${local.output_image_prefix}-recipe"
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
   version      = "1.0.0"
 
@@ -229,7 +220,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   image_recipe_arn                 = aws_imagebuilder_image_recipe.golden_ami.arn
   infrastructure_configuration_arn = aws_imagebuilder_distribution_configuration.golden_ami.arn
-  name                             = "${module.golden_ami_lookup.ami_name_prefix}-pipeline"
+  name                             = "${local.output_image_prefix}-pipeline"
 
   schedule {
     schedule_expression                = var.pipeline_schedule_expression

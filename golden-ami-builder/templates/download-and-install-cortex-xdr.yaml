@@ -11,7 +11,7 @@ phases:
         maxAttempts: 3
         inputs:
           - source: 's3://${software_distribution_bucket_id}/dist/cortex/latest/cortex.conf'
-            destination: '/var/tmp/cortex.conf'
+            destination: '/tmp/cortex.conf'
       - name: DownloadAgent
         action: S3Download
         timeoutSeconds: 60
@@ -19,7 +19,7 @@ phases:
         maxAttempts: 3
         inputs:
           - source: 's3://${software_distribution_bucket_id}/dist/cortex/latest/cortex-agent.rpm'
-            destination: '/var/tmp/cortex-agent.rpm'
+            destination: '/tmp/cortex-agent.rpm'
       - name: Install
         action: ExecuteBash
         onFailure: Continue
