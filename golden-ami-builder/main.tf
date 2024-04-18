@@ -57,17 +57,6 @@ data "aws_iam_policy_document" "instance_profile" {
   statement {
     effect = "Allow"
     actions = [
-      "kms:Decrypt",
-      "kms:GenerateDataKey*",
-      "kms:DescribeKey"
-    ]
-    resources = [
-      var.software_distribution_bucket_key_arn
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
       /* arn:aws:imagebuilder:us-east-1:aws:component/eni-attachment-test-linux/x.x.x description:
       *
       * To perform this test, an IAM policy with the following actions is required:
@@ -98,6 +87,12 @@ resource "aws_iam_role" "instance_profile" {
 resource "aws_iam_role_policy" "instance_profile" {
   role   = aws_iam_role.instance_profile.name
   policy = data.aws_iam_policy_document.instance_profile.json
+}
+
+resource "aws_kms_grant" "instance_profile" {
+  key_id            = var.software_distribution_bucket_key_arn
+  operations        = ["Decrypt", "DescribeKey"]
+  grantee_principal = aws_iam_role.instance_profile.arn
 }
 
 resource "aws_security_group" "all_egress" {
