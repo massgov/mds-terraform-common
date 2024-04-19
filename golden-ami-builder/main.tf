@@ -18,10 +18,6 @@ locals {
   output_image_prefix = "ssr-golden-aws-linux-2"
 }
 
-module "golden_ami_lookup" {
-  source = "../golden-ami-lookup"
-}
-
 module "vpcread" {
   source   = "github.com/massgov/mds-terraform-common//vpcread?ref=1.0.88"
   vpc_name = var.vpc_name
