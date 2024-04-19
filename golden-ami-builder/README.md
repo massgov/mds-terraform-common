@@ -48,7 +48,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "distribution_buck
 }
 
 module "golden_ami_build" {
-  source = "github.com/massgov/mds-terraform-common//golden-ami-builder?ref=1.x"
+  source = "github.com/massgov/mds-terraform-common//golden-ami-builder?ref=1.0.88"
 
   # Identifier of bucket where binaries/libraries/etc required by the pipeline are stored
   software_distribution_bucket_id = aws_s3_bucket.distribution_bucket.id
