@@ -55,6 +55,17 @@ data "aws_iam_policy_document" "instance_profile" {
   statement {
     effect = "Allow"
     actions = [
+      "s3:ListBucket",
+      "s3:PutObject"
+    ]
+    resources = [
+      module.image_builder_logs.bucket_arn,
+      "${module.image_builder_logs.bucket_arn}/*"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
       /* arn:aws:imagebuilder:us-east-1:aws:component/eni-attachment-test-linux/x.x.x description:
       *
       * To perform this test, an IAM policy with the following actions is required:
