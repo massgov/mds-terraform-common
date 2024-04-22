@@ -15,7 +15,7 @@ locals {
   logs_bucket_suffix = "golden-ami-image-builder-logs"
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 
-  output_image_prefix = "ssr-golden-aws-linux-2"
+  output_image_prefix = var.name_prefix
 }
 
 module "vpcread" {
@@ -73,6 +73,11 @@ data "aws_iam_policy_document" "instance_profile" {
   }
 }
 
+resource "aws_iam_instance_profile" "instance_profile" {
+  name = "${local.output_image_prefix}-instance-profile"
+  role = aws_iam_role.instance_profile.name
+}
+
 resource "aws_iam_role" "instance_profile" {
   name               = "${local.output_image_prefix}-instance-profile"
   assume_role_policy = data.aws_iam_policy_document.instance_profile_assume.json
@@ -126,7 +131,7 @@ resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
 
 resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   description           = "Infrastructure configuration for Amazon-Linux-2-based golden AMI pipeline"
-  instance_profile_name = aws_iam_role.instance_profile.name
+  instance_profile_name = aws_iam_instance_profile.instance_profile.name
   instance_types        = ["t3.micro"]
   name                  = "${local.output_image_prefix}-infrastructure-configuration"
   security_group_ids = coalesce(
