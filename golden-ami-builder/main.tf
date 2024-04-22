@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "instance_profile" {
 }
 
 resource "aws_iam_role" "instance_profile" {
-  name               = local.output_image_prefix
+  name               = "${local.output_image_prefix}-instance-profile"
   assume_role_policy = data.aws_iam_policy_document.instance_profile_assume.json
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
@@ -215,7 +215,8 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
 resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   image_recipe_arn                 = aws_imagebuilder_image_recipe.golden_ami.arn
-  infrastructure_configuration_arn = aws_imagebuilder_distribution_configuration.golden_ami.arn
+  infrastructure_configuration_arn = aws_imagebuilder_infrastructure_configuration.golden_ami.arn
+  distribution_configuration_arn   = aws_imagebuilder_distribution_configuration.golden_ami.arn
   name                             = "${local.output_image_prefix}-pipeline"
 
   schedule {
