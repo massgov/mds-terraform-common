@@ -126,7 +126,7 @@ resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
 
 resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   description           = "Infrastructure configuration for Amazon-Linux-2-based golden AMI pipeline"
-  instance_profile_name = aws_iam_role.instance_profile.id
+  instance_profile_name = aws_iam_role.instance_profile.name
   instance_types        = ["t3.micro"]
   name                  = "${local.output_image_prefix}-infrastructure-configuration"
   security_group_ids = coalesce(
