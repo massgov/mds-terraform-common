@@ -174,6 +174,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
     ebs {
       kms_key_id            = data.aws_kms_key.volume_key.arn
+      encrypted             = true
       delete_on_termination = false
       volume_size           = 200
       volume_type           = "gp2"
