@@ -1,13 +1,3 @@
-variable "name_prefix" {
-  description = "Prefix to apply to names of resources created by this module"
-  type        = string
-  default     = "ssr-golden-aws-linux-2"
-  validation {
-    condition     = can(regex("^([a-z0-9]+-)*[a-z0-9]+$", var.name_prefix))
-    error_message = "Prefix should be an alphanumeric 'dash-case' string which does not start or end in a dash"
-  }
-}
-
 variable "software_distribution_bucket_id" {
   description = "Identifier of the S3 bucket used to distribute software required by Image Builder pipeline"
   type        = string

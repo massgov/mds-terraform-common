@@ -15,7 +15,7 @@ locals {
   logs_bucket_suffix = "golden-ami-image-builder-logs"
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 
-  output_image_prefix = var.name_prefix
+  output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
 }
 
 module "vpcread" {
