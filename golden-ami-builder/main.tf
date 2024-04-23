@@ -48,8 +48,8 @@ data "aws_iam_policy_document" "instance_profile" {
       "s3:GetObject"
     ]
     resources = [
-      "arn:aws:s3:::${var.software_distribution_bucket_id}",
-      "arn:aws:s3:::${var.software_distribution_bucket_id}/*"
+      var.software_distribution_bucket_arn,
+      "${var.software_distribution_bucket_arn}/*"
     ]
   }
   statement {
@@ -172,7 +172,7 @@ resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
   data = templatefile(
     "${path.module}/templates/download-and-install-cortex-xdr.yaml",
     {
-      software_distribution_bucket_id = var.software_distribution_bucket_id
+      software_distribution_bucket_arn = var.software_distribution_bucket_arn
     }
   )
   name     = "download-and-install-cortex-xdr"

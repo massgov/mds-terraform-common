@@ -8,8 +8,8 @@ variable "name_prefix" {
   }
 }
 
-variable "software_distribution_bucket_id" {
-  description = "Identifier of the S3 bucket used to distribute software required by Image Builder pipeline"
+variable "software_distribution_bucket_arn" {
+  description = "ARN of the S3 bucket used to distribute software required by Image Builder pipeline"
   type        = string
 }
 
