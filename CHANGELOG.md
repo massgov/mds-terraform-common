@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.89] - 2024-04-24
+
+- [Golden AMI Builder] Adds new module which sets up an Image Builder pipeline for creating an EOTSS-compliant Golden AMI.
+
 ## [1.0.88] - 2024-01-20
 
 - [Golden AMI Lookup] Fix a an incorrectly quoted variable type.
