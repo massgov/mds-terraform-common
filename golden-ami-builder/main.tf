@@ -164,7 +164,8 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
     }
   }
 
-  tags = var.tags
+  resource_tags = var.tags
+  tags          = var.tags
 }
 
 resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
