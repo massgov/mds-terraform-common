@@ -165,11 +165,11 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   }
 
   resource_tags = {
-    # 'createdby' is a reserved tag for instances created by Image Builder.
-    # Trying to set it here will kill deployments
-    for k,v in var.tags: k => v if lower(k) != "createdby"
+    # 'CreatedBy' and 'Ec2ImageBuilderArn' are reserved tags for instances created by
+    # Image Builder. Trying to provide either will kill deployments
+    for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], k)
   }
-  tags          = var.tags
+  tags = var.tags
 }
 
 resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
