@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.91] - 2024-04-25
+
+- [Golden AMI Lookup] Update regex to look up SSR Image Builder AMI instead
+
 ## [1.0.90] - 2024-04-25
 
 - [Golden AMI Builder] Adds new module which sets up an Image Builder pipeline for creating an EOTSS-compliant Golden AMI.
