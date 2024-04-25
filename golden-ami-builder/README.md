@@ -59,9 +59,12 @@ module "golden_ami_build" {
   # Name of VPC where build instance should be launched
   vpc_name = "My-Cool-VPC-NonProd"
 
-  # Custom tags will be applied in addition to any default tags specified at the provider level
-  tags = {
-    "jeepers" = "creepers"
-  }
+  tags = merge(
+    # When not passed in explicitly, default tags might not be applied to resources as expected
+    local.default_tags,
+    {
+      "jeepers" = "creepers"
+    }
+  )
 }
 ```
