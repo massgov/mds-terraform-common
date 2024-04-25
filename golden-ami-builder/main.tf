@@ -167,7 +167,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   resource_tags = {
     # 'CreatedBy' and 'Ec2ImageBuilderArn' are reserved tags for instances created by
     # Image Builder. Trying to provide either will kill deployments
-    for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], k)
+    for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], lower(k))
   }
   tags = var.tags
 }
