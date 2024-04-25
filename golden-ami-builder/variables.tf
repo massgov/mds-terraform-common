@@ -38,7 +38,10 @@ variable "pipeline_schedule_expression" {
 }
 
 variable "tags" {
-  description = "Map of key-value pairs used to tag resources created by this module"
+  description = <<EOF
+    Map of key-value pairs used to tag resources created by this module. Provider-level default tags may not be applied to infrastructure as
+    expected; make sure to explicitly pass in all desired tags (default: {})
+  EOF
   type        = map(string)
   default     = {}
 }
