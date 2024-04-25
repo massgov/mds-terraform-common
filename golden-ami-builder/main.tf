@@ -164,7 +164,10 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
     }
   }
 
-  resource_tags = var.tags
+  resource_tags = {
+    # 'createdby' is a reserved tag for instances created by Image Builder
+    for k,v in var.tags: k => v if lower(k) != "createdby"
+  }
   tags          = var.tags
 }
 
