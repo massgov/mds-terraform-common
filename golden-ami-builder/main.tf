@@ -165,7 +165,8 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   }
 
   resource_tags = {
-    # 'createdby' is a reserved tag for instances created by Image Builder
+    # 'createdby' is a reserved tag for instances created by Image Builder.
+    # Trying to set it here will kill deployments
     for k,v in var.tags: k => v if lower(k) != "createdby"
   }
   tags          = var.tags
