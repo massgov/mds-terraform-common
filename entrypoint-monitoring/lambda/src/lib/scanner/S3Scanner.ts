@@ -44,7 +44,7 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       this.logger.debug(`- ${bucketName} bucket.`)
 
       // CloudFront links to an S3 bucket the following way.
-      const cfOriginPoint = `${bucketName}.s3.amazonaws.com`
+      const cfOriginPoint = `${bucketName}.s3.${region}.amazonaws.com`;
       interconnections.addPointToServiceLink(
         cfOriginPoint,
         this.serviceType,
