@@ -2,7 +2,7 @@
   "name": "massgov-aws-entrypoint-monitor",
   "version": "1.0.0",
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node20": "^20.1.4",
     "@types/aws-lambda": "^8.10.110",
     "@types/node": "^18.8.3",
     "dotenv": "^16.0.3",
@@ -21,6 +21,6 @@
     "dev": "node scripts/build-local.js && node -r dotenv/config dist/local.js"
   },
   "volta": {
-    "node": "16.19.1"
+    "node": "20.13.0"
   }
 }

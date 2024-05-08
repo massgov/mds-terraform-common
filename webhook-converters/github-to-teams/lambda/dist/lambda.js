@@ -13030,7 +13030,6 @@ var require_Aws_query = __commonJS({
       return (0, smithy_client_1.decorateServiceException)(exception, body);
     };
     var se_AssumeRoleRequest = (input, context) => {
-      var _a, _b, _c, _d;
       const entries = {};
       if (input.RoleArn != null) {
         entries["RoleArn"] = input.RoleArn;
@@ -13040,7 +13039,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.PolicyArns != null) {
         const memberEntries = se_policyDescriptorListType(input.PolicyArns, context);
-        if (((_a = input.PolicyArns) == null ? void 0 : _a.length) === 0) {
+        if (input.PolicyArns?.length === 0) {
           entries.PolicyArns = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13056,7 +13055,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.Tags != null) {
         const memberEntries = se_tagListType(input.Tags, context);
-        if (((_b = input.Tags) == null ? void 0 : _b.length) === 0) {
+        if (input.Tags?.length === 0) {
           entries.Tags = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13066,7 +13065,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.TransitiveTagKeys != null) {
         const memberEntries = se_tagKeyListType(input.TransitiveTagKeys, context);
-        if (((_c = input.TransitiveTagKeys) == null ? void 0 : _c.length) === 0) {
+        if (input.TransitiveTagKeys?.length === 0) {
           entries.TransitiveTagKeys = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13088,7 +13087,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.ProvidedContexts != null) {
         const memberEntries = se_ProvidedContextsListType(input.ProvidedContexts, context);
-        if (((_d = input.ProvidedContexts) == null ? void 0 : _d.length) === 0) {
+        if (input.ProvidedContexts?.length === 0) {
           entries.ProvidedContexts = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13099,7 +13098,6 @@ var require_Aws_query = __commonJS({
       return entries;
     };
     var se_AssumeRoleWithSAMLRequest = (input, context) => {
-      var _a;
       const entries = {};
       if (input.RoleArn != null) {
         entries["RoleArn"] = input.RoleArn;
@@ -13112,7 +13110,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.PolicyArns != null) {
         const memberEntries = se_policyDescriptorListType(input.PolicyArns, context);
-        if (((_a = input.PolicyArns) == null ? void 0 : _a.length) === 0) {
+        if (input.PolicyArns?.length === 0) {
           entries.PolicyArns = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13129,7 +13127,6 @@ var require_Aws_query = __commonJS({
       return entries;
     };
     var se_AssumeRoleWithWebIdentityRequest = (input, context) => {
-      var _a;
       const entries = {};
       if (input.RoleArn != null) {
         entries["RoleArn"] = input.RoleArn;
@@ -13145,7 +13142,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.PolicyArns != null) {
         const memberEntries = se_policyDescriptorListType(input.PolicyArns, context);
-        if (((_a = input.PolicyArns) == null ? void 0 : _a.length) === 0) {
+        if (input.PolicyArns?.length === 0) {
           entries.PolicyArns = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13180,7 +13177,6 @@ var require_Aws_query = __commonJS({
       return entries;
     };
     var se_GetFederationTokenRequest = (input, context) => {
-      var _a, _b;
       const entries = {};
       if (input.Name != null) {
         entries["Name"] = input.Name;
@@ -13190,7 +13186,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.PolicyArns != null) {
         const memberEntries = se_policyDescriptorListType(input.PolicyArns, context);
-        if (((_a = input.PolicyArns) == null ? void 0 : _a.length) === 0) {
+        if (input.PolicyArns?.length === 0) {
           entries.PolicyArns = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13203,7 +13199,7 @@ var require_Aws_query = __commonJS({
       }
       if (input.Tags != null) {
         const memberEntries = se_tagListType(input.Tags, context);
-        if (((_b = input.Tags) == null ? void 0 : _b.length) === 0) {
+        if (input.Tags?.length === 0) {
           entries.Tags = [];
         }
         Object.entries(memberEntries).forEach(([key, value]) => {
@@ -13584,8 +13580,7 @@ var require_Aws_query = __commonJS({
     };
     var buildFormUrlencodedString = (formEntries) => Object.entries(formEntries).map(([key, value]) => (0, smithy_client_1.extendedEncodeURIComponent)(key) + "=" + (0, smithy_client_1.extendedEncodeURIComponent)(value)).join("&");
     var loadQueryErrorCode = (output, data) => {
-      var _a;
-      if (((_a = data.Error) == null ? void 0 : _a.Code) !== void 0) {
+      if (data.Error?.Code !== void 0) {
         return data.Error.Code;
       }
       if (output.statusCode == 404) {
@@ -14973,16 +14968,16 @@ var require_runtimeConfig_shared = __commonJS({
     var getRuntimeConfig = (config) => {
       return {
         apiVersion: "2019-06-10",
-        base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
-        base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
-        disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
-        endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
-        extensions: (config == null ? void 0 : config.extensions) ?? [],
-        logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
-        serviceId: (config == null ? void 0 : config.serviceId) ?? "SSO",
-        urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
-        utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
-        utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+        base64Decoder: config?.base64Decoder ?? util_base64_1.fromBase64,
+        base64Encoder: config?.base64Encoder ?? util_base64_1.toBase64,
+        disableHostPrefix: config?.disableHostPrefix ?? false,
+        endpointProvider: config?.endpointProvider ?? endpointResolver_1.defaultEndpointResolver,
+        extensions: config?.extensions ?? [],
+        logger: config?.logger ?? new smithy_client_1.NoOpLogger(),
+        serviceId: config?.serviceId ?? "SSO",
+        urlParser: config?.urlParser ?? url_parser_1.parseUrl,
+        utf8Decoder: config?.utf8Decoder ?? util_utf8_1.fromUtf8,
+        utf8Encoder: config?.utf8Encoder ?? util_utf8_1.toUtf8
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -15127,19 +15122,19 @@ var require_runtimeConfig = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
-        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: config?.bodyLengthChecker ?? util_body_length_node_1.calculateBodyLength,
+        defaultUserAgentProvider: config?.defaultUserAgentProvider ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: config?.maxAttempts ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: config?.region ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: config?.requestHandler ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: config?.retryMode ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: config?.sha256 ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: config?.streamCollector ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: config?.useDualstackEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: config?.useFipsEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -15341,7 +15336,7 @@ var require_SSOClient = __commonJS({
         const _config_4 = (0, middleware_retry_1.resolveRetryConfig)(_config_3);
         const _config_5 = (0, middleware_host_header_1.resolveHostHeaderConfig)(_config_4);
         const _config_6 = (0, middleware_user_agent_1.resolveUserAgentConfig)(_config_5);
-        const _config_7 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_6, (configuration == null ? void 0 : configuration.extensions) || []);
+        const _config_7 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_6, configuration?.extensions || []);
         super(_config_7);
         this.config = _config_7;
         this.middlewareStack.use((0, middleware_retry_1.getRetryPlugin)(this.config));
@@ -15488,7 +15483,7 @@ var require_Aws_restJson1 = __commonJS({
       const headers = (0, smithy_client_1.map)({}, isSerializableHeaderValue, {
         "x-amz-sso_bearer_token": input.accessToken
       });
-      const resolvedPath = `${(basePath == null ? void 0 : basePath.endsWith("/")) ? basePath.slice(0, -1) : basePath || ""}/federation/credentials`;
+      const resolvedPath = `${basePath?.endsWith("/") ? basePath.slice(0, -1) : basePath || ""}/federation/credentials`;
       const query = (0, smithy_client_1.map)({
         role_name: [, (0, smithy_client_1.expectNonNull)(input.roleName, `roleName`)],
         account_id: [, (0, smithy_client_1.expectNonNull)(input.accountId, `accountId`)]
@@ -15511,7 +15506,7 @@ var require_Aws_restJson1 = __commonJS({
       const headers = (0, smithy_client_1.map)({}, isSerializableHeaderValue, {
         "x-amz-sso_bearer_token": input.accessToken
       });
-      const resolvedPath = `${(basePath == null ? void 0 : basePath.endsWith("/")) ? basePath.slice(0, -1) : basePath || ""}/assignment/roles`;
+      const resolvedPath = `${basePath?.endsWith("/") ? basePath.slice(0, -1) : basePath || ""}/assignment/roles`;
       const query = (0, smithy_client_1.map)({
         next_token: [, input.nextToken],
         max_result: [() => input.maxResults !== void 0, () => input.maxResults.toString()],
@@ -15535,7 +15530,7 @@ var require_Aws_restJson1 = __commonJS({
       const headers = (0, smithy_client_1.map)({}, isSerializableHeaderValue, {
         "x-amz-sso_bearer_token": input.accessToken
       });
-      const resolvedPath = `${(basePath == null ? void 0 : basePath.endsWith("/")) ? basePath.slice(0, -1) : basePath || ""}/assignment/accounts`;
+      const resolvedPath = `${basePath?.endsWith("/") ? basePath.slice(0, -1) : basePath || ""}/assignment/accounts`;
       const query = (0, smithy_client_1.map)({
         next_token: [, input.nextToken],
         max_result: [() => input.maxResults !== void 0, () => input.maxResults.toString()]
@@ -15558,7 +15553,7 @@ var require_Aws_restJson1 = __commonJS({
       const headers = (0, smithy_client_1.map)({}, isSerializableHeaderValue, {
         "x-amz-sso_bearer_token": input.accessToken
       });
-      const resolvedPath = `${(basePath == null ? void 0 : basePath.endsWith("/")) ? basePath.slice(0, -1) : basePath || ""}/logout`;
+      const resolvedPath = `${basePath?.endsWith("/") ? basePath.slice(0, -1) : basePath || ""}/logout`;
       let body;
       return new protocol_http_1.HttpRequest({
         protocol,
@@ -18002,16 +17997,16 @@ var require_runtimeConfig_shared2 = __commonJS({
     var getRuntimeConfig = (config) => {
       return {
         apiVersion: "2011-06-15",
-        base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
-        base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
-        disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
-        endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
-        extensions: (config == null ? void 0 : config.extensions) ?? [],
-        logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
-        serviceId: (config == null ? void 0 : config.serviceId) ?? "STS",
-        urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
-        utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
-        utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+        base64Decoder: config?.base64Decoder ?? util_base64_1.fromBase64,
+        base64Encoder: config?.base64Encoder ?? util_base64_1.toBase64,
+        disableHostPrefix: config?.disableHostPrefix ?? false,
+        endpointProvider: config?.endpointProvider ?? endpointResolver_1.defaultEndpointResolver,
+        extensions: config?.extensions ?? [],
+        logger: config?.logger ?? new smithy_client_1.NoOpLogger(),
+        serviceId: config?.serviceId ?? "STS",
+        urlParser: config?.urlParser ?? url_parser_1.parseUrl,
+        utf8Decoder: config?.utf8Decoder ?? util_utf8_1.fromUtf8,
+        utf8Encoder: config?.utf8Encoder ?? util_utf8_1.toUtf8
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -18052,20 +18047,20 @@ var require_runtimeConfig2 = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
-        credentialDefaultProvider: (config == null ? void 0 : config.credentialDefaultProvider) ?? (0, defaultStsRoleAssumers_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
-        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: config?.bodyLengthChecker ?? util_body_length_node_1.calculateBodyLength,
+        credentialDefaultProvider: config?.credentialDefaultProvider ?? (0, defaultStsRoleAssumers_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
+        defaultUserAgentProvider: config?.defaultUserAgentProvider ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: config?.maxAttempts ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: config?.region ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: config?.requestHandler ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: config?.retryMode ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: config?.sha256 ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: config?.streamCollector ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: config?.useDualstackEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: config?.useFipsEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -18132,7 +18127,7 @@ var require_STSClient = __commonJS({
         const _config_5 = (0, middleware_host_header_1.resolveHostHeaderConfig)(_config_4);
         const _config_6 = (0, middleware_sdk_sts_1.resolveStsAuthConfig)(_config_5, { stsClientCtor: STSClient });
         const _config_7 = (0, middleware_user_agent_1.resolveUserAgentConfig)(_config_6);
-        const _config_8 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_7, (configuration == null ? void 0 : configuration.extensions) || []);
+        const _config_8 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_7, configuration?.extensions || []);
         super(_config_8);
         this.config = _config_8;
         this.middlewareStack.use((0, middleware_retry_1.getRetryPlugin)(this.config));
@@ -18704,16 +18699,16 @@ var require_runtimeConfig_shared3 = __commonJS({
     var getRuntimeConfig = (config) => {
       return {
         apiVersion: "2014-11-06",
-        base64Decoder: (config == null ? void 0 : config.base64Decoder) ?? util_base64_1.fromBase64,
-        base64Encoder: (config == null ? void 0 : config.base64Encoder) ?? util_base64_1.toBase64,
-        disableHostPrefix: (config == null ? void 0 : config.disableHostPrefix) ?? false,
-        endpointProvider: (config == null ? void 0 : config.endpointProvider) ?? endpointResolver_1.defaultEndpointResolver,
-        extensions: (config == null ? void 0 : config.extensions) ?? [],
-        logger: (config == null ? void 0 : config.logger) ?? new smithy_client_1.NoOpLogger(),
-        serviceId: (config == null ? void 0 : config.serviceId) ?? "SSM",
-        urlParser: (config == null ? void 0 : config.urlParser) ?? url_parser_1.parseUrl,
-        utf8Decoder: (config == null ? void 0 : config.utf8Decoder) ?? util_utf8_1.fromUtf8,
-        utf8Encoder: (config == null ? void 0 : config.utf8Encoder) ?? util_utf8_1.toUtf8
+        base64Decoder: config?.base64Decoder ?? util_base64_1.fromBase64,
+        base64Encoder: config?.base64Encoder ?? util_base64_1.toBase64,
+        disableHostPrefix: config?.disableHostPrefix ?? false,
+        endpointProvider: config?.endpointProvider ?? endpointResolver_1.defaultEndpointResolver,
+        extensions: config?.extensions ?? [],
+        logger: config?.logger ?? new smithy_client_1.NoOpLogger(),
+        serviceId: config?.serviceId ?? "SSM",
+        urlParser: config?.urlParser ?? url_parser_1.parseUrl,
+        utf8Decoder: config?.utf8Decoder ?? util_utf8_1.fromUtf8,
+        utf8Encoder: config?.utf8Encoder ?? util_utf8_1.toUtf8
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -18754,20 +18749,20 @@ var require_runtimeConfig3 = __commonJS({
         ...config,
         runtime: "node",
         defaultsMode,
-        bodyLengthChecker: (config == null ? void 0 : config.bodyLengthChecker) ?? util_body_length_node_1.calculateBodyLength,
-        credentialDefaultProvider: (config == null ? void 0 : config.credentialDefaultProvider) ?? (0, client_sts_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
-        defaultUserAgentProvider: (config == null ? void 0 : config.defaultUserAgentProvider) ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
-        maxAttempts: (config == null ? void 0 : config.maxAttempts) ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-        region: (config == null ? void 0 : config.region) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
-        requestHandler: (config == null ? void 0 : config.requestHandler) ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
-        retryMode: (config == null ? void 0 : config.retryMode) ?? (0, node_config_provider_1.loadConfig)({
+        bodyLengthChecker: config?.bodyLengthChecker ?? util_body_length_node_1.calculateBodyLength,
+        credentialDefaultProvider: config?.credentialDefaultProvider ?? (0, client_sts_1.decorateDefaultCredentialProvider)(credential_provider_node_1.defaultProvider),
+        defaultUserAgentProvider: config?.defaultUserAgentProvider ?? (0, util_user_agent_node_1.defaultUserAgent)({ serviceId: clientSharedValues.serviceId, clientVersion: package_json_1.default.version }),
+        maxAttempts: config?.maxAttempts ?? (0, node_config_provider_1.loadConfig)(middleware_retry_1.NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
+        region: config?.region ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_REGION_CONFIG_OPTIONS, config_resolver_1.NODE_REGION_CONFIG_FILE_OPTIONS),
+        requestHandler: config?.requestHandler ?? new node_http_handler_1.NodeHttpHandler(defaultConfigProvider),
+        retryMode: config?.retryMode ?? (0, node_config_provider_1.loadConfig)({
           ...middleware_retry_1.NODE_RETRY_MODE_CONFIG_OPTIONS,
           default: async () => (await defaultConfigProvider()).retryMode || util_retry_1.DEFAULT_RETRY_MODE
         }),
-        sha256: (config == null ? void 0 : config.sha256) ?? hash_node_1.Hash.bind(null, "sha256"),
-        streamCollector: (config == null ? void 0 : config.streamCollector) ?? node_http_handler_1.streamCollector,
-        useDualstackEndpoint: (config == null ? void 0 : config.useDualstackEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
-        useFipsEndpoint: (config == null ? void 0 : config.useFipsEndpoint) ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
+        sha256: config?.sha256 ?? hash_node_1.Hash.bind(null, "sha256"),
+        streamCollector: config?.streamCollector ?? node_http_handler_1.streamCollector,
+        useDualstackEndpoint: config?.useDualstackEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS),
+        useFipsEndpoint: config?.useFipsEndpoint ?? (0, node_config_provider_1.loadConfig)(config_resolver_1.NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS)
       };
     };
     exports.getRuntimeConfig = getRuntimeConfig;
@@ -18834,7 +18829,7 @@ var require_SSMClient = __commonJS({
         const _config_5 = (0, middleware_host_header_1.resolveHostHeaderConfig)(_config_4);
         const _config_6 = (0, middleware_signing_1.resolveAwsAuthConfig)(_config_5);
         const _config_7 = (0, middleware_user_agent_1.resolveUserAgentConfig)(_config_6);
-        const _config_8 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_7, (configuration == null ? void 0 : configuration.extensions) || []);
+        const _config_8 = (0, runtimeExtensions_1.resolveRuntimeExtensions)(_config_7, configuration?.extensions || []);
         super(_config_8);
         this.config = _config_8;
         this.middlewareStack.use((0, middleware_retry_1.getRetryPlugin)(this.config));
@@ -48165,6 +48160,9 @@ var ParamsSchema = z.object({
 
 // src/lib/params/ConfigurableParamsReader.ts
 var ConfigurableParamsReader = class {
+  region;
+  paramPrefix;
+  promise;
   constructor({
     region,
     paramPrefix
@@ -48182,7 +48180,6 @@ var ConfigurableParamsReader = class {
     return this.promise;
   }
   async loadParams() {
-    var _a;
     const normalizedPrefix = this.paramPrefix.replace(/\/+$/, "");
     const teamsWebhookParamName = `${normalizedPrefix}/teams-webhook`;
     const paramNameToKeyMap = {
@@ -48196,7 +48193,7 @@ var ConfigurableParamsReader = class {
     });
     const response = await client.send(command);
     const result = {};
-    if ((_a = response.Parameters) == null ? void 0 : _a.length) {
+    if (response.Parameters?.length) {
       for (const param of response.Parameters) {
         const paramName = param.Name;
         if (paramName === void 0) {
@@ -48391,6 +48388,8 @@ var logLevelNumbers = {
   error: 3
 };
 var ConsoleLogger = class {
+  minLevel;
+  minLevelNumber;
   constructor(minLevel = "log") {
     this.minLevel = minLevel;
     this.minLevelNumber = logLevelNumbers[minLevel];
