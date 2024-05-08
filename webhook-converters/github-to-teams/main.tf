@@ -31,7 +31,7 @@ resource "random_password" "path_token" {
 }
 
 module "lambda" {
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.46"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.90"
   package = data.archive_file.lambda_package.output_path
   runtime = "nodejs20.x"
   handler = "lambda.default"

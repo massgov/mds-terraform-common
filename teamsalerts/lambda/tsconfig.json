@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "experimentalDecorators": true,
     "resolveJsonModule": true,
@@ -18,7 +18,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "useUnknownInCatchVariables": true,
-    "types": ["node"]
-  },
-  "exclude": ["node_modules"]
+    "types": ["node"],
+    "rootDir": "./",
+  }
 }
