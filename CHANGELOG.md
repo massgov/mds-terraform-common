@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.91] - 2024-05-09
+
+- [Github to Teams] Upgrade lambda runtime to node20
+- [Teams Alerts] Upgrade lambda runtime to node20
+- [Entrypoint Monitor] Upgrade lambda runtime to node20
+- [RDS] Upgrade backup and cleanup lambda runtimes to node20
+
 ## [1.0.90] - 2024-04-25
 
 - [Golden AMI Builder] Adds new module which sets up an Image Builder pipeline for creating an EOTSS-compliant Golden AMI.
