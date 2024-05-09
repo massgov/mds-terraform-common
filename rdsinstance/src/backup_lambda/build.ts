@@ -14,7 +14,7 @@ const run = async (): Promise<void> => {
     entryPoints: ["index.ts"],
     bundle: true,
     platform: "node",
-    target: "node16",
+    target: "node20",
     outfile: path.join(tmp, "index.js"),
   });
   const archivePath = path.join(
