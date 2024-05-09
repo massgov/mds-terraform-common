@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
 }
 
 module "monitor_lambda" {
-  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.90"
+  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
   package                = data.archive_file.monitor_package.output_path
   runtime                = "nodejs20.x"
   handler                = "lambda.default"
