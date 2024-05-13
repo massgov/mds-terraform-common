@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.92] - 2024-05-13
+
+- [RDS] Add option for RDS auto scaling with max_allocatable_storage
+
 ## [1.0.91] - 2024-04-25
 
 - [Golden AMI Lookup] Update regex to look up SSR Image Builder AMI instead
