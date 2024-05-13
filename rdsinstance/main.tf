@@ -11,6 +11,7 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_db_instance" "default" {
   identifier                            = var.name
   allocated_storage                     = var.allocated_storage
+  max_allocated_storage                 = var.max_allocated_storage
   storage_type                          = "gp2"
   engine                                = var.engine
   engine_version                        = var.engine_version
