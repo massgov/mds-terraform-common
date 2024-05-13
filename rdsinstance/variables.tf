@@ -63,6 +63,12 @@ variable "allocated_storage" {
   default     = 10
 }
 
+variable "max_allocated_storage" {
+  type        = string
+  description = "If defined, will enable Storage Autoscaling. Must be higher than allocated_storage."
+  default     = null
+}
+
 variable "storage_encrypted" {
   type        = string
   description = "Boolean indicating whether to encrypt the disk or not"
