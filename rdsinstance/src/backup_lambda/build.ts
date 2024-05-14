@@ -16,6 +16,7 @@ const run = async (): Promise<void> => {
     platform: "node",
     target: "node20",
     outfile: path.join(tmp, "index.js"),
+    external: ["@aws-sdk/client-rds"]
   });
   const archivePath = path.join(
     __dirname,

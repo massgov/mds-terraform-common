@@ -10,6 +10,7 @@
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@aws-sdk/client-rds": "^3.575.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/archiver": "^5.3.2",
     "@types/aws-lambda": "^8.10.114",
