@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.94] - 2024-05-21
+
+- [RDS] Add `ca_cert_identifier` variable.
+
 ## [1.0.93] - 2024-05-13
 
 - [Github to Teams] Upgrade lambda runtime to node20

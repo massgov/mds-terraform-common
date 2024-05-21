@@ -32,6 +32,8 @@ resource "aws_db_instance" "default" {
   allow_major_version_upgrade           = var.allow_major_version_upgrade
   apply_immediately                     = var.apply_immediately
   iam_database_authentication_enabled   = var.iam_database_authentication_enabled
+  ca_cert_identifier                    = var.ca_cert_identifier
+
   vpc_security_group_ids = flatten([
     var.security_groups,
     aws_security_group.db.id,
