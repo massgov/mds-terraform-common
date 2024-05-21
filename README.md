@@ -30,3 +30,22 @@ These Terraform modules are used by other Terraform code.  Development happens i
 * Update the changelog to categorize items as being in the correct release.  Commit this change directly to `master`.
 * Tag a new release using Semantic versioning (breaking changes are a major release).
 * Merge `master` back to `develop`
+
+Contributing
+------------
+
+When you update a module in this repository, please update [CHANGELOG.md](./CHANGELOG.MD) with a description of the change made to each module headed under a new version tag and the release date. For example, if the current version tag is `1.0.99` and you're planning to release changes to [asg](./asg/) and [ecscluster](./ecscluster) on January 1 2025, a possible CHANGELOG line might look like
+
+```md
+## [1.0.100] - 2025-01-01
+
+- [ASG] Replace `volume_encryption` and `volume_size` variables with `block_devices` variable
+- [ECS Cluster] Add `include_ami_device_names` variable to allow importing block device specifications from AMI.
+```
+
+Once the change is squash-merged into `1.x`, tag and push the commit associated with the new version:
+
+```sh
+git tag -a 1.0.100 -m 'Updates ASG and ECS modules to allow module consumers to import block device specs' <commit hash>
+git push --tags
+```

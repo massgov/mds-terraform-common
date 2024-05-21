@@ -2,14 +2,15 @@
   "name": "massgov-aws-sns-to-teams",
   "version": "1.0.0",
   "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
     "@types/archiver": "^5.3.1",
     "@types/aws-lambda": "^8.10.110",
     "@types/node": "^18.13.0",
     "archiver": "^5.3.1",
     "esbuild": "^0.17.8",
     "prettier": "^2.8.4",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "assert": "^2.0.0",
@@ -17,10 +18,10 @@
     "streaming-iterables": "^7.1.0"
   },
   "scripts": {
-    "build": "ts-node bin/build.ts",
+    "build": "npx ts-node bin/build.ts",
     "prettier": "npx prettier --write '**/*.{js,jsx,ts,tsx,json}'"
   },
   "volta": {
-    "node": "16.19.0"
+    "node": "20.13.0"
   }
 }

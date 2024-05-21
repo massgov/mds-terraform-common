@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.93] - 2024-05-13
+
+- [Github to Teams] Upgrade lambda runtime to node20
+- [Teams Alerts] Upgrade lambda runtime to node20
+- [Entrypoint Monitor] Upgrade lambda runtime to node20
+- [RDS] Upgrade backup and cleanup lambda runtimes to node20
+
 ## [1.0.92] - 2024-05-13
 
 - [RDS] Add option for RDS auto scaling with max_allocatable_storage

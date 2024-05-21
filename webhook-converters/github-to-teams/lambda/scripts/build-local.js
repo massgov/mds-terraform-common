@@ -5,7 +5,7 @@ require('esbuild')
     ],
     bundle: true,
     platform: 'node',
-    target: 'node16',
+    target: 'node20',
     outfile: 'dist/local.js',
   })
   .catch(() => process.exit(1))

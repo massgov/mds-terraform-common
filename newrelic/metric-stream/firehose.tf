@@ -33,18 +33,16 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
       log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
       log_stream_name = aws_cloudwatch_log_stream.firehose_logs_http.name
     }
-  }
 
-  # NOTE: When we upgrade the aws terraform provider to >=5, this needs to be
-  # moved inside the http_endpoint_configuration
-  s3_configuration {
-    bucket_arn = module.firehose_bucket.bucket_arn
-    role_arn   = aws_iam_role.firehose_role.arn
+    s3_configuration {
+      bucket_arn = module.firehose_bucket.bucket_arn
+      role_arn   = aws_iam_role.firehose_role.arn
 
-    cloudwatch_logging_options {
-      enabled         = true
-      log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.name
+      cloudwatch_logging_options {
+        enabled         = true
+        log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
+        log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.name
+      }
     }
   }
 
