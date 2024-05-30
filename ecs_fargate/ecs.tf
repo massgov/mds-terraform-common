@@ -17,7 +17,7 @@ locals {
       logConfiguration : {
         logDriver : "awslogs",
         options : {
-          awslogs-group : aws_cloudwatch_log_group.main.name
+          awslogs-group : coalesce(t.log_group_name, aws_cloudwatch_log_group.main[t.container_name].name)
           awslogs-region : data.aws_region.current.name,
           awslogs-stream-prefix : "ecs"
         }
@@ -27,6 +27,11 @@ locals {
       cpu : 0
     }
   ]
+  fargate_compute = {
+    ".25_.5" = { cpu : 256, memory : 512 }
+    ".25_1"  = { cpu : 256, memory : 1024 }
+    ".25_2"  = { cpu : 256, memory : 2056 }
+  }
 }
 
 data "aws_ecs_cluster" "main" {
@@ -39,8 +44,8 @@ resource "aws_ecs_task_definition" "main" {
   count              = length(var.ecs_task_def_custom) == 0 ? 1 : 0
   execution_role_arn = var.ecs_task_def.execution_role_arn
   task_role_arn      = var.ecs_task_def.task_role_arn
-  cpu                = var.ecs_task_def.cpu
-  memory             = var.ecs_task_def.memory
+  cpu                = local.fargate_compute[var.ecs_compute_config].cpu
+  memory             = local.fargate_compute[var.ecs_compute_config].memory
   family             = var.ecs_task_def.family
 
   container_definitions = jsonencode(local.task_containers)
@@ -187,7 +192,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_up" {
 
 resource "aws_sns_topic" "cb" {
   count = var.ecs_circuit_breaker ? 1 : 0
-  name = join("", [var.ecs_service_name, "CB", "Topic"])
+  name  = join("", [var.ecs_service_name, "CB", "Topic"])
   tags = merge(
     var.tags,
     {
@@ -204,13 +209,13 @@ resource "aws_cloudwatch_event_rule" "cb" {
   description = "Capture and alert when Circuit Break is rolling back"
 
   event_pattern = jsonencode({
-    "source": ["aws.ecs"],
-    "detail-type": ["ECS Deployment State Change"],
-    "resources": [
+    "source" : ["aws.ecs"],
+    "detail-type" : ["ECS Deployment State Change"],
+    "resources" : [
       aws_ecs_service.main.id
     ]
-    "detail": {
-      "eventName": ["SERVICE_DEPLOYMENT_FAILED"]
+    "detail" : {
+      "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]
     }
   })
   tags = merge(
@@ -222,7 +227,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
 }
 
 resource "aws_cloudwatch_event_target" "sns" {
-  count = var.ecs_circuit_breaker  ? 1 : 0
+  count = var.ecs_circuit_breaker ? 1 : 0
 
   rule      = aws_cloudwatch_event_rule.cb[0].name
   target_id = "SendToSNS"
@@ -230,7 +235,7 @@ resource "aws_cloudwatch_event_target" "sns" {
 }
 
 resource "aws_sns_topic_subscription" "cb_email_targets" {
-  count = length(var.ecs_circuit_breaker_alert_email)
+  count     = length(var.ecs_circuit_breaker_alert_email)
   topic_arn = aws_sns_topic.cb[0].arn
   protocol  = "email"
   endpoint  = var.ecs_circuit_breaker_alert_email[count.index]
