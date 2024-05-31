@@ -225,7 +225,12 @@ variable "ecs_load_balancers" {
 }
 
 variable "ecs_compute_config" {
-  description = "Fargate Compute Configuration: "
+  description = <<EOH
+    Fargate Compute Configuration:
+    .25_.5 = { cpu : 256, memory : 512 }
+    .25_1 = { cpu : 256, memory : 1024 }
+    .25_2 = { cpu : 256, memory : 2056 }
+  EOH
   type        = string
 }
 
