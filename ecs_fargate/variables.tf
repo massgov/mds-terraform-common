@@ -53,8 +53,6 @@ variable "ecs_task_def" {
   type = object({
     execution_role_arn = string
     task_role_arn      = string
-    cpu                = number
-    memory             = number
     family             = string
     containers = list(object({
       container_name = string
