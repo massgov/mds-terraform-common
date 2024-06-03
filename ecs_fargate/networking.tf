@@ -41,13 +41,37 @@ resource "aws_lb_listener_rule" "static" {
     target_group_arn = aws_lb_target_group.alb[each.key].arn
   }
 
-  condition {
+  dynamic "condition" {
+    for_each = try(lookup(each.value, "conditions").host_header, null ) != null ? [1] : []
 
-    host_header {
-      values = lookup(each.value.conditions, "host_header")
+    content {
+      host_header {
+        values = lookup(each.value, "conditions").host_header
+      }
     }
-
   }
+
+  dynamic "condition" {
+    for_each = try(lookup(each.value, "conditions").path_pattern, null ) != null ? [1] : []
+
+    content {
+      host_header {
+        values = lookup(each.value, "conditions").path_pattern
+      }
+    }
+  }
+
+  dynamic "condition" {
+    for_each = try(lookup(each.value, "conditions").http_header, null ) != null ? [1] : []
+    content {
+      http_header {
+        values = lookup(each.value, "conditions").http_header.values
+        http_header_name = lookup(each.value, "conditions").http_header.http_header_name
+      }
+    }
+  }
+
+
 
   lifecycle { ignore_changes = [action] }
 }

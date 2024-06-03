@@ -49,62 +49,39 @@ variable "ecs_task_def_custom" {
   default     = ""
 }
 variable "ecs_task_def" {
-  description = "Object to create Task Def"
+  description = <<EOH
+  Object to create Task Def:
+
+  Optionals:
+    log_group_name  -> if null, will create a log group for the container and place in path of '/ecs/<workspace>/<cluster_name>/<service_name>/<container_name>
+    environment_vars -> key, value pair
+    secret_vars -> key, value pair (should only include ssm name: prepends 'arn:aws:ssm:<aws_region>:<account_id>:parameter/' to value
+  EOH
   type = object({
     execution_role_arn = string
     task_role_arn      = string
     family             = string
     containers = list(object({
       container_name = string
-      log_group_name = string
-      environment_vars = list(object({
-        name  = string
-        value = string
-      }))
-      secret_vars = list(object({
-        name      = string
-        valueFrom = string
-      }))
+
       image_name = string
       port_mappings = list(object({
         containerPort = number
         protocol      = string
       }))
-    }))
+      # optionals
+      log_group_name = optional(string)
+      environment_vars = optional(list(object({
+        name  = string
+        value = string
+      })))
+      secret_vars = optional(list(object({
+        name      = string
+        valueFrom = string
+      })))
 
+    }))
   })
-  /*
-    default = {
-      execution_role_arn : "arn:aws:iam::748039698304:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
-      task_role_arn : "arn:aws:iam::748039698304:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
-      cpu : 1024,
-      memory : 1024,
-      family : "family",
-      containers : [{
-        container_name : "string",
-        log_group_name : "string"
-        environment_vars : [{
-          name : "string",
-          value : "string"
-        }]
-        secret_vars : [
-          {
-            name : "string",
-            valueFrom : "string"
-          }
-        ]
-        image_name : "string",
-        port_mappings : [{
-          containerPort : 80,
-          protocol : "tcp"
-          },
-          {
-            containerPort : 8080,
-            protocol : "tcp"
-        }]
-      }]
-    }
-  */
 }
 
 
@@ -176,9 +153,14 @@ variable "ecs_load_balancers" {
     {
       container_port = number
       tls            = bool
-      conditions = object({
-        host_header = list(string)
-      })
+      conditions = optional(object({
+        host_header = optional(list(string))
+        path_pattern = optional(list(string))
+        http_header = optional(object({
+          values           = optional(list(string))
+          http_header_name = optional(string)
+        }))
+      }))
     }
   )))
 

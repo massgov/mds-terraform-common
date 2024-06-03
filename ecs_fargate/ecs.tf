@@ -17,7 +17,7 @@ locals {
       logConfiguration : {
         logDriver : "awslogs",
         options : {
-          awslogs-group : coalesce(t.log_group_name, aws_cloudwatch_log_group.main[t.container_name].name)
+          awslogs-group : try(t.log_group_name, null) != null ? t.log_group_name : aws_cloudwatch_log_group.main[t.container_name].name
           awslogs-region : data.aws_region.current.name,
           awslogs-stream-prefix : "ecs"
         }
