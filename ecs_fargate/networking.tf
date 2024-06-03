@@ -8,7 +8,7 @@ data "aws_lb_listener" "selected_443" {
 }
 
 resource "aws_lb_target_group" "alb" {
-  for_each = var.ecs_load_balancers.alb
+  for_each = var.ecs_load_balancers.alb != null ? length(var.ecs_load_balancers) : []
 
   name                 = substr(join("-", [terraform.workspace, each.key, lookup(each.value, "tls") ? "HTTPS" : "HTTP"]), 0, 32)
   port                 = lookup(each.value, "service_port", lookup(each.value, "container_port"))
