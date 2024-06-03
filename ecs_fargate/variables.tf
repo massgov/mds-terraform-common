@@ -24,6 +24,7 @@ variable "ec2_alb_arn" {
   description = "ARN for Application Load Balancer to attach ecs service"
   type        = string
   nullable = true
+  default = null
 }
 
 
@@ -57,7 +58,6 @@ variable "ecs_task_def" {
     log_group_name  -> if null, will create a log group for the container and place in path of '/ecs/<workspace>/<cluster_name>/<service_name>/<container_name>
     environment_vars -> key, value pair
     secret_vars -> key, value pair (should only include ssm name: prepends 'arn:aws:ssm:<aws_region>:<account_id>:parameter/' to value
-    port_mappings -> container ports exposed
   EOH
   type = object({
     execution_role_arn = string
@@ -65,14 +65,13 @@ variable "ecs_task_def" {
     family             = string
     containers = list(object({
       container_name = string
+
       image_name = string
-
-
-      # optionals
       port_mappings = optional(list(object({
         containerPort = number
         protocol      = string
       })))
+      # optionals
       log_group_name = optional(string)
       environment_vars = optional(list(object({
         name  = string
@@ -152,7 +151,6 @@ variable "ecs_subnet_ids" {
 }
 variable "ecs_load_balancers" {
   description = "Connect service to load balancer"
-  nullable = true
   type = map(map(object(
     {
       container_port = number
@@ -167,6 +165,8 @@ variable "ecs_load_balancers" {
       }))
     }
   )))
+  default = {  }
+
 }
 
 variable "ecs_compute_config" {
