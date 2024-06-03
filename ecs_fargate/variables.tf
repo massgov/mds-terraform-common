@@ -163,45 +163,6 @@ variable "ecs_load_balancers" {
       }))
     }
   )))
-
-  /*
-    default = {
-      alb = {
-        test-service1 = {
-          container_port = 8081
-          tls            = false
-          health_check_path = "/custom"
-          conditions     = {
-            host_header = ["google.com"]
-            http_header = {
-              values           = []
-              http_header_name = ""
-            }
-            http_request_method = []
-            path_pattern        = []
-            query_string        = ""
-            source_ip           = []
-          }
-        }
-        test-service2 = {
-          container_port = 8081
-          tls            = false
-          conditions = {
-            host_header = ["google.com"]
-            http_header = {
-              values           = []
-              http_header_name = ""
-            }
-            http_request_method = []
-            path_pattern        = []
-            query_string        = ""
-            source_ip           = []
-          }
-        }
-      }
-    }
-
-   */
 }
 
 variable "ecs_compute_config" {
