@@ -81,7 +81,8 @@ resource "aws_ecs_service" "main" {
   cluster                           = data.aws_ecs_cluster.main.cluster_name
   task_definition                   = length(var.ecs_task_def_custom) == 0 ? aws_ecs_task_definition.main[0].arn : var.ecs_task_def_custom
   desired_count                     = var.ecs_desire_count
-  health_check_grace_period_seconds = 300
+
+  health_check_grace_period_seconds = length(coalesce( var.ecs_load_balancers, {})) != 0 ? 300 : null
 
   network_configuration {
     security_groups = var.ecs_security_group_ids
