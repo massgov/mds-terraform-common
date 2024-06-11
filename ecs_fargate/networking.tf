@@ -36,7 +36,7 @@ resource "aws_lb_listener_rule" "static" {
   for_each = length(coalesce( var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers.alb : {}
 
   listener_arn = data.aws_lb_listener.selected[0].arn
-  priority     = lookup(each.value, "container_port")
+#   priority     = lookup(each.value, "container_port")
   tags         = {}
 
   action {
