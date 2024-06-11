@@ -58,7 +58,7 @@ resource "aws_lb_listener_rule" "static" {
     for_each = try(lookup(each.value, "conditions").path_pattern, null ) != null ? [1] : []
 
     content {
-      host_header {
+      path_pattern {
         values = lookup(each.value, "conditions").path_pattern
       }
     }
