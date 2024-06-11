@@ -169,6 +169,13 @@ variable "ecs_load_balancers" {
 
 }
 
+variable "lb_listener_port" {
+  type = number
+  default = null
+  nullable = true
+  description = "What is the default LB Listener Port for lookup?"
+}
+
 variable "ecs_compute_config" {
   description = <<EOH
     Fargate Compute Configuration:
