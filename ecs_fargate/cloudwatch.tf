@@ -1,7 +1,7 @@
 locals {
   log_groups = {
     for k, v in var.ecs_task_def.containers : "${v.container_name}" => v
-    if try(v.log_group_name, null) == null
+    if var.ecs_task_def != null && try(v.log_group_name, null) == null
 
   }
 }

@@ -84,6 +84,7 @@ variable "ecs_task_def" {
 
     }))
   })
+  nullable = true
 }
 
 
