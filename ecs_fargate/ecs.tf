@@ -16,7 +16,7 @@ locals {
       logConfiguration : {
         logDriver : "awslogs",
         options : {
-          awslogs-group : try(t.log_group_name, null) != null ? t.log_group_name : aws_cloudwatch_log_group.main[t.container_name].name
+          awslogs-group : t.log_group_name
           awslogs-region : data.aws_region.current.name,
           awslogs-stream-prefix : "ecs"
         }
@@ -61,7 +61,6 @@ data "aws_ecs_cluster" "main" {
 
 // create a task def if custom task def was not supplied
 resource "aws_ecs_task_definition" "main" {
-  depends_on         = [aws_cloudwatch_log_group.main]
   count              = length(var.ecs_task_def_custom) == 0 ? 1 : 0
   execution_role_arn = var.ecs_task_def.execution_role_arn
   task_role_arn      = var.ecs_task_def.task_role_arn
