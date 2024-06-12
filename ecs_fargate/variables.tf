@@ -151,7 +151,7 @@ variable "ecs_subnet_ids" {
 }
 variable "ecs_load_balancers" {
   description = "Connect service to load balancer"
-  type = map(map(object(
+  type = map(object(
     {
       container_port = number
       tls            = bool
@@ -164,7 +164,7 @@ variable "ecs_load_balancers" {
         }))
       }))
     }
-  )))
+  ))
   default = {  }
 
 }
