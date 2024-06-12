@@ -55,7 +55,6 @@ variable "ecs_task_def" {
   Object to create Task Def:
 
   Optionals:
-    log_group_name  -> if null, will create a log group for the container and place in path of '/ecs/<workspace>/<cluster_name>/<service_name>/<container_name>
     environment_vars -> key, value pair
     secret_vars -> key, value pair (should only include ssm name: prepends 'arn:aws:ssm:<aws_region>:<account_id>:parameter/' to value
   EOH
@@ -71,8 +70,9 @@ variable "ecs_task_def" {
         containerPort = number
         protocol      = string
       })))
+      log_group_name = string
+
       # optionals
-      log_group_name = optional(string)
       environment_vars = optional(list(object({
         name  = string
         value = string
