@@ -62,7 +62,7 @@ data "aws_ecs_cluster" "main" {
 // create a task def if custom task def was not supplied
 resource "aws_ecs_task_definition" "main" {
   depends_on         = [aws_cloudwatch_log_group.main]
-  count              = length(var.ecs_task_def_custom) == 0 ? 1 : 0
+  count              = var.ecs_task_def != null ? 1 : 0
   execution_role_arn = var.ecs_task_def.execution_role_arn
   task_role_arn      = var.ecs_task_def.task_role_arn
   cpu                = local.fargate_compute[var.ecs_compute_config].cpu
