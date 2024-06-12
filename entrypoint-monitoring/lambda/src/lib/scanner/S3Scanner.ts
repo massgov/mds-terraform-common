@@ -9,6 +9,7 @@ import {
   ListBucketsCommandOutput,
   S3Client,
   WebsiteConfiguration,
+  _Error,
 } from "@aws-sdk/client-s3";
 import Interconnections from "../Interconnections";
 import getPaginated from "../util/getPaginated";
@@ -41,7 +42,11 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       )
       return headBucketResult.LocationConstraint ?? null;
     } catch (e) {
-      this.logger.error([bucketName, e]);
+      if ((e as _Error).Code === 'AccessDenied') {
+        this.logger.error(`Insufficient permissions to get ${bucketName} bucket location`);
+      } else {
+        this.logger.error([bucketName, e]);
+      }
     }
     return null;
   }
