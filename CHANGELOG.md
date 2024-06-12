@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.94] - 2024-06-12
+
+- [Entrypoint Monitor] Update (again) so CloudFront S3 uses regional endpoint
+
 ## [1.0.93] - 2024-05-13
 
 - [Github to Teams] Upgrade lambda runtime to node20

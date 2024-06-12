@@ -32,7 +32,7 @@ export default class S3Scanner extends BaseScanner implements Scanner {
     this.client = client
   }
 
-  protected async getBucketRegion(bucketName: string): Promise<string | null> {
+  protected async tryGetBucketRegion(bucketName: string): Promise<string | null> {
     try {
       const headBucketResult = await this.client.send(
         new GetBucketLocationCommand({
@@ -57,14 +57,14 @@ export default class S3Scanner extends BaseScanner implements Scanner {
         this.logger.error(`Bucket without a name!`);
         continue;
       }
-      const bucketRegion = await this.getBucketRegion(bucketName) ?? defaultRegion;
+      const bucketRegion = await this.tryGetBucketRegion(bucketName) ?? defaultRegion;
 
       this.logger.debug(`- ${bucketName} bucket.`)
 
       // CloudFront links to an S3 bucket the following way.
       const cfOriginPoints = [
         `${bucketName}.s3.${bucketRegion}.amazonaws.com`,
-        `${bucketName}.s3.amazonaws.com` // S3 origins are sometimes missing the region
+        `${bucketName}.s3.amazonaws.com` // S3 origins are sometimes missing the region in CF
       ];
       cfOriginPoints.forEach((cfOriginPoint) => {
         interconnections.addPointToServiceLink(
