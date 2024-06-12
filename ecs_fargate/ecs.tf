@@ -1,6 +1,6 @@
 // compile task containers for resource
 locals {
-  task_containers = [
+  task_containers = var.ecs_task_def != null ? [
     for t in var.ecs_task_def.containers :
     {
       name  = t.container_name
@@ -16,7 +16,7 @@ locals {
       logConfiguration : {
         logDriver : "awslogs",
         options : {
-          awslogs-group : t.log_group_name
+          awslogs-group : try(t.log_group_name, null) != null ? t.log_group_name : aws_cloudwatch_log_group.main[t.container_name].name
           awslogs-region : data.aws_region.current.name,
           awslogs-stream-prefix : "ecs"
         }
@@ -25,7 +25,7 @@ locals {
       mountPoints : []
       cpu : 0
     }
-  ]
+  ] : []
   fargate_compute = {
     //  https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
     ".25_.5" = { cpu : 256, memory : 512 }
@@ -61,6 +61,7 @@ data "aws_ecs_cluster" "main" {
 
 // create a task def if custom task def was not supplied
 resource "aws_ecs_task_definition" "main" {
+  depends_on         = [aws_cloudwatch_log_group.main]
   count              = length(var.ecs_task_def_custom) == 0 ? 1 : 0
   execution_role_arn = var.ecs_task_def.execution_role_arn
   task_role_arn      = var.ecs_task_def.task_role_arn
