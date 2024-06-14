@@ -67,18 +67,13 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       this.logger.debug(`- ${bucketName} bucket.`)
 
       // CloudFront links to an S3 bucket the following way.
-      const cfOriginPoints = [
-        `${bucketName}.s3.${bucketRegion}.amazonaws.com`,
-        `${bucketName}.s3.amazonaws.com` // S3 origins are sometimes missing the region in CF
-      ];
-      cfOriginPoints.forEach((cfOriginPoint) => {
-        interconnections.addPointToServiceLink(
-          cfOriginPoint,
-          this.serviceType,
-          bucketName
-        );
-        this.logger.debug(`-- CF-specific entrypoint: ${cfOriginPoint}`);
-      });
+      const cfOriginPoint = `${bucketName}.s3.${bucketRegion}.amazonaws.com`;
+      interconnections.addPointToServiceLink(
+        cfOriginPoint,
+        this.serviceType,
+        bucketName
+      );
+      this.logger.debug(`-- CF-specific entrypoint: ${cfOriginPoint}`);
 
       const websiteConfigPromise = this.getBucketWebsiteConfig(bucketName)
         .then((websiteConfig: WebsiteConfiguration|undefined) => {
