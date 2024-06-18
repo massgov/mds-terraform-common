@@ -221,10 +221,10 @@ resource "aws_imagebuilder_component" "yum_update" {
   tags        = var.tags
 }
 
-resource "aws_imagebuilder_component" "install-postgres14" {
+resource "aws_imagebuilder_component" "install-postgresql14" {
   description = "Installs postgresql client v14 with amazon-linux-extras"
-  data        = file("${path.module}/templates/install-postgres14.yaml")
-  name        = "install-postgres14"
+  data        = file("${path.module}/templates/install-postgresql14.yaml")
+  name        = "install-postgresql14"
   platform    = "Linux"
   version     = "1.0.0"
   tags        = var.tags
