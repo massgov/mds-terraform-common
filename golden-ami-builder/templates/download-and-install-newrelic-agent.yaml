@@ -22,11 +22,12 @@ phases:
             group: rootUserGroup
       - name: CreateCloudInitFolder
         action: CreateFolder
-        path: /etc/cloud/cloud.cfg.d
-        owner: root
-        group: rootUserGroup
-        permissions: 0755
-        overwrite: false
+        inputs:
+          - path: /etc/cloud/cloud.cfg.d
+            owner: root
+            group: rootUserGroup
+            permissions: 0755
+            overwrite: false
       - name: DownloadCloudConfig
         action: S3Download
         timeoutSeconds: 60
