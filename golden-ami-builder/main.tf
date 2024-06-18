@@ -221,7 +221,7 @@ resource "aws_imagebuilder_component" "yum_update" {
   tags        = var.tags
 }
 
-resource "aws_imagebuilder_component" "install-postgresql14" {
+resource "aws_imagebuilder_component" "install_postgresql14" {
   description = "Installs postgresql client v14 with amazon-linux-extras"
   data        = file("${path.module}/templates/install-postgresql14.yaml")
   name        = "install-postgresql14"
@@ -266,7 +266,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     component_arn = aws_imagebuilder_component.download_and_install_chamber.arn
   }
   component {
-    component_arn = aws_imagebuilder_component.install-postgres14.arn
+    component_arn = aws_imagebuilder_component.install_postgresql14.arn
   }
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/amazon-cloudwatch-agent-linux/x.x.x"
