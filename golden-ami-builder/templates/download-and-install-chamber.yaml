@@ -37,4 +37,4 @@ phases:
         inputs:
           - path: '/usr/bin/chamber'
             owner: root
-            group: rootUserGroup
+            group: root

@@ -19,13 +19,13 @@ phases:
         inputs:
           - path: '{{ build.DownloadAgentConfig.inputs[0].destination }}'
             owner: root
-            group: rootUserGroup
+            group: root
       - name: CreateCloudInitFolder
         action: CreateFolder
         inputs:
           - path: /etc/cloud/cloud.cfg.d
             owner: root
-            group: rootUserGroup
+            group: root
             permissions: 0755
             overwrite: false
       - name: DownloadCloudConfig
