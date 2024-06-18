@@ -183,8 +183,51 @@ resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
   name     = "download-and-install-cortex-xdr"
   platform = "Linux"
   version  = "1.0.0"
+  tags     = var.tags
+}
 
-  tags = var.tags
+resource "aws_imagebuilder_component" "download_and_install_newrelic_agent" {
+  description = <<EOF
+    Downloads initial New Relic agent configuration file and a cloud-init action file needed by the agent,
+    then installs the agent from the New Relic yum repository
+  EOF
+  data = templatefile(
+    "${path.module}/templates/download-and-install-newrelic-agent.yaml",
+    {
+      software_distribution_bucket_id = var.software_distribution_bucket_id
+    }
+  )
+  name     = "download-and-install-newrelic-agent"
+  platform = "Linux"
+  version  = "1.0.0"
+  tags     = var.tags
+}
+
+resource "aws_imagebuilder_component" "download_and_install_chamber" {
+  description = "Downloads and installs the latest version of chamber from GitHub"
+  data        = file("${path.module}/templates/download-and-install-chamber.yaml")
+  name        = "download-and-install-chamber"
+  platform    = "Linux"
+  version     = "1.0.0"
+  tags        = var.tags
+}
+
+resource "aws_imagebuilder_component" "yum_update" {
+  description = "Updates package manager packages"
+  data        = file("${path.module}/templates/yum-update.yaml")
+  name        = "yum-update"
+  platform    = "Linux"
+  version     = "1.0.0"
+  tags        = var.tags
+}
+
+resource "aws_imagebuilder_component" "install-postgres14" {
+  description = "Installs postgresql client v14 with amazon-linux-extras"
+  data        = file("${path.module}/templates/install-postgres14.yaml")
+  name        = "install-postgres14"
+  platform    = "Linux"
+  version     = "1.0.0"
+  tags        = var.tags
 }
 
 resource "aws_imagebuilder_image_recipe" "golden_ami" {
@@ -204,9 +247,26 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
   working_directory = "/tmp"
 
-  # Build components
+  # ~ Build components
+  # ~~~ Start with system updates
+  component {
+    component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/update-linux/x.x.x"
+  }
+  component {
+    component_arn = aws_imagebuilder_component.yum_update.arn
+  }
+  # ~~~ Install some applications used across SSR projects
   component {
     component_arn = aws_imagebuilder_component.download_and_install_cortex_xdr.arn
+  }
+  component {
+    component_arn = aws_imagebuilder_component.download_and_install_newrelic_agent.arn
+  }
+  component {
+    component_arn = aws_imagebuilder_component.download_and_install_chamber.arn
+  }
+  component {
+    component_arn = aws_imagebuilder_component.install-postgres14.arn
   }
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/amazon-cloudwatch-agent-linux/x.x.x"
@@ -214,11 +274,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/aws-cli-version-2-linux/x.x.x"
   }
-  component {
-    component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/update-linux/x.x.x"
-  }
-
-  # Test components
+  # ~ Test components
   component {
     component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/simple-boot-test-linux/x.x.x"
   }
@@ -228,9 +284,6 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
       name  = "WorkingPath"
       value = "/tmp"
     }
-  }
-  component {
-    component_arn = "arn:aws:imagebuilder:${local.region}:aws:component/yum-repository-test-linux/x.x.x"
   }
 
   name         = "${local.output_image_prefix}-recipe"

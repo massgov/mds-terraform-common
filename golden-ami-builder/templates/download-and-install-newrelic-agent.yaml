@@ -1,0 +1,45 @@
+name: download-and-install-newrelic-agent
+description: |
+  Downloads initial New Relic agent configuration file and a cloud-init action file needed by the agent,
+  then installs the agent from the New Relic yum repository
+schemaVersion: 1.0
+phases:
+  - name: 'build'
+    steps:
+      - name: DownloadAgentConfig
+        action: S3Download
+        timeoutSeconds: 60
+        onFailure: Abort
+        maxAttempts: 3
+        inputs:
+          - source: 's3://${software_distribution_bucket_id}/dist/newrelic-agent/latest/newrelic-infra.yml'
+            destination: '/etc/newrelic-infra.yml'
+      - name: SetConfigOwnership
+        action: SetFileOwner
+        inputs:
+          - path: '{{ build.DownloadAgentConfig.inputs[0].destination }}'
+            owner: root
+            group: rootUserGroup
+      - name: CreateCloudInitFolder
+        action: CreateFolder
+        path: /etc/cloud/cloud.cfg.d
+        owner: root
+        group: rootUserGroup
+        permissions: 0755
+        overwrite: false
+      - name: DownloadCloudConfig
+        action: S3Download
+        timeoutSeconds: 60
+        onFailure: Abort
+        maxAttempts: 3
+        inputs:
+          - source: 's3://${software_distribution_bucket_id}/dist/newrelic-agent/latest/cloudconfig.yml'
+            destination: '/etc/cloud/cloud.cfg.d/newrelic-agent-cloudconfig.yml'
+      - name: Install
+        action: ExecuteBash
+        onFailure: Continue
+        inputs:
+          commands:
+            - sudo curl -o /etc/yum.repos.d/newrelic-infra.repo https://download.newrelic.com/infrastructure_agent/linux/yum/amazonlinux/2/x86_64/newrelic-infra.repo
+            - sudo yum -q makecache -y --disablerepo='*' --enablerepo='newrelic-infra'
+            - sudo yum install newrelic-infra -y
