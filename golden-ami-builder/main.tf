@@ -139,9 +139,7 @@ resource "aws_imagebuilder_distribution_configuration" "golden_ami" {
   distribution {
     ami_distribution_configuration {
       ami_tags = var.tags
-      ## Uncomment the following:
-      # name     = "${local.output_image_prefix}-{{ imagebuilder:buildDate }}"
-      name     = "jared-test-recipe-{{ imagebuilder:buildDate }}"
+      name     = "${local.output_image_prefix}-{{ imagebuilder:buildDate }}"
     }
     region = local.region
   }
