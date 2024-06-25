@@ -23,19 +23,21 @@ variable "vpc_id" {
 variable "ec2_alb_arn" {
   description = "ARN for Application Load Balancer to attach ecs service"
   type        = string
+  nullable = true
+  default = null
 }
 
 
 // Cloudwatch LogGroup
 variable "log_retention_days" {
   description = "How many days to keep logs for? 0 = Never Expire Logs"
-  type = number
-  default = 0
+  type        = number
+  default     = 0
 }
 variable "cw_kms_key" {
   description = "KMS Key for CloudWatch Log Group"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 // ECS var:
@@ -49,70 +51,57 @@ variable "ecs_task_def_custom" {
   default     = ""
 }
 variable "ecs_task_def" {
-  description = "Object to create Task Def"
-  type        = object({
+  description = <<EOH
+  Object to create Task Def:
+
+  Optionals:
+    environment_vars -> key, value pair
+    secret_vars -> key, value pair (should only include ssm name: prepends 'arn:aws:ssm:<aws_region>:<account_id>:parameter/' to value
+  EOH
+  type = object({
     execution_role_arn = string
     task_role_arn      = string
-    cpu                = number
-    memory             = number
     family             = string
-    containers         = list(object({
-      container_name   = string
-      log_group_name   = string
-      environment_vars = list(object({
-        name  = string
-        value = string
-      }))
-      secret_vars = list(object({
-        name      = string
-        valueFrom = string
-      }))
-      image_name    = string
-      port_mappings = list(object({
+    containers = list(object({
+      container_name = string
+
+      image_name = string
+      port_mappings = optional(list(object({
         containerPort = number
         protocol      = string
-      }))
-    }))
+      })))
+      log_group_name = string
 
+      # optionals
+      environment_vars = optional(list(object({
+        name  = string
+        value = string
+      })))
+      secret_vars = optional(list(object({
+        name      = string
+        valueFrom = string
+      })))
+
+    }))
   })
-  /*
-    default = {
-      execution_role_arn : "arn:aws:iam::748039698304:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
-      task_role_arn : "arn:aws:iam::748039698304:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
-      cpu : 1024,
-      memory : 1024,
-      family : "family",
-      containers : [{
-        container_name : "string",
-        log_group_name : "string"
-        environment_vars : [{
-          name : "string",
-          value : "string"
-        }]
-        secret_vars : [
-          {
-            name : "string",
-            valueFrom : "string"
-          }
-        ]
-        image_name : "string",
-        port_mappings : [{
-          containerPort : 80,
-          protocol : "tcp"
-          },
-          {
-            containerPort : 8080,
-            protocol : "tcp"
-        }]
-      }]
-    }
-  */
+  nullable = true
 }
 
+variable "volume_configuration" {
+  description = "Add Volume to ECS"
+  type = map(object({
+    name = string
+    volume_configuration = object({
+      role_arn = string
+    })
+  })
+  )
+  default = { }
+}
 
-variable "ecs_task_volumes" {
+variable "ecs_task_efs_volumes" {
   description = "Add EFS Mount to ECS"
-  type        = list(object({
+  type = list(object({
     name            = string,
     host_path       = string,
     access_point_id = string,
@@ -174,54 +163,59 @@ variable "ecs_subnet_ids" {
 }
 variable "ecs_load_balancers" {
   description = "Connect service to load balancer"
-  type        = map(map(object(
+  type = map(object(
     {
       container_port = number
       tls            = bool
-      conditions     = object({
-        host_header = list(string)
-      })
+      conditions = optional(object({
+        host_header = optional(list(string))
+        path_pattern = optional(list(string))
+        http_header = optional(object({
+          values           = optional(list(string))
+          http_header_name = optional(string)
+        }))
+      }))
     }
-  )))
+  ))
+  default = {  }
 
-  /*
-    default = {
-      alb = {
-        test-service1 = {
-          container_port = 8081
-          tls            = false
-          health_check_path = "/custom"
-          conditions     = {
-            host_header = ["google.com"]
-            http_header = {
-              values           = []
-              http_header_name = ""
-            }
-            http_request_method = []
-            path_pattern        = []
-            query_string        = ""
-            source_ip           = []
-          }
-        }
-        test-service2 = {
-          container_port = 8081
-          tls            = false
-          conditions = {
-            host_header = ["google.com"]
-            http_header = {
-              values           = []
-              http_header_name = ""
-            }
-            http_request_method = []
-            path_pattern        = []
-            query_string        = ""
-            source_ip           = []
-          }
-        }
-      }
-    }
+}
 
-   */
+variable "lb_listener_port" {
+  type = number
+  default = null
+  nullable = true
+  description = "What is the default LB Listener Port for lookup?"
+}
+
+variable "ecs_compute_config" {
+  description = <<EOH
+    Fargate Compute Configuration:
+    ".25_.5" = { cpu : 256, memory : 512 }
+    ".25_1"  = { cpu : 256, memory : 1024 * 1 }
+    ".25_2"  = { cpu : 256, memory : 1024 * 2 }
+
+    ".5_1"  = { cpu : 512, memory : 1024 * 1 }
+    ".5_2"  = { cpu : 512, memory : 1024 * 2 }
+    ".5_3"  = { cpu : 512, memory : 1024 * 3 }
+    ".5_4"  = { cpu : 512, memory : 1024 * 4 }
+
+    "1_2"  = { cpu : 1024 * 1, memory : 1024 * 2 }
+    "1_3"  = { cpu : 1024 * 1, memory : 1024 * 3 }
+    "1_4"  = { cpu : 1024 * 1, memory : 1024 * 4 }
+    "1_5"  = { cpu : 1024 * 1, memory : 1024 * 5 }
+    "1_6"  = { cpu : 1024 * 1, memory : 1024 * 6 }
+    "1_7"  = { cpu : 1024 * 1, memory : 1024 * 7 }
+    "1_8"  = { cpu : 1024 * 1, memory : 1024 * 8 }
+
+    "2_4"  = { cpu : 1024 * 2, memory : 1024 * 4 }
+    "2_5"  = { cpu : 1024 * 2, memory : 1024 * 5 }
+    "2_6"  = { cpu : 1024 * 2, memory : 1024 * 6 }
+    "2_7"  = { cpu : 1024 * 2, memory : 1024 * 7 }
+    "2_8"  = { cpu : 1024 * 2, memory : 1024 * 8 }
+
+  EOH
+  type        = string
 }
 
 variable "ecs_circuit_breaker" {
@@ -243,7 +237,7 @@ variable "create_ecr" {
 variable "ecr_name" {
   description = "ECR Repo Name, required if creating new"
   type        = string
-  default = ""
+  default     = ""
 }
 variable "ecr_kms_arn" {
   type    = string

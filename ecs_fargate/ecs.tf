@@ -1,15 +1,14 @@
 // compile task containers for resource
 locals {
-  task_containers = [
+  task_containers = var.ecs_task_def != null ? [
     for t in var.ecs_task_def.containers :
     {
       name  = t.container_name
       image = t.image_name
 
-      essential    = true
+      essential    = coalesce(t.essential, true)
       portMappings = t.port_mappings
       environment : t.environment_vars
-
       secrets : [
         for s in t.secret_vars :
         { name : s.name, valueFrom : "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${s.valueFrom}" }
@@ -17,16 +16,45 @@ locals {
       logConfiguration : {
         logDriver : "awslogs",
         options : {
-          awslogs-group : aws_cloudwatch_log_group.main.name
+          awslogs-group : try(t.log_group_name, null) != null ? t.log_group_name : aws_cloudwatch_log_group.main[t.container_name].name
           awslogs-region : data.aws_region.current.name,
           awslogs-stream-prefix : "ecs"
         }
       }
-      volumesFrom : []
-      mountPoints : []
+      volumesFrom : coalesce(t.volumesFrom, [])
+      mountPoints : coalesce(t.mountPoints, [])
+      dependsOn : coalesce(t.dependsOn, [])
+
       cpu : 0
     }
-  ]
+  ] : []
+  fargate_compute = {
+    //  https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html#fargate-tasks-size
+    ".25_.5" = { cpu : 256, memory : 512 }
+    ".25_1"  = { cpu : 256, memory : 1024 * 1 }
+    ".25_2"  = { cpu : 256, memory : 1024 * 2 }
+
+    ".5_1"  = { cpu : 512, memory : 1024 * 1 }
+    ".5_2"  = { cpu : 512, memory : 1024 * 2 }
+    ".5_3"  = { cpu : 512, memory : 1024 * 3 }
+    ".5_4"  = { cpu : 512, memory : 1024 * 4 }
+
+    "1_2"  = { cpu : 1024 * 1, memory : 1024 * 2 }
+    "1_3"  = { cpu : 1024 * 1, memory : 1024 * 3 }
+    "1_4"  = { cpu : 1024 * 1, memory : 1024 * 4 }
+    "1_5"  = { cpu : 1024 * 1, memory : 1024 * 5 }
+    "1_6"  = { cpu : 1024 * 1, memory : 1024 * 6 }
+    "1_7"  = { cpu : 1024 * 1, memory : 1024 * 7 }
+    "1_8"  = { cpu : 1024 * 1, memory : 1024 * 8 }
+
+    "2_4"  = { cpu : 1024 * 2, memory : 1024 * 4 }
+    "2_5"  = { cpu : 1024 * 2, memory : 1024 * 5 }
+    "2_6"  = { cpu : 1024 * 2, memory : 1024 * 6 }
+    "2_7"  = { cpu : 1024 * 2, memory : 1024 * 7 }
+    "2_8"  = { cpu : 1024 * 2, memory : 1024 * 8 }
+
+
+  }
 }
 
 data "aws_ecs_cluster" "main" {
@@ -36,11 +64,11 @@ data "aws_ecs_cluster" "main" {
 // create a task def if custom task def was not supplied
 resource "aws_ecs_task_definition" "main" {
   depends_on         = [aws_cloudwatch_log_group.main]
-  count              = length(var.ecs_task_def_custom) == 0 ? 1 : 0
+  count              = var.ecs_task_def != null ? 1 : 0
   execution_role_arn = var.ecs_task_def.execution_role_arn
   task_role_arn      = var.ecs_task_def.task_role_arn
-  cpu                = var.ecs_task_def.cpu
-  memory             = var.ecs_task_def.memory
+  cpu                = local.fargate_compute[var.ecs_compute_config].cpu
+  memory             = local.fargate_compute[var.ecs_compute_config].memory
   family             = var.ecs_task_def.family
 
   container_definitions = jsonencode(local.task_containers)
@@ -49,8 +77,12 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   tags                     = {}
 
+  volume {
+    name = ""
+  }
+
   dynamic "volume" {
-    for_each = var.ecs_task_volumes
+    for_each = var.ecs_task_efs_volumes
     content {
       efs_volume_configuration {
         file_system_id     = volume.value.fs_id
@@ -76,7 +108,8 @@ resource "aws_ecs_service" "main" {
   cluster                           = data.aws_ecs_cluster.main.cluster_name
   task_definition                   = length(var.ecs_task_def_custom) == 0 ? aws_ecs_task_definition.main[0].arn : var.ecs_task_def_custom
   desired_count                     = var.ecs_desire_count
-  health_check_grace_period_seconds = 300
+
+  health_check_grace_period_seconds = length(coalesce( var.ecs_load_balancers, {})) != 0 ? 300 : null
 
   network_configuration {
     security_groups = var.ecs_security_group_ids
@@ -89,8 +122,17 @@ resource "aws_ecs_service" "main" {
     rollback = var.ecs_circuit_breaker
   }
 
+  dynamic "volume_configuration" {
+    for_each = length(coalesce( var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
+    content {
+      name   = lookup(volume_configuration.value, "name")
+      managed_ebs_volume   = lookup(volume_configuration.value, "managed_ebs_volume")
+    }
+  }
+
+
   dynamic "load_balancer" {
-    for_each = var.ecs_load_balancers.alb
+    for_each = length(coalesce( var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
     content {
       target_group_arn = aws_lb_target_group.alb[load_balancer.key].arn
       container_name   = load_balancer.key
@@ -187,7 +229,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_up" {
 
 resource "aws_sns_topic" "cb" {
   count = var.ecs_circuit_breaker ? 1 : 0
-  name = join("", [var.ecs_service_name, "CB", "Topic"])
+  name  = join("", [var.ecs_service_name, "CB", "Topic"])
   tags = merge(
     var.tags,
     {
@@ -204,13 +246,13 @@ resource "aws_cloudwatch_event_rule" "cb" {
   description = "Capture and alert when Circuit Break is rolling back"
 
   event_pattern = jsonencode({
-    "source": ["aws.ecs"],
-    "detail-type": ["ECS Deployment State Change"],
-    "resources": [
+    "source" : ["aws.ecs"],
+    "detail-type" : ["ECS Deployment State Change"],
+    "resources" : [
       aws_ecs_service.main.id
     ]
-    "detail": {
-      "eventName": ["SERVICE_DEPLOYMENT_FAILED"]
+    "detail" : {
+      "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]
     }
   })
   tags = merge(
@@ -222,7 +264,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
 }
 
 resource "aws_cloudwatch_event_target" "sns" {
-  count = var.ecs_circuit_breaker  ? 1 : 0
+  count = var.ecs_circuit_breaker ? 1 : 0
 
   rule      = aws_cloudwatch_event_rule.cb[0].name
   target_id = "SendToSNS"
@@ -230,7 +272,7 @@ resource "aws_cloudwatch_event_target" "sns" {
 }
 
 resource "aws_sns_topic_subscription" "cb_email_targets" {
-  count = length(var.ecs_circuit_breaker_alert_email)
+  count     = length(var.ecs_circuit_breaker_alert_email)
   topic_arn = aws_sns_topic.cb[0].arn
   protocol  = "email"
   endpoint  = var.ecs_circuit_breaker_alert_email[count.index]
