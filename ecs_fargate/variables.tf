@@ -89,13 +89,13 @@ variable "ecs_task_def" {
 
 variable "volume_configuration" {
   description = "Add Volume to ECS"
-  type = optional(map(object({
+  type = map(object({
     name = string
     volume_configuration = object({
       role_arn = string
     })
   })
-  ))
+  )
   default = { }
 }
 
