@@ -87,8 +87,19 @@ variable "ecs_task_def" {
   nullable = true
 }
 
+variable "volume_configuration" {
+  description = "Add Volume to ECS"
+  type = optional(map(object({
+    name = string
+    volume_configuration = object({
+      role_arn = string
+    })
+  })
+  ))
+  default = { }
+}
 
-variable "ecs_task_volumes" {
+variable "ecs_task_efs_volumes" {
   description = "Add EFS Mount to ECS"
   type = list(object({
     name            = string,
@@ -180,9 +191,29 @@ variable "lb_listener_port" {
 variable "ecs_compute_config" {
   description = <<EOH
     Fargate Compute Configuration:
-    .25_.5 = { cpu : 256, memory : 512 }
-    .25_1 = { cpu : 256, memory : 1024 }
-    .25_2 = { cpu : 256, memory : 2056 }
+    ".25_.5" = { cpu : 256, memory : 512 }
+    ".25_1"  = { cpu : 256, memory : 1024 * 1 }
+    ".25_2"  = { cpu : 256, memory : 1024 * 2 }
+
+    ".5_1"  = { cpu : 512, memory : 1024 * 1 }
+    ".5_2"  = { cpu : 512, memory : 1024 * 2 }
+    ".5_3"  = { cpu : 512, memory : 1024 * 3 }
+    ".5_4"  = { cpu : 512, memory : 1024 * 4 }
+
+    "1_2"  = { cpu : 1024 * 1, memory : 1024 * 2 }
+    "1_3"  = { cpu : 1024 * 1, memory : 1024 * 3 }
+    "1_4"  = { cpu : 1024 * 1, memory : 1024 * 4 }
+    "1_5"  = { cpu : 1024 * 1, memory : 1024 * 5 }
+    "1_6"  = { cpu : 1024 * 1, memory : 1024 * 6 }
+    "1_7"  = { cpu : 1024 * 1, memory : 1024 * 7 }
+    "1_8"  = { cpu : 1024 * 1, memory : 1024 * 8 }
+
+    "2_4"  = { cpu : 1024 * 2, memory : 1024 * 4 }
+    "2_5"  = { cpu : 1024 * 2, memory : 1024 * 5 }
+    "2_6"  = { cpu : 1024 * 2, memory : 1024 * 6 }
+    "2_7"  = { cpu : 1024 * 2, memory : 1024 * 7 }
+    "2_8"  = { cpu : 1024 * 2, memory : 1024 * 8 }
+
   EOH
   type        = string
 }

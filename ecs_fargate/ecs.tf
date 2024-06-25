@@ -6,7 +6,7 @@ locals {
       name  = t.container_name
       image = t.image_name
 
-      essential    = true
+      essential    = coalesce(t.essential, true)
       portMappings = t.port_mappings
       environment : t.environment_vars
       secrets : [
@@ -21,8 +21,10 @@ locals {
           awslogs-stream-prefix : "ecs"
         }
       }
-      volumesFrom : []
-      mountPoints : []
+      volumesFrom : coalesce(t.volumesFrom, [])
+      mountPoints : coalesce(t.mountPoints, [])
+      dependsOn : coalesce(t.dependsOn, [])
+
       cpu : 0
     }
   ] : []
@@ -75,6 +77,10 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   tags                     = {}
 
+  volume {
+    name = ""
+  }
+
   dynamic "volume" {
     for_each = var.ecs_task_volumes
     content {
@@ -115,6 +121,15 @@ resource "aws_ecs_service" "main" {
     enable   = var.ecs_circuit_breaker
     rollback = var.ecs_circuit_breaker
   }
+
+  dynamic "volume_configuration" {
+    for_each = length(coalesce( var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
+    content {
+      name   = lookup(volume_configuration.value, "name")
+      managed_ebs_volume   = lookup(volume_configuration.value, "managed_ebs_volume")
+    }
+  }
+
 
   dynamic "load_balancer" {
     for_each = length(coalesce( var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
