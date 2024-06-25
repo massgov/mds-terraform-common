@@ -126,7 +126,6 @@ resource "aws_ecs_service" "main" {
     for_each = length(coalesce( var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
     content {
       name   = lookup(volume_configuration.value, "name")
-      managed_ebs_volume   = lookup(volume_configuration.value, "managed_ebs_volume")
     }
   }
 
