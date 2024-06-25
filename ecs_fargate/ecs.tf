@@ -82,7 +82,7 @@ resource "aws_ecs_task_definition" "main" {
   }
 
   dynamic "volume" {
-    for_each = var.ecs_task_volumes
+    for_each = var.ecs_task_efs_volumes
     content {
       efs_volume_configuration {
         file_system_id     = volume.value.fs_id
