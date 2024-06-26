@@ -21,9 +21,9 @@ locals {
           awslogs-stream-prefix : "ecs"
         }
       }
-      volumesFrom : coalesce(t.volumesFrom, [])
-      mountPoints : coalesce(t.mountPoints, [])
-      dependsOn : coalesce(t.dependsOn, [])
+      volumesFrom : lookup(t, "volumesFrom", [])
+      mountPoints : lookup(t, "mountPoints", [])
+      dependsOn :   lookup(t, "dependsOn", [])
 
       cpu : 0
     }
@@ -34,24 +34,24 @@ locals {
     ".25_1"  = { cpu : 256, memory : 1024 * 1 }
     ".25_2"  = { cpu : 256, memory : 1024 * 2 }
 
-    ".5_1"  = { cpu : 512, memory : 1024 * 1 }
-    ".5_2"  = { cpu : 512, memory : 1024 * 2 }
-    ".5_3"  = { cpu : 512, memory : 1024 * 3 }
-    ".5_4"  = { cpu : 512, memory : 1024 * 4 }
+    ".5_1" = { cpu : 512, memory : 1024 * 1 }
+    ".5_2" = { cpu : 512, memory : 1024 * 2 }
+    ".5_3" = { cpu : 512, memory : 1024 * 3 }
+    ".5_4" = { cpu : 512, memory : 1024 * 4 }
 
-    "1_2"  = { cpu : 1024 * 1, memory : 1024 * 2 }
-    "1_3"  = { cpu : 1024 * 1, memory : 1024 * 3 }
-    "1_4"  = { cpu : 1024 * 1, memory : 1024 * 4 }
-    "1_5"  = { cpu : 1024 * 1, memory : 1024 * 5 }
-    "1_6"  = { cpu : 1024 * 1, memory : 1024 * 6 }
-    "1_7"  = { cpu : 1024 * 1, memory : 1024 * 7 }
-    "1_8"  = { cpu : 1024 * 1, memory : 1024 * 8 }
+    "1_2" = { cpu : 1024 * 1, memory : 1024 * 2 }
+    "1_3" = { cpu : 1024 * 1, memory : 1024 * 3 }
+    "1_4" = { cpu : 1024 * 1, memory : 1024 * 4 }
+    "1_5" = { cpu : 1024 * 1, memory : 1024 * 5 }
+    "1_6" = { cpu : 1024 * 1, memory : 1024 * 6 }
+    "1_7" = { cpu : 1024 * 1, memory : 1024 * 7 }
+    "1_8" = { cpu : 1024 * 1, memory : 1024 * 8 }
 
-    "2_4"  = { cpu : 1024 * 2, memory : 1024 * 4 }
-    "2_5"  = { cpu : 1024 * 2, memory : 1024 * 5 }
-    "2_6"  = { cpu : 1024 * 2, memory : 1024 * 6 }
-    "2_7"  = { cpu : 1024 * 2, memory : 1024 * 7 }
-    "2_8"  = { cpu : 1024 * 2, memory : 1024 * 8 }
+    "2_4" = { cpu : 1024 * 2, memory : 1024 * 4 }
+    "2_5" = { cpu : 1024 * 2, memory : 1024 * 5 }
+    "2_6" = { cpu : 1024 * 2, memory : 1024 * 6 }
+    "2_7" = { cpu : 1024 * 2, memory : 1024 * 7 }
+    "2_8" = { cpu : 1024 * 2, memory : 1024 * 8 }
 
 
   }
@@ -103,13 +103,13 @@ resource "aws_ecs_task_definition" "main" {
 
 // create ecs service under cluster
 resource "aws_ecs_service" "main" {
-  depends_on                        = [aws_ecs_task_definition.main, aws_lb_target_group.alb]
-  name                              = var.ecs_service_name
-  cluster                           = data.aws_ecs_cluster.main.cluster_name
-  task_definition                   = length(var.ecs_task_def_custom) == 0 ? aws_ecs_task_definition.main[0].arn : var.ecs_task_def_custom
-  desired_count                     = var.ecs_desire_count
+  depends_on      = [aws_ecs_task_definition.main, aws_lb_target_group.alb]
+  name            = var.ecs_service_name
+  cluster         = data.aws_ecs_cluster.main.cluster_name
+  task_definition = length(var.ecs_task_def_custom) == 0 ? aws_ecs_task_definition.main[0].arn : var.ecs_task_def_custom
+  desired_count   = var.ecs_desire_count
 
-  health_check_grace_period_seconds = length(coalesce( var.ecs_load_balancers, {})) != 0 ? 300 : null
+  health_check_grace_period_seconds = length(coalesce(var.ecs_load_balancers, {})) != 0 ? 300 : null
 
   network_configuration {
     security_groups = var.ecs_security_group_ids
@@ -123,9 +123,9 @@ resource "aws_ecs_service" "main" {
   }
 
   dynamic "volume_configuration" {
-    for_each = length(coalesce( var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
+    for_each = length(coalesce(var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
     content {
-      name   = lookup(volume_configuration.value, "name")
+      name = lookup(volume_configuration.value, "name")
       managed_ebs_volume {
         role_arn = lookup(volume_configuration.value, "managed_ebs_volume").role_arn
       }
@@ -134,7 +134,7 @@ resource "aws_ecs_service" "main" {
 
 
   dynamic "load_balancer" {
-    for_each = length(coalesce( var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
+    for_each = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
     content {
       target_group_arn = aws_lb_target_group.alb[load_balancer.key].arn
       container_name   = load_balancer.key

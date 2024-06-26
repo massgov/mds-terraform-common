@@ -23,8 +23,8 @@ variable "vpc_id" {
 variable "ec2_alb_arn" {
   description = "ARN for Application Load Balancer to attach ecs service"
   type        = string
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
 }
 
 
@@ -94,9 +94,9 @@ variable "volume_configuration" {
     volume_configuration = object({
       role_arn = string
     })
-  })
+    })
   )
-  default = { }
+  default = {}
 }
 
 variable "ecs_task_efs_volumes" {
@@ -168,7 +168,7 @@ variable "ecs_load_balancers" {
       container_port = number
       tls            = bool
       conditions = optional(object({
-        host_header = optional(list(string))
+        host_header  = optional(list(string))
         path_pattern = optional(list(string))
         http_header = optional(object({
           values           = optional(list(string))
@@ -177,14 +177,14 @@ variable "ecs_load_balancers" {
       }))
     }
   ))
-  default = {  }
+  default = {}
 
 }
 
 variable "lb_listener_port" {
-  type = number
-  default = null
-  nullable = true
+  type        = number
+  default     = null
+  nullable    = true
   description = "What is the default LB Listener Port for lookup?"
 }
 
