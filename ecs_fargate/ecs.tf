@@ -6,7 +6,7 @@ locals {
       name  = t.container_name
       image = t.image_name
 
-      essential    = coalesce(t.essential, true)
+      essential    = lookup(t, "essential", true)
       portMappings = t.port_mappings
       environment : t.environment_vars
       secrets : [
