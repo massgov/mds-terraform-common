@@ -185,3 +185,9 @@ variable "backup_error_topics" {
   description = "An array of SNS topics to publish notifications to when backups error out"
   default     = []
 }
+
+variable "ca_cert_identifier" {
+  type        = string
+  description = "The identifier of the CA certificate for the DB instance."
+  default     = null
+}

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.97] - 2024-07-17
+
+- [RDS] Add `ca_cert_identifier` variable.
+
 ## [1.0.96] - 2024-07-17
 
 - [Entrypoint Monitor] Update (again) so CloudFront S3 uses regional endpoint
