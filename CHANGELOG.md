@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.96] - 2024-07-17
+
+- [Entrypoint Monitor] Update (again) so CloudFront S3 uses regional endpoint
+
 ## [1.0.95] - 2024-06-25
 
 - [Golden AMI Builder] Update Golden AMI recipe to install commonly-used tools
