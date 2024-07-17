@@ -1,8 +1,20 @@
 # Changelog
 
-## [1.0.94] - 2024-05-21
+## [1.0.97] - 2024-07-17
 
 - [RDS] Add `ca_cert_identifier` variable.
+
+## [1.0.96] - 2024-07-17
+
+- [Entrypoint Monitor] Update (again) so CloudFront S3 uses regional endpoint
+
+## [1.0.95] - 2024-06-25
+
+- [Golden AMI Builder] Update Golden AMI recipe to install commonly-used tools
+
+## [1.0.94] - 2024-05-23
+
+- [ECS Fargate] Fargate PoC
 
 ## [1.0.93] - 2024-05-13
 
