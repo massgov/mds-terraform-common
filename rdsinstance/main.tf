@@ -126,6 +126,7 @@ data "aws_iam_policy_document" "rds_snapshot_create" {
 }
 
 data "aws_iam_policy_document" "rds_snapshot_delete" {
+  count = var.enable_manual_snapshots ? 1 : 0
   statement {
     effect = "Allow"
     resources = [
@@ -139,7 +140,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
   statement {
     effect = "Allow"
     resources = [
-      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.id}*"
+      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.identifier}*"
     ]
     actions = [
       "rds:DeleteDBSnapshot"
@@ -150,7 +151,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
 module "backup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
-  name    = "${aws_db_instance.default.id}-backup-lambda"
+  name    = "${aws_db_instance.default.identifier}-backup-lambda"
   package = "${path.module}/dist/backup_lambda.zip"
   handler = "index.handler"
   runtime = "nodejs20.x"
@@ -160,14 +161,14 @@ module "backup_lambda" {
   ]
   environment = {
     variables = {
-      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.id}"
+      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.identifier}"
     }
   }
   schedule = var.manual_snapshot_schedule
   tags = merge(
     var.tags,
     {
-      "Name" = "${aws_db_instance.default.id}-backup-lambda"
+      "Name" = "${aws_db_instance.default.identifier}-backup-lambda"
     }
   )
   error_topics = var.backup_error_topics
@@ -176,17 +177,17 @@ module "backup_lambda" {
 module "cleanup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
-  name    = "${aws_db_instance.default.id}-cleanup-lambda"
+  name    = "${aws_db_instance.default.identifier}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
   handler = "index.handler"
   runtime = "nodejs20.x"
   timeout = 300
   iam_policies = [
-    data.aws_iam_policy_document.rds_snapshot_delete.json
+    data.aws_iam_policy_document.rds_snapshot_delete[count.index].json
   ]
   environment = {
     variables = {
-      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.id}"
+      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.identifier}"
     }
   }
   schedule = {
@@ -195,7 +196,7 @@ module "cleanup_lambda" {
   tags = merge(
     var.tags,
     {
-      "Name" = "${aws_db_instance.default.id}-cleanup-lambda"
+      "Name" = "${aws_db_instance.default.identifier}-cleanup-lambda"
     }
   )
   error_topics = var.backup_error_topics

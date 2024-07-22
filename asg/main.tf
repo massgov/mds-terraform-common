@@ -87,6 +87,16 @@ resource "aws_autoscaling_group" "default" {
     propagate_at_launch = false
     value               = var.name
   }
+
+  dynamic "tag" {
+    for_each = var.amazon_ecs_managed_tag ? [1] : []
+
+    content {
+      key                 = "AmazonECSManaged"
+      propagate_at_launch = true
+      value               = "true"
+    }
+  }
 }
 
 resource "aws_autoscaling_schedule" "schedule_down" {

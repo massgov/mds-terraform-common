@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.98] - 2024-07-22
+
+- [ASG] Add optional `AmazonECSManaged` tag to autoscaling group to be compatible with aws provider v5.
+- [ECS] Add variable to disable `AmazonECSManaged` tag in autoscaling group.
+- [RDS] Add `rds_instance_identifier` output for aws provider v5.
+- [RDS] Switch `aws_db_instance.id` to `aws_db_instance.identifier` to be compatible with aws provider v5.
+
 ## [1.0.97] - 2024-07-17
 
 - [RDS] Add `ca_cert_identifier` variable.
