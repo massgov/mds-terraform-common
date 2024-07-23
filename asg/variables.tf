@@ -130,3 +130,9 @@ variable "block_devices" {
     }
   ]
 }
+
+variable "amazon_ecs_managed_tag" {
+  type        = bool
+  description = "Whether or not to include the AmazonECSManaged tag."
+  default     = true
+}

@@ -115,3 +115,9 @@ variable "additional_cloudinit_configs" {
   DESC
   default = []
 }
+
+variable "amazon_ecs_managed_tag" {
+  type        = bool
+  description = "Whether or not to include the AmazonECSManaged tag to the autoscaling group."
+  default     = true
+}

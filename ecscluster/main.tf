@@ -78,6 +78,8 @@ module "asg" {
 
   block_devices = concat(local.default_devices, module.ami_devices.block_devices)
 
+  amazon_ecs_managed_tag  = var.amazon_ecs_managed_tag
+
   tags = merge(
     var.tags,
     {
