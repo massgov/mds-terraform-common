@@ -11,11 +11,6 @@ resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = var.bucket_name
 
-  website {
-    index_document = var.index_document
-    error_document = coalesce(var.error_document, var.index_document)
-  }
-
   // Enable CORS if requested.
   dynamic "cors_rule" {
     for_each = var.enable_cors ? [1] : []
@@ -37,6 +32,19 @@ resource "aws_s3_bucket" "site" {
       "public"             = "yes"
     }
   )
+}
+
+# https://registry.terraform.io/providers/-/aws/5.40.0/docs/guides/version-4-upgrade#website-website_domain-and-website_endpoint-arguments
+resource "aws_s3_bucket_website_configuration" "site" {
+  bucket = var.bucket_name
+
+  index_document {
+    suffix = var.index_document
+  }
+
+  error_document {
+    key = coalesce(var.error_document, var.index_document)
+  }
 }
 
 // IAM
