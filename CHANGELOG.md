@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.99] - 2024-07-24
+
+- [Static Site] Replace deprecated `website` block with `aws_s3_bucket_website_configuration`.
+
 ## [1.0.98] - 2024-07-22
 
 - [ASG] Add optional `AmazonECSManaged` tag to autoscaling group to be compatible with aws provider v5.
