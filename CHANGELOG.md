@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.100] - 2024-08-05
+
+- [Entrypoint Monitor] Update permissions so Lambda can read bucket location
+
 ## [1.0.99] - 2024-07-24
 
 - [Static Site] Replace deprecated `website` block with `aws_s3_bucket_website_configuration`.

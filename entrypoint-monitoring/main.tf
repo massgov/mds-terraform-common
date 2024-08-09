@@ -31,6 +31,7 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
       "route53:ListResourceRecordSets",
       "s3:ListAllMyBuckets",
       "s3:GetBucketWebsite",
+      "s3:GetBucketLocation"
     ]
     resources = ["*"]
   }
