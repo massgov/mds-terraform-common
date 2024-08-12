@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.101] - 2024-08-12
+
+- [RDS] Update module to enable AWS-managed master passwords
+
 ## [1.0.100] - 2024-08-05
 
 - [Entrypoint Monitor] Update permissions so Lambda can read bucket location

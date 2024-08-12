@@ -1,5 +1,5 @@
-data aws_region default {}
-data aws_caller_identity default {}
+data "aws_region" "default" {}
+data "aws_caller_identity" "default" {}
 
 resource "aws_db_subnet_group" "default" {
   name       = "${var.name}-subnet"
@@ -33,6 +33,8 @@ resource "aws_db_instance" "default" {
   apply_immediately                     = var.apply_immediately
   iam_database_authentication_enabled   = var.iam_database_authentication_enabled
   ca_cert_identifier                    = var.ca_cert_identifier
+  manage_master_user_password           = var.manage_master_user_password
+  master_user_secret_kms_key_id         = var.master_user_secret_kms_key_id
 
   vpc_security_group_ids = flatten([
     var.security_groups,

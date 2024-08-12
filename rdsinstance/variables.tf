@@ -191,3 +191,15 @@ variable "ca_cert_identifier" {
   description = "The identifier of the CA certificate for the DB instance."
   default     = null
 }
+
+variable "manage_master_user_password" {
+  type = bool
+  default = false
+  description = "Enables management of the master password with Secrets Manager"
+}
+
+variable "master_user_secret_kms_key_id" {
+  type = string
+  default = null
+  description = "Specifies a custom KMS key used to encrypt/decrypt master password."
+}

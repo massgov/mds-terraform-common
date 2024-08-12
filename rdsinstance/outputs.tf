@@ -43,3 +43,9 @@ output "accessor_security_group" {
 output "rds_instance_identifier" {
   value = aws_db_instance.default.identifier
 }
+
+output "master_password_secret_arn" {
+  value = var.manage_master_user_password ? try(
+    aws_db_instance.default.master_user_secret[0].secret_arn, null
+  ) : null
+}
