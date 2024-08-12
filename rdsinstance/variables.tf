@@ -42,7 +42,8 @@ variable "username" {
 
 variable "password" {
   type        = string
-  description = "The root account password."
+  default     = null
+  description = "The root account password. Either this or `manage_master_user_password` is required."
 }
 
 variable "policies" {
