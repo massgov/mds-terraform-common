@@ -10,7 +10,20 @@ variable "human_name" {
 
 variable "teams_webhook_url" {
   type        = string
-  description = "URL of incoming webhook"
+  default     = null
+  description = "URL of incoming webhook. This or `teams_webhook_url_param_arn` is required"
+}
+
+variable "teams_webhook_url_param_arn" {
+  type        = string
+  default     = null
+  description = "Parameter Store ARN of incoming webhook URL"
+}
+
+variable "teams_webhook_url_param_key" {
+  type = string
+  default = null
+  description = "ARN of KMS key used to encrypt/decrypt webhook URL parameter"
 }
 
 variable "tags" {

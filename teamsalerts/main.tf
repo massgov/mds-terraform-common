@@ -1,3 +1,39 @@
+data "aws_kms_alias" "ssm_key" {
+  name = "alias/aws/ssm"
+}
+
+resource "aws_iam_policy" "read_parameter_store" {
+  count = var.teams_webhook_url_param_arn == null ? 0 : 1
+
+  name = "${var.name}-read-parameter-store"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssm:GetParameter",
+        ]
+        Effect = "Allow"
+        Resource = [
+          var.teams_webhook_url_param_arn
+        ]
+      },
+      {
+        Action = [
+          "kms:Decrypt"
+        ]
+        Effect = "Allow"
+        Resources = [
+          coalesce(
+            var.teams_webhook_url_param_key,
+            data.aws_kms_alias.ssm_key.target_key_arn
+          )
+        ]
+      }
+    ]
+  })
+}
+
 module "sns_to_teams" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
   package = "${path.module}/lambda/dist/archive.zip"
@@ -5,13 +41,14 @@ module "sns_to_teams" {
   handler = "lambda.handler"
   environment = {
     variables = {
-      TOPIC_MAP         = jsonencode(var.topic_map)
-      TEAMS_WEBHOOK_URL = var.teams_webhook_url
+      TOPIC_MAP                   = jsonencode(var.topic_map)
+      TEAMS_WEBHOOK_URL           = var.teams_webhook_url
+      TEAMS_WEBHOOK_URL_PARAM_ARN = var.teams_webhook_url_param_arn
     }
   }
-  iam_policies = []
-  name         = var.name
-  human_name   = var.human_name
+  iam_policy_arns = [for p in aws_iam_policy.read_parameter_store : p.arn]
+  name            = var.name
+  human_name      = var.human_name
   tags = merge(
     var.tags,
     {
