@@ -12,7 +12,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: hashicorp/setup-terraform@v3
       - run: terraform fmt -recursive -check || echo "Terraform fmt check failed. Run 'terraform fmt -recursive' to fix the formatting issues."
-      - name: Render terraform docs inside the README.md and push changes back to PR branch
+      - name: Check Terraform docs
         uses: terraform-docs/gh-actions@v1.1.0
         with:
           working-dir: ssm-session-monitor/,jump-box/
