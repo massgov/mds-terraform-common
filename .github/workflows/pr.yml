@@ -16,4 +16,3 @@ jobs:
         uses: terraform-docs/gh-actions@v1.1.0
         with:
           working-dir: ssm-session-monitor/,jump-box/
-          git-push: "true"

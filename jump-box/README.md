@@ -86,20 +86,20 @@ aws ssm start-session \
 
 ```
 
-
 <!-- BEGIN_TF_DOCS -->
+
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.45 |
+| Name                                                                     | Version |
+| ------------------------------------------------------------------------ | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.8  |
+| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | >= 5.45 |
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.45 |
+| Name                                             | Version |
+| ------------------------------------------------ | ------- |
+| <a name="provider_aws"></a> [aws](#provider_aws) | >= 5.45 |
 
 ## Modules
 
@@ -107,35 +107,23 @@ No modules.
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [aws_iam_instance_profile.profile](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
-| [aws_iam_role.jump](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy_attachment.ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_iam_role_policy_attachment.ssm_managed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
-| [aws_instance.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) | resource |
-| [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
-| [aws_iam_policy_document.assume_by_ec2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_ami"></a> [ami](#input\_ami) | The ami to use for the jump box. If the SSM Agent is not already installed on the ami, it should be installed through the user\_data variable. | `string` | n/a | yes |
-| <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use for the instance. | `string` | `"t4g.nano"` | no |
-| <a name="input_name"></a> [name](#input\_name) | Name to use for the instance. | `string` | n/a | yes |
-| <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | The VPC subnet to launch the instance in. | `string` | n/a | yes |
-| <a name="input_user_data"></a> [user\_data](#input\_user\_data) | User data to use when creating the instance. | `string` | `null` | no |
-| <a name="input_volume_size"></a> [volume\_size](#input\_volume\_size) | Size of the root volume in gibibytes. | `number` | `null` | no |
-| <a name="input_volume_type"></a> [volume\_type](#input\_volume\_type) | Volume type for the root volume. | `string` | `null` | no |
-| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | The VPC to launch the instance in. | `string` | n/a | yes |
+| Name                                                                                                                                                 | Type        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [aws_iam_instance_profile.profile](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile)                 | resource    |
+| [aws_iam_role.jump](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)                                            | resource    |
+| [aws_iam_role_policy_attachment.ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment)         | resource    |
+| [aws_iam_role_policy_attachment.ssm_managed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource    |
+| [aws_instance.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)                                            | resource    |
+| [aws_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)                                | resource    |
+| [aws_iam_policy_document.assume_by_ec2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document)          | data source |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_jump_box_instance"></a> [jump\_box\_instance](#output\_jump\_box\_instance) | n/a |
-| <a name="output_jump_box_security_group"></a> [jump\_box\_security\_group](#output\_jump\_box\_security\_group) | n/a |
+| Name                                                                                                     | Description |
+| -------------------------------------------------------------------------------------------------------- | ----------- |
+| <a name="output_jump_box_instance"></a> [jump_box_instance](#output_jump_box_instance)                   | n/a         |
+| <a name="output_jump_box_security_group"></a> [jump_box_security_group](#output_jump_box_security_group) | n/a         |
+
 <!-- END_TF_DOCS -->
 
 ## Development
