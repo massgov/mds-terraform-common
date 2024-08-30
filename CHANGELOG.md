@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.101] - 2024-08-12
+## [1.0.101] - 2024-08-30
 
 - [RDS] Update module to enable AWS-managed master passwords
 - [Teams alert] Update module to support reading Teams webhook URL from Parameter Store
