@@ -1,8 +1,8 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 locals {
-  region = coalesce(var.region, data.aws_region.current.name)
-  account_id = coalesce(var.account_id, data.aws_caller_identity.current.account_id)
+  region            = coalesce(var.region, data.aws_region.current.name)
+  account_id        = coalesce(var.account_id, data.aws_caller_identity.current.account_id)
   secrets_namespace = "tf/${var.namespace}"
 }
 
@@ -52,32 +52,32 @@ resource "aws_codebuild_project" "plan" {
 }
 
 resource "aws_codebuild_webhook" "plan" {
-  project_name  = aws_codebuild_project.plan.name
+  project_name = aws_codebuild_project.plan.name
 
   filter_group {
     filter {
-      type = "EVENT"
+      type    = "EVENT"
       pattern = "PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED, PULL_REQUEST_REOPENED"
     }
 
     filter {
-      type = "BASE_REF"
+      type    = "BASE_REF"
       pattern = "^refs/heads/(?:master|main|develop)$"
     }
   }
 }
 
 resource "aws_codebuild_webhook" "apply_develop" {
-  project_name  = aws_codebuild_project.apply_develop.name
+  project_name = aws_codebuild_project.apply_develop.name
 
   filter_group {
     filter {
-      type = "EVENT"
+      type    = "EVENT"
       pattern = "PUSH"
     }
 
     filter {
-      type = "HEAD_REF"
+      type    = "HEAD_REF"
       pattern = "^refs/heads/develop$"
     }
   }
@@ -141,16 +141,16 @@ resource "aws_codebuild_project" "apply_develop" {
 }
 
 resource "aws_codebuild_webhook" "apply_master" {
-  project_name  = aws_codebuild_project.apply_master.name
+  project_name = aws_codebuild_project.apply_master.name
 
   filter_group {
     filter {
-      type = "EVENT"
+      type    = "EVENT"
       pattern = "PUSH"
     }
 
     filter {
-      type = "HEAD_REF"
+      type    = "HEAD_REF"
       pattern = "^refs/heads/(?:master|main)$"
     }
   }
@@ -233,15 +233,15 @@ EOD
 }
 
 resource "aws_cloudwatch_event_target" "build_failure" {
-  count = length(var.failure_topics)
-  arn = element(var.failure_topics, count.index)
-  rule = aws_cloudwatch_event_rule.build_failure.name
+  count     = length(var.failure_topics)
+  arn       = element(var.failure_topics, count.index)
+  rule      = aws_cloudwatch_event_rule.build_failure.name
   target_id = "${var.name}-to-SNS"
   input_transformer {
     input_template = jsonencode("Codebuild job failed for <project-name>")
     input_paths = {
       "project-name" = "$.detail.project-name"
-      "build-id" = "$.id"
+      "build-id"     = "$.id"
     }
   }
 }
