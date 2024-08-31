@@ -15,6 +15,6 @@ jobs:
       - name: Check Terraform docs
         uses: terraform-docs/gh-actions@v1.1.0
         with:
-          working-dir: ssm-session-monitor/,jump-box/
+          working-dir: ssm-session-monitor/,jump-box/,assume-role-alerts/,gha-environment/,gha-role/,terraform-bootstrap/
           git-push: false
           fail-on-diff: true
