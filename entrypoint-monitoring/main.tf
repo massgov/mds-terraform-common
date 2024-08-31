@@ -3,7 +3,7 @@ data "aws_region" "default" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  aws_region = data.aws_region.default.name
+  aws_region     = data.aws_region.default.name
   aws_account_id = data.aws_caller_identity.current.account_id
 }
 
@@ -59,10 +59,10 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
 }
 
 module "monitor_lambda" {
-  source                 = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
-  package                = data.archive_file.monitor_package.output_path
-  runtime                = "nodejs20.x"
-  handler                = "lambda.default"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
+  package = data.archive_file.monitor_package.output_path
+  runtime = "nodejs20.x"
+  handler = "lambda.default"
   environment = {
     variables = merge({
       ALLOWED_POINTS_PARAMETER = var.allowed_points_parameter

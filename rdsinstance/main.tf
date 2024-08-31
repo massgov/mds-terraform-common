@@ -1,5 +1,5 @@
-data aws_region default {}
-data aws_caller_identity default {}
+data "aws_region" "default" {}
+data "aws_caller_identity" "default" {}
 
 resource "aws_db_subnet_group" "default" {
   name       = "${var.name}-subnet"

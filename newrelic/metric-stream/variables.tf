@@ -47,14 +47,14 @@ variable "retry_duration" {
 }
 
 variable "include_filters" {
-  type        = list(object({
-                  namespace = string,
-                  metric_names = list(string)
-                }))
+  type = list(object({
+    namespace    = string,
+    metric_names = list(string)
+  }))
   description = "List of metrics to include. See aws_cloudwatch_metric_stream.include_filter. Note - empty metric_names list will include all metrics."
 }
 
 variable "tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }

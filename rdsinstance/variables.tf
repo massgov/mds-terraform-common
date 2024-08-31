@@ -100,9 +100,9 @@ variable "apply_immediately" {
 }
 
 variable "iam_database_authentication_enabled" {
-  type = string
+  type        = string
   description = "Boolean indicating whether to enable IAM database authentication"
-  default = false
+  default     = false
 }
 
 variable "tags" {
@@ -170,8 +170,8 @@ variable "snapshot_identifier" {
 
 variable "enable_manual_snapshots" {
   description = "If set to true, will periodically create manual DB backups which get retained for at least 90 days"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "manual_snapshot_schedule" {

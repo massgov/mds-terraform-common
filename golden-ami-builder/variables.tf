@@ -4,7 +4,7 @@ variable "software_distribution_bucket_id" {
 }
 
 variable "software_distribution_bucket_key_arn" {
-  description = "ARN of KMS key used to encrypt/decrypt files in the distribution bucket" 
+  description = "ARN of KMS key used to encrypt/decrypt files in the distribution bucket"
   type        = string
 }
 

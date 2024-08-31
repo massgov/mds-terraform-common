@@ -41,7 +41,7 @@ data "template_cloudinit_config" "config" {
   part {
     filename     = "init.cfg"
     content_type = "text/cloud-config"
-    content      = "${data.template_file.instance_init.rendered}"
+    content      = data.template_file.instance_init.rendered
   }
 
   dynamic "part" {
@@ -78,7 +78,7 @@ module "asg" {
 
   block_devices = concat(local.default_devices, module.ami_devices.block_devices)
 
-  amazon_ecs_managed_tag  = var.amazon_ecs_managed_tag
+  amazon_ecs_managed_tag = var.amazon_ecs_managed_tag
 
   tags = merge(
     var.tags,

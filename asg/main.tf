@@ -19,12 +19,12 @@ resource "aws_launch_template" "default" {
 
       ebs {
         delete_on_termination = block_device_mappings.value.delete_on_termination
-        encrypted = block_device_mappings.value.encrypted
-        iops = block_device_mappings.value.iops
-        snapshot_id = block_device_mappings.value.snapshot_id
-        throughput = block_device_mappings.value.throughput
-        volume_size = block_device_mappings.value.volume_size
-        volume_type = block_device_mappings.value.volume_type
+        encrypted             = block_device_mappings.value.encrypted
+        iops                  = block_device_mappings.value.iops
+        snapshot_id           = block_device_mappings.value.snapshot_id
+        throughput            = block_device_mappings.value.throughput
+        volume_size           = block_device_mappings.value.volume_size
+        volume_type           = block_device_mappings.value.volume_type
       }
     }
   }
