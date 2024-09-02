@@ -2,36 +2,35 @@ data "aws_kms_alias" "ssm_key" {
   name = "alias/aws/ssm"
 }
 
+data "aws_iam_policy_document" "read_parameter_store" {
+  statement {
+    actions = [
+      "ssm:GetParameter",
+    ]
+    effect = "Allow"
+    resources = var.teams_webhook_url_param_arn == null ? [] : [
+      var.teams_webhook_url_param_arn
+    ]
+  }
+  statement {
+    actions = [
+      "kms:Decrypt"
+    ]
+    effect = "Allow"
+    resources = [
+      coalesce(
+        var.teams_webhook_url_param_key,
+        data.aws_kms_alias.ssm_key.target_key_arn
+      )
+    ]
+  }
+}
+
 resource "aws_iam_policy" "read_parameter_store" {
   count = var.teams_webhook_url_param_arn == null ? 0 : 1
 
-  name = "${var.name}-read-parameter-store"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ssm:GetParameter",
-        ]
-        Effect = "Allow"
-        Resource = [
-          var.teams_webhook_url_param_arn
-        ]
-      },
-      {
-        Action = [
-          "kms:Decrypt"
-        ]
-        Effect = "Allow"
-        Resources = [
-          coalesce(
-            var.teams_webhook_url_param_key,
-            data.aws_kms_alias.ssm_key.target_key_arn
-          )
-        ]
-      }
-    ]
-  })
+  name   = "${var.name}-read-parameter-store"
+  policy = data.aws_iam_policy_document.read_parameter_store.json
 }
 
 module "sns_to_teams" {

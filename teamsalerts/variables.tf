@@ -21,8 +21,8 @@ variable "teams_webhook_url_param_arn" {
 }
 
 variable "teams_webhook_url_param_key" {
-  type = string
-  default = null
+  type        = string
+  default     = null
   description = "ARN of KMS key used to encrypt/decrypt webhook URL parameter"
 }
 
