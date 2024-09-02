@@ -1,7 +1,7 @@
 # Look up AMI for `include_ami_device_names`
 data "aws_ami" "default" {
   filter {
-    name = "image-id"
+    name   = "image-id"
     values = [var.ami]
   }
 }
@@ -18,14 +18,14 @@ locals {
 
   block_devices = [
     for mapping in data.aws_ami.default.block_device_mappings :
-      # flatten object so there isn't a nested "ebs" object
-      merge(
-         {device_name = mapping.device_name},
-         mapping.ebs,
-         # overwrite delete_on_termination based on variable
-         var.force_delete_on_termination ? { delete_on_termination = true } : {}
-      )
-      # Only include devices that pass the filter.
-      if (contains(local.filter_list, mapping.device_name) == local.filter_contains_value)
+    # flatten object so there isn't a nested "ebs" object
+    merge(
+      { device_name = mapping.device_name },
+      mapping.ebs,
+      # overwrite delete_on_termination based on variable
+      var.force_delete_on_termination ? { delete_on_termination = true } : {}
+    )
+    # Only include devices that pass the filter.
+    if(contains(local.filter_list, mapping.device_name) == local.filter_contains_value)
   ]
 }

@@ -187,7 +187,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_up" {
 
 resource "aws_sns_topic" "cb" {
   count = var.ecs_circuit_breaker ? 1 : 0
-  name = join("", [var.ecs_service_name, "CB", "Topic"])
+  name  = join("", [var.ecs_service_name, "CB", "Topic"])
   tags = merge(
     var.tags,
     {
@@ -204,13 +204,13 @@ resource "aws_cloudwatch_event_rule" "cb" {
   description = "Capture and alert when Circuit Break is rolling back"
 
   event_pattern = jsonencode({
-    "source": ["aws.ecs"],
-    "detail-type": ["ECS Deployment State Change"],
-    "resources": [
+    "source" : ["aws.ecs"],
+    "detail-type" : ["ECS Deployment State Change"],
+    "resources" : [
       aws_ecs_service.main.id
     ]
-    "detail": {
-      "eventName": ["SERVICE_DEPLOYMENT_FAILED"]
+    "detail" : {
+      "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]
     }
   })
   tags = merge(
@@ -222,7 +222,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
 }
 
 resource "aws_cloudwatch_event_target" "sns" {
-  count = var.ecs_circuit_breaker  ? 1 : 0
+  count = var.ecs_circuit_breaker ? 1 : 0
 
   rule      = aws_cloudwatch_event_rule.cb[0].name
   target_id = "SendToSNS"
@@ -230,7 +230,7 @@ resource "aws_cloudwatch_event_target" "sns" {
 }
 
 resource "aws_sns_topic_subscription" "cb_email_targets" {
-  count = length(var.ecs_circuit_breaker_alert_email)
+  count     = length(var.ecs_circuit_breaker_alert_email)
   topic_arn = aws_sns_topic.cb[0].arn
   protocol  = "email"
   endpoint  = var.ecs_circuit_breaker_alert_email[count.index]

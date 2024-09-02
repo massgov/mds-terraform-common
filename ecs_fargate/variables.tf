@@ -29,13 +29,13 @@ variable "ec2_alb_arn" {
 // Cloudwatch LogGroup
 variable "log_retention_days" {
   description = "How many days to keep logs for? 0 = Never Expire Logs"
-  type = number
-  default = 0
+  type        = number
+  default     = 0
 }
 variable "cw_kms_key" {
   description = "KMS Key for CloudWatch Log Group"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 // ECS var:
@@ -50,15 +50,15 @@ variable "ecs_task_def_custom" {
 }
 variable "ecs_task_def" {
   description = "Object to create Task Def"
-  type        = object({
+  type = object({
     execution_role_arn = string
     task_role_arn      = string
     cpu                = number
     memory             = number
     family             = string
-    containers         = list(object({
-      container_name   = string
-      log_group_name   = string
+    containers = list(object({
+      container_name = string
+      log_group_name = string
       environment_vars = list(object({
         name  = string
         value = string
@@ -67,7 +67,7 @@ variable "ecs_task_def" {
         name      = string
         valueFrom = string
       }))
-      image_name    = string
+      image_name = string
       port_mappings = list(object({
         containerPort = number
         protocol      = string
@@ -112,7 +112,7 @@ variable "ecs_task_def" {
 
 variable "ecs_task_volumes" {
   description = "Add EFS Mount to ECS"
-  type        = list(object({
+  type = list(object({
     name            = string,
     host_path       = string,
     access_point_id = string,
@@ -174,11 +174,11 @@ variable "ecs_subnet_ids" {
 }
 variable "ecs_load_balancers" {
   description = "Connect service to load balancer"
-  type        = map(map(object(
+  type = map(map(object(
     {
       container_port = number
       tls            = bool
-      conditions     = object({
+      conditions = object({
         host_header = list(string)
       })
     }
@@ -243,7 +243,7 @@ variable "create_ecr" {
 variable "ecr_name" {
   description = "ECR Repo Name, required if creating new"
   type        = string
-  default = ""
+  default     = ""
 }
 variable "ecr_kms_arn" {
   type    = string

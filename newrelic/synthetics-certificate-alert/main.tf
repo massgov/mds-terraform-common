@@ -5,7 +5,7 @@ locals {
 resource "newrelic_alert_policy" "policy" {
   count = (var.policy_id == null ? 1 : 0)
 
-  name = "${var.name} Monitor"
+  name                = "${var.name} Monitor"
   incident_preference = "PER_POLICY"
 }
 
@@ -29,9 +29,9 @@ resource "newrelic_synthetics_cert_check_monitor" "monitor" {
 }
 
 module "alert_condition" {
-  source = "../nrql-alert"
+  source     = "../nrql-alert"
   account_id = var.account_id
-  policy_id = local.policy_id
+  policy_id  = local.policy_id
   name = format(
     "%s Certificate Monitor - Failed %d checks to '%s' in %d seconds",
     var.name,
@@ -40,11 +40,11 @@ module "alert_condition" {
     var.critical_threshold_duration
   )
 
-  nrql_query = "SELECT filter(count(*), WHERE result = 'FAILED') AS 'Failures' FROM SyntheticCheck WHERE entityGuid IN ('${newrelic_synthetics_cert_check_monitor.monitor.id}') FACET monitorName"
-  critical_threshold = var.critical_threshold
+  nrql_query                  = "SELECT filter(count(*), WHERE result = 'FAILED') AS 'Failures' FROM SyntheticCheck WHERE entityGuid IN ('${newrelic_synthetics_cert_check_monitor.monitor.id}') FACET monitorName"
+  critical_threshold          = var.critical_threshold
   critical_threshold_duration = var.critical_threshold_duration
-  aggregation_window = var.aggregation_window
-  aggregation_method = "event_flow"
-  aggregation_delay  = var.aggregation_delay
-  tags = var.tags
+  aggregation_window          = var.aggregation_window
+  aggregation_method          = "event_flow"
+  aggregation_delay           = var.aggregation_delay
+  tags                        = var.tags
 }
