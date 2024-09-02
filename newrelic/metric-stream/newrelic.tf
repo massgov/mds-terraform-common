@@ -1,10 +1,3 @@
-resource "newrelic_cloud_aws_link_account" "default" {
-  arn                    = aws_iam_role.newrelic_integration_role.arn
-  metric_collection_mode = "PUSH"
-  name                   = var.newrelic_aws_account_name
-  account_id             = var.newrelic_account_id
-}
-
 resource "aws_iam_role" "newrelic_integration_role" {
   name               = "${var.name_prefix}-newrelic-integration-role"
   assume_role_policy = data.aws_iam_policy_document.newrelic_integration_assume_role.json
