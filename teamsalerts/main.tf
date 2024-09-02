@@ -23,6 +23,13 @@ data "aws_iam_policy_document" "read_parameter_store" {
         data.aws_kms_alias.ssm_key.target_key_arn
       )
     ]
+    condition {
+      test = "ArnLike"
+      values = var.teams_webhook_url_param_arn == null ? [] : [
+        var.teams_webhook_url_param_arn
+      ]
+      variable = "kms:EncryptionContext:PARAMETER_ARN"
+    }
   }
 }
 
