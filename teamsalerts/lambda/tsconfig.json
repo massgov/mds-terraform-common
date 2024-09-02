@@ -19,6 +19,6 @@
     "strictPropertyInitialization": true,
     "useUnknownInCatchVariables": true,
     "types": ["node"],
-    "rootDir": "./",
+    "rootDir": "./"
   }
 }

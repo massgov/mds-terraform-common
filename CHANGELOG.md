@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.102] - 2024-09-02
+
+- [RDS] Update module to enable AWS-managed master passwords
+- [Teams alert] Update module to support reading Teams webhook URL from Parameter Store
+
+## [1.0.101] - 2024-08-31
+
+- [Role Escalation Alerts] Add module
+
 ## [1.0.100] - 2024-08-05
 
 - [Entrypoint Monitor] Update permissions so Lambda can read bucket location

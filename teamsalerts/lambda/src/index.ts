@@ -2,16 +2,12 @@ import assert from "assert";
 import { SNSHandler } from "aws-lambda";
 import { TopicMap } from "./types";
 import { consume, pipeline, tap } from "streaming-iterables";
-import { enrichWithMessageCards, publishToTeams } from "./util";
+import { enrichWithMessageCards, publishToTeams, getWebhookUrl } from "./util";
 
 const handler: SNSHandler = async function (event, context) {
-  assert(
-    process.env.TEAMS_WEBHOOK_URL &&
-      typeof process.env.TEAMS_WEBHOOK_URL === "string"
-  );
+  const webhookUrl = await getWebhookUrl();
   assert(process.env.TOPIC_MAP && typeof process.env.TOPIC_MAP === "string");
 
-  const webhookUrl = process.env.TEAMS_WEBHOOK_URL;
   const topicMap = <TopicMap>JSON.parse(process.env.TOPIC_MAP);
 
   await pipeline(
