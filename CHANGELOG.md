@@ -5,6 +5,10 @@
 - [RDS] Update module to enable AWS-managed master passwords
 - [Teams alert] Update module to support reading Teams webhook URL from Parameter Store
 
+### Breaking
+
+- [New Relic] Remove New Relic-AWS link from `metrics-stream` submodule
+
 ## [1.0.101] - 2024-08-31
 
 - [Role Escalation Alerts] Add module
