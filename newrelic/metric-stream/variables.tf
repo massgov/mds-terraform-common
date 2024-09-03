@@ -18,11 +18,6 @@ variable "newrelic_access_key" {
   description = "The new relic access key."
 }
 
-variable "newrelic_aws_account_name" {
-  type        = string
-  description = "Nickname for AWS account in New Relic."
-}
-
 variable "newrelic_account_id" {
   type        = string
   description = "The account number for the New Relic account."

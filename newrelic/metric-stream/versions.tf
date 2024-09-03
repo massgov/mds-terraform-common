@@ -8,9 +8,5 @@ terraform {
       version = ">= 4.67"
     }
 
-    newrelic = {
-      source  = "newrelic/newrelic"
-      version = ">= 2.44"
-    }
   }
 }
