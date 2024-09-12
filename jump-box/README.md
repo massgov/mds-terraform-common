@@ -121,6 +121,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami"></a> [ami](#input\_ami) | The ami to use for the jump box. If the SSM Agent is not already installed on the ami, it should be installed through the user\_data variable. | `string` | n/a | yes |
+| <a name="input_instance_tags"></a> [instance\_tags](#input\_instance\_tags) | Additional tags to apply to the EC2 instance. | `map(string)` | `{}` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use for the instance. | `string` | `"t4g.nano"` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name to use for the instance. | `string` | n/a | yes |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | The VPC subnet to launch the instance in. | `string` | n/a | yes |
