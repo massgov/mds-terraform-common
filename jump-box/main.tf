@@ -59,7 +59,10 @@ resource "aws_instance" "this" {
     http_tokens = "required"
   }
 
-  tags = {
-    "Name" = "${var.name}"
-  }
+  tags = merge(
+    var.instance_tags,
+    {
+      "Name" = "${var.name}"
+    }
+  )
 }
