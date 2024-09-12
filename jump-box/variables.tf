@@ -24,6 +24,12 @@ variable "instance_type" {
   default     = "t4g.nano"
 }
 
+variable "instance_tags" {
+  type        = map(string)
+  description = "Additional tags to apply to the EC2 instance."
+  default     = {}
+}
+
 variable "volume_size" {
   type        = number
   description = "Size of the root volume in gibibytes."
