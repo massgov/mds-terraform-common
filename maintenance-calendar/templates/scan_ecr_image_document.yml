@@ -1,0 +1,40 @@
+schemaVersion: '0.3'
+description: |-
+  ### Purpose
+  This automation initiates an image scan for a particular ECR repository and image tag and publishes the result to the specified SNS Topic
+  ### Usage
+  #### Parameters
+  - `AutomationAssumeRole` - (required) role to assume while performing this automation
+  - `ClusterArn` - (string, required); the ARN of the ECS Cluster to scan
+  - `AlertsTopicArn` - (string, optional); the ARN of the SNS Topic to which results should be pushed (default: `arn:aws:sns:us-east-1:786775234217:ssr-maintenance-notifications`)
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  ClusterArn:
+    type: String
+    description: ARN of the ECS Cluster
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+    description: Role to assume
+  AlertsTopicArn:
+    type: String
+    default: '${alerts_topic_arn}'
+    description: ARN of SNS topic
+mainSteps:
+  - name: InvokeLambdaFunction
+    action: aws:invokeLambdaFunction
+    isEnd: true
+    onFailure: step:AlertOnError
+    inputs:
+      InvocationType: RequestResponse
+      FunctionName: '${lambda_arn}'
+      InputPayload:
+        cluster: '{{ClusterArn}}'
+  - description: ''
+    name: AlertOnError
+    action: aws:executeAutomation
+    isEnd: true
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: 'There was an error running the `SSR-ScanECRImage` automation on {{ClusterArn}}. More details here: https://us-east-1.console.aws.amazon.com/systems-manager/automation/execution/{{ automation:EXECUTION_ID }}?region=us-east-1'
