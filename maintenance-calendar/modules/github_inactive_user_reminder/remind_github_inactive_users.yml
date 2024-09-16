@@ -1,0 +1,40 @@
+description: |-
+  ### Purpose
+  Sends a reminder email for compliance with GitHub SOE policy
+  ### Usage
+  ### Parameters
+    - `AlertsTopicArn` - (optional, string); the ARN of the SNS Topic to which results should be pushed (default: `${alerts_topic_arn}`)
+    - `AutomationAssumeRole` - (required, string); ARN of role to assume while performing this automation
+schemaVersion: '0.3'
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  AlertsTopicArn:
+    type: String
+    default: ${alerts_topic_arn}
+  AutomationAssumeRole:
+    type: 'AWS::IAM::Role::Arn'
+mainSteps:
+  - name: SendInactiveUserReminder
+    action: 'aws:executeAutomation'
+    onFailure: Abort
+    isCritical: true
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      DocumentVersion: $LATEST
+      RuntimeParameters:
+        TopicArn: '{{AlertsTopicArn}}'
+        Message: |-
+          Per EOTSS GitHub SOE policy: "GitHub Members will be removed from the TSS GitHub Platform after 180 days of inactivity."
+
+          This message is your quarterly reminder to:
+            Check for inactive GitHub accounts
+            Check for GitHub accounts with non-commonweath email addresses
+            Check for for access tokens more than 90 days old
+
+          Accounts with no activity in the last 180 days should be removed from the massgov org
+          For accounts we can't identify, email them directly and ask if they still need access to repos in the massgov org
+
+          For more info, please see:
+            https://massgov.sharepoint.com/sites/TSS-GitHub/SitePages/SOE.aspx
+            https://docs.github.com/en/enterprise-cloud@latest/admin/managing-accounts-and-repositories/managing-users-in-your-enterprise/managing-dormant-users
+    isEnd: true
