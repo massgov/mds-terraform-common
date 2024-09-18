@@ -14,8 +14,8 @@ resource "aws_ssm_document" "ssr_create_rds_snapshot" {
   content = templatefile(
     "${path.module}/templates/create_rds_snapshot.yml",
     {
-      region           = local.region
-      alerts_topic_arn = aws_sns_topic.maintenance_notifications.arn
+      region           = var.region
+      alerts_topic_arn = var.sns_topic_arn
     }
   )
 }
@@ -27,78 +27,10 @@ resource "aws_ssm_document" "ssr_clean_up_rds_snapshots" {
   content = templatefile(
     "${path.module}/templates/clean_up_rds_snapshots.yml",
     {
-      region           = local.region
-      alerts_topic_arn = aws_sns_topic.maintenance_notifications.arn
+      region           = var.region
+      alerts_topic_arn = var.sns_topic_arn
     }
   )
-}
-
-resource "aws_iam_role" "rds_backups_role" {
-  name               = "SSRRDSBackupsRole"
-  assume_role_policy = data.aws_iam_policy_document.maintenance_assume_role_policy.json
-}
-
-data "aws_iam_policy_document" "rds_backups" {
-  statement {
-    effect = "Allow"
-    resources = formatlist(
-      "arn:aws:rds:${local.region}:${local.account_id}:snapshot:%s-*",
-      data.aws_db_instances.dbinstance.instance_identifiers
-    )
-    actions = [
-      "rds:AddTagsToResource",
-      "rds:DescribeDBSnapshots",
-      "rds:DeleteDBSnapshot",
-      "rds:CreateDBSnapshot"
-    ]
-  }
-  statement {
-    effect    = "Allow"
-    resources = data.aws_db_instances.dbinstance.instance_arns
-    actions = [
-      "rds:CreateDBSnapshot",
-      "rds:DescribeDBSnapshots",
-      "rds:DescribeDBInstances"
-    ]
-  }
-  statement {
-    effect = "Allow"
-    resources = [
-      "arn:aws:ssm:${local.region}::automation-definition/AWS-CreateRdsSnapshot:$LATEST"
-    ]
-    actions = [
-      "ssm:StartAutomationExecution"
-    ]
-  }
-  statement {
-    effect = "Allow"
-    actions = [
-      "ssm:GetAutomationExecution"
-    ]
-    resources = [
-      "*"
-    ]
-  }
-}
-
-resource "aws_iam_policy" "rds_backups_policy" {
-  name   = "rds-backups"
-  policy = data.aws_iam_policy_document.rds_backups.json
-}
-
-resource "aws_iam_role_policy_attachment" "rds_backups" {
-  role       = aws_iam_role.rds_backups_role.id
-  policy_arn = aws_iam_policy.rds_backups_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "rds_backups_publish_alerts" {
-  role       = aws_iam_role.rds_backups_role.id
-  policy_arn = aws_iam_policy.maintenance_publish_alerts.arn
-}
-
-resource "aws_iam_role_policy_attachment" "rds_backups_maintenance_logs" {
-  role       = aws_iam_role.rds_backups_role.id
-  policy_arn = aws_iam_policy.maintenance_publish_alerts.arn
 }
 
 resource "aws_ssm_maintenance_window" "rds_backups_window" {
@@ -162,4 +94,81 @@ resource "aws_ssm_maintenance_window_task" "rds_destroy_backups" {
       }
     }
   }
+}
+
+data "aws_iam_policy_document" "assume_role_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = [
+        "ssm.amazonaws.com"
+      ]
+    }
+  }
+}
+
+resource "aws_iam_role" "rds_backups_role" {
+  name               = "SSR-RDS-Backups-Role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
+}
+
+data "aws_iam_policy_document" "rds_backups" {
+  statement {
+    effect = "Allow"
+    resources = formatlist(
+      "arn:aws:rds:${var.region}:${var.account_id}:snapshot:%s-*",
+      data.aws_db_instances.dbinstance.instance_identifiers
+    )
+    actions = [
+      "rds:AddTagsToResource",
+      "rds:DescribeDBSnapshots",
+      "rds:DeleteDBSnapshot",
+      "rds:CreateDBSnapshot"
+    ]
+  }
+  statement {
+    effect    = "Allow"
+    resources = data.aws_db_instances.dbinstance.instance_arns
+    actions = [
+      "rds:CreateDBSnapshot",
+      "rds:DescribeDBSnapshots",
+      "rds:DescribeDBInstances"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    resources = [
+      "arn:aws:ssm:${var.region}::automation-definition/AWS-CreateRdsSnapshot:$LATEST",
+      "arn:aws:ssm:${var.region}:${var.account_id}:automation-definition/${aws_ssm_document.ssr_create_rds_snapshot.name}:$LATEST",
+      "arn:aws:ssm:${var.region}:${var.account_id}:automation-definition/${aws_ssm_document.ssr_clean_up_rds_snapshots.name}:$LATEST"
+    ]
+    actions = [
+      "ssm:StartAutomationExecution"
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      aws_iam_role.rds_backups_role.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "rds_backups_policy" {
+  name   = "SSR-RDS-backups-policy"
+  policy = data.aws_iam_policy_document.rds_backups.json
+}
+
+resource "aws_iam_role_policy_attachment" "rds_backups" {
+  role       = aws_iam_role.rds_backups_role.id
+  policy_arn = aws_iam_policy.rds_backups_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "rds_backups_publish_alerts" {
+  role       = aws_iam_role.rds_backups_role.id
+  policy_arn = var.publish_alerts_policy
 }

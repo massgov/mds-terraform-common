@@ -1,0 +1,57 @@
+formatter: 'markdown'
+
+recursive:
+  enabled: true
+  path:    modules
+
+sort:
+  enabled: true
+  by: required
+
+output:
+  file: ./README.md
+  mode: inject
+
+content: |-
+  {{ .Header }}
+
+  ## Example
+
+  ```hcl
+    module "calendar" {
+    source = "example.com/maintenance-calendar"
+
+    maintenance_sns_topic   = "testsnstopic"
+    maintenance_logs_bucket = "12345-maintenance-logs"
+
+    create_github_inactive_user_reminder = true
+    create_ecs_scans                     = true
+    create_rds_snapshots                 = true
+
+    scan_ecs_clusters = {
+      foo = [
+        "bar",
+        "baz"
+      ]
+    }
+    scan_ecr_repositories = {
+      foo = [
+        "bar",
+        "baz"
+      ]
+    }
+    rds_instance_names = [
+      "database-1",
+      "database-2"
+    ]
+  }
+  ```
+  {{ .Requirements }}
+
+  {{ .Modules }}
+
+  {{ .Inputs }}
+
+  {{ .Outputs }}
+
+  {{ .Resources }}
