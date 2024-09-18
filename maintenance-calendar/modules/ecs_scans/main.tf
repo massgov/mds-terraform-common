@@ -1,7 +1,7 @@
 locals {
   ecr_repository_names = flatten(values(var.scan_ecr_repositories))
   ecr_repository_arns = formatlist(
-    "arn:aws:ecr:${local.region}:${local.account_id}:repository/%s",
+    "arn:aws:ecr:${var.region}:${var.account_id}:repository/%s",
     local.ecr_repository_names
   )
   all_ecr_repository_scans = flatten([
@@ -16,7 +16,7 @@ locals {
   ecs_cluster_arns = {
     for name in local.ecs_cluster_names :
     name => format(
-      "arn:aws:ecs:${local.region}:${local.account_id}:cluster/%s",
+      "arn:aws:ecs:${var.region}:${var.account_id}:cluster/%s",
       name
     )
   }
@@ -29,9 +29,9 @@ resource "aws_ssm_document" "ssr_scan_ecr_image" {
   content = templatefile(
     "${path.module}/templates/scan_ecr_image_document.yml",
     {
-      region           = local.region
-      account_id       = local.account_id
-      alerts_topic_arn = aws_sns_topic.maintenance_notifications.arn
+      region           = var.region
+      account_id       = var.account_id
+      alerts_topic_arn = var.sns_topic_arn
       lambda_arn       = module.ecs_cluster_image_scan.function_arn
     }
   )
@@ -54,7 +54,7 @@ resource "aws_ssm_maintenance_window_task" "ecr_image_scan" {
   task_arn         = aws_ssm_document.ssr_scan_ecr_image.arn
   task_type        = "AUTOMATION"
   window_id        = aws_ssm_maintenance_window.ecr_image_scan.id
-  service_role_arn = aws_iam_role.maintenance.arn
+  service_role_arn = aws_iam_role.ecs_scans_role.arn
 
   task_invocation_parameters {
     automation_parameters {
@@ -67,27 +67,66 @@ resource "aws_ssm_maintenance_window_task" "ecr_image_scan" {
 
       parameter {
         name   = "AutomationAssumeRole"
-        values = [aws_iam_role.maintenance.arn]
+        values = [aws_iam_role.ecs_scans_role.arn]
       }
     }
   }
 }
 
-// TODO: This can be removed after we switch the calendar to use the lambda.
-data "aws_iam_policy_document" "ecr_image_scan" {
+data "aws_iam_policy_document" "assume_role_policy" {
   statement {
-    effect    = "Allow"
-    actions   = ["ecr:StartImageScan", "ecr:DescribeImageScanFindings"]
-    resources = local.ecr_repository_arns
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = [
+        "ssm.amazonaws.com"
+      ]
+    }
   }
 }
 
-resource "aws_iam_policy" "ecr_image_scan" {
-  name   = "ecr-image-scan"
-  policy = data.aws_iam_policy_document.ecr_image_scan.json
+resource "aws_iam_role" "ecs_scans_role" {
+  name               = "SSR-ECS-Scans-Role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
-resource "aws_iam_role_policy_attachment" "ecr_image_scan" {
-  role       = aws_iam_role.maintenance.id
-  policy_arn = aws_iam_policy.ecr_image_scan.arn
+data "aws_iam_policy_document" "ecs_scans" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:StartAutomationExecution"
+    ]
+    resources = [
+      "arn:aws:ssm:${var.region}:${var.account_id}:automation-definition/${aws_ssm_document.ssr_scan_ecr_image.name}:$LATEST"
+    ]
+  }
+  statement {
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [module.ecs_cluster_image_scan.function_arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      aws_iam_role.ecs_scans_role.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ecs_scans_policy" {
+  name   = "SSR-ECS-Scans-Policy"
+  policy = data.aws_iam_policy_document.ecs_scans.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_scans" {
+  role       = aws_iam_role.ecs_scans_role.id
+  policy_arn = aws_iam_policy.ecs_scans_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_scans_publish_alerts" {
+  role       = aws_iam_role.ecs_scans_role.id
+  policy_arn = var.publish_alerts_policy
 }

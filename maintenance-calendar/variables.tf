@@ -1,3 +1,25 @@
+variable "maintenance_sns_topic" {
+  type        = string
+  description = "Name of the SNS topic to use for maintenance notifications"
+}
+
+variable "maintenance_sns_display_name" {
+  type        = string
+  description = "(Optional) Display name for the maintenance notifications SNS topic"
+  default     = null
+}
+
+variable "maintenance_logs_bucket" {
+  type        = string
+  description = "Name of the S3 bucket to store maintenance logs"
+}
+
+variable "create_ecs_scans" {
+  type        = bool
+  description = "Determines if maintenance calendar tasks for ECS/ECR scanning will be created"
+  default     = false
+}
+
 variable "scan_ecs_clusters" {
   type = map(
     list(string)
@@ -14,26 +36,16 @@ variable "scan_ecr_repositories" {
   default     = {}
 }
 
+variable "create_rds_snapshots" {
+  type        = bool
+  description = "Determines if maintenance calendar tasks for managaing RDS snapshots will be created"
+  default     = false
+}
+
 variable "rds_instance_names" {
   type        = list(string)
-  description = "A list of RDS instance names we want to manage backups for"
+  description = "A list of RDS instance names we want to manage snapshots for"
   default     = null
-}
-
-variable "maintenance_sns_topic" {
-  type        = string
-  description = "Name of the SNS topic to use for maintenance notifications"
-}
-
-variable "maintenance_sns_display_name" {
-  type        = string
-  description = "(Optional) Display name for the maintenance notifications SNS topic"
-  default     = null
-}
-
-variable "maintenance_logs_bucket" {
-  type        = string
-  description = "Name of the S3 bucket to store maintenance logs"
 }
 
 variable "create_github_inactive_user_reminder" {

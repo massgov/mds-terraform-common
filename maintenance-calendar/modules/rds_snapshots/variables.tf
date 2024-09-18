@@ -1,5 +1,10 @@
+variable "rds_instance_names" {
+  type        = list(string)
+  description = "A list of RDS instance names we want to manage backups for"
+}
+
 variable "sns_topic_arn" {
-  description = "The SNS topic to send the reminder to"
+  description = "The SNS topic to send alerts to"
   type        = string
 }
 variable "publish_alerts_policy" {
