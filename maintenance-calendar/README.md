@@ -1,3 +1,13 @@
+# Maintenance Calendar
+
+Creates maintenance windows and tasks for AWS Systems Manager along with supporting pieces to accomplish regular tasks we want to schedule. Currently it has 3 tasks:
+
+ - ECS/ECR vulnerability scans and notifications
+ - RDS snapshots and cleanup
+ - A quarterly reminder for compliance with the GitHub SOE
+
+The `teamsalerts` module is also required if notifications are desired
+
 <!-- BEGIN_TF_DOCS -->
 
 
