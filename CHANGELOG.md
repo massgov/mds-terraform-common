@@ -2,6 +2,10 @@
 
 ## [1.0.103] - 2024-09-12
 
+- [New Relic/Synthetics Certificate Alert] - Add required parameters to `newrelic` Synthetics monitor resource
+
+## [1.0.103] - 2024-09-12
+
 - [Jump Box] - Add `instance_tags` variable.
 
 ## [1.0.102] - 2024-09-02
