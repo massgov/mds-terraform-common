@@ -1,0 +1,55 @@
+schemaVersion: '0.3'
+description: |2-
+    ## SSR-CreateRDSSnapshot
+    ### Purpose
+    This automation creates an RDS snapshot
+    ### Usage
+    #### Parameters
+    - `AutomationAssumeRole` - (required, string) role to assume while performing this automation
+    - `DBInstanceIdentifier` -  (required, string) identifier of parent RDS instance
+    - `AlertsTopicArn` - (optional, string) the ARN of the SNS topic to alert in case of failure (default: `${alerts_topic_arn}`)
+parameters:
+  AutomationAssumeRole:
+    type: AWS::IAM::Role::Arn
+    description: (required, string) role to assume while performing this automation
+  DBInstanceIdentifier:
+    type: String
+    description: (required, string) identifier of parent RDS instance
+  AlertsTopicArn:
+    type: String
+    description: '(optional, string) the ARN of the SNS topic to alert in case of failure (default: `${alerts_topic_arn}`)'
+    default: '${alerts_topic_arn}'
+assumeRole: '{{ AutomationAssumeRole }}'
+mainSteps:
+  - name: WaitOnAWSResourceProperty
+    action: aws:waitForAwsResourceProperty
+    timeoutSeconds: 300
+    nextStep: AWS_CreateRdsSnapshot
+    isEnd: false
+    onFailure: step:AWS_PublishSNSNotification
+    inputs:
+      Service: rds
+      Api: DescribeDBInstances
+      PropertySelector: '$.DBInstances.[0].DBInstanceStatus'
+      DesiredValues:
+        - available
+      DBInstanceIdentifier: '{{ DBInstanceIdentifier }}'
+  - name: AWS_CreateRdsSnapshot
+    action: aws:executeAutomation
+    isEnd: true
+    onFailure: step:AWS_PublishSNSNotification
+    inputs:
+      DocumentName: AWS-CreateRdsSnapshot
+      RuntimeParameters:
+        DBInstanceIdentifier: '{{ DBInstanceIdentifier }}'
+      DocumentVersion: $LATEST
+  - name: AWS_PublishSNSNotification
+    action: aws:executeAutomation
+    isEnd: true
+    onFailure: Abort
+    inputs:
+      DocumentName: AWS-PublishSNSNotification
+      RuntimeParameters:
+        TopicArn: '{{ AlertsTopicArn }}'
+        Message: 'Error running `SSR-CreateRDSSnapshot` automation on `{{ DBInstanceIdentifier }}`. More details here: https://${region}.console.aws.amazon.com/systems-manager/automation/execution/{{ automation:EXECUTION_ID }}?region=${region}'
+      DocumentVersion: $LATEST
