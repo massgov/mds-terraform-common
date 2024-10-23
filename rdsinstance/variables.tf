@@ -42,7 +42,8 @@ variable "username" {
 
 variable "password" {
   type        = string
-  description = "The root account password."
+  default     = null
+  description = "The root account password. Either this or `manage_master_user_password` is required."
 }
 
 variable "policies" {
@@ -100,9 +101,9 @@ variable "apply_immediately" {
 }
 
 variable "iam_database_authentication_enabled" {
-  type = string
+  type        = string
   description = "Boolean indicating whether to enable IAM database authentication"
-  default = false
+  default     = false
 }
 
 variable "tags" {
@@ -170,8 +171,8 @@ variable "snapshot_identifier" {
 
 variable "enable_manual_snapshots" {
   description = "If set to true, will periodically create manual DB backups which get retained for at least 90 days"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "manual_snapshot_schedule" {
@@ -184,4 +185,22 @@ variable "backup_error_topics" {
   type        = list(string)
   description = "An array of SNS topics to publish notifications to when backups error out"
   default     = []
+}
+
+variable "ca_cert_identifier" {
+  type        = string
+  description = "The identifier of the CA certificate for the DB instance."
+  default     = null
+}
+
+variable "manage_master_user_password" {
+  type        = bool
+  default     = false
+  description = "Enables management of the master password with Secrets Manager"
+}
+
+variable "master_user_secret_kms_key_id" {
+  type        = string
+  default     = null
+  description = "Specifies a custom KMS key used to encrypt/decrypt master password."
 }

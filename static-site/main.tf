@@ -1,7 +1,7 @@
 locals {
   domains = [
-    for environment in var.environments:
-          environment.domain
+    for environment in var.environments :
+    environment.domain
   ]
 }
 
@@ -10,11 +10,6 @@ locals {
 resource "aws_s3_bucket" "site" {
   // name bucket after domain name
   bucket = var.bucket_name
-
-  website {
-    index_document = var.index_document
-    error_document = coalesce(var.error_document, var.index_document)
-  }
 
   // Enable CORS if requested.
   dynamic "cors_rule" {
@@ -39,6 +34,19 @@ resource "aws_s3_bucket" "site" {
   )
 }
 
+# https://registry.terraform.io/providers/-/aws/5.40.0/docs/guides/version-4-upgrade#website-website_domain-and-website_endpoint-arguments
+resource "aws_s3_bucket_website_configuration" "site" {
+  bucket = var.bucket_name
+
+  index_document {
+    suffix = var.index_document
+  }
+
+  error_document {
+    key = coalesce(var.error_document, var.index_document)
+  }
+}
+
 // IAM
 // OAI (Origin Access Identity) policy document
 data "aws_iam_policy_document" "oai_read" {
@@ -53,7 +61,7 @@ data "aws_iam_policy_document" "oai_read" {
       ]
 
       principals {
-        type = "AWS"
+        type        = "AWS"
         identifiers = [aws_cloudfront_origin_access_identity.edge[statement.key].iam_arn]
       }
     }
@@ -68,17 +76,17 @@ resource "aws_s3_bucket_policy" "default" {
 }
 
 module "aws_acm_site_certificate" {
-  source = "../domain-certificate"
-  name = var.name
-  tags = var.tags
-  zone_id = var.zone_id
+  source       = "../domain-certificate"
+  name         = var.name
+  tags         = var.tags
+  zone_id      = var.zone_id
   domain_names = local.domains
 }
 
 //// Route 53
 //// Add CNAME entry for domain
 resource "aws_route53_record" "default" {
-  count = length(var.environments)
+  count   = length(var.environments)
   zone_id = var.zone_id
   name    = var.environments[count.index].domain
   type    = "CNAME"
@@ -87,15 +95,15 @@ resource "aws_route53_record" "default" {
 }
 
 module "cf_geo_restriction" {
-  source = "../cloudfront_geo_restriction"
+  source  = "../cloudfront_geo_restriction"
   enabled = var.geo_restriction
 }
 
 // Cloudfront
 // CDN for the domain
 resource "aws_cloudfront_distribution" "domain_distribution" {
-  count = length(var.environments)
-  comment = "${var.name}:${var.environments[count.index].name}"
+  count               = length(var.environments)
+  comment             = "${var.name}:${var.environments[count.index].name}"
   wait_for_deployment = false
   enabled             = true
   default_root_object = var.index_document
@@ -121,8 +129,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   dynamic "custom_error_response" {
     for_each = var.is_spa ? [1] : []
     content {
-      error_code = 404
-      response_code = 200
+      error_code         = 404
+      response_code      = 200
       response_page_path = "/${var.index_document}"
     }
   }
@@ -142,7 +150,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
     // we're using CORS for the site.
     forwarded_values {
       query_string = false
-      headers = var.enable_cors ? ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"] : []
+      headers      = var.enable_cors ? ["Origin", "Access-Control-Request-Headers", "Access-Control-Request-Method"] : []
       cookies {
         forward = "none"
       }
@@ -151,8 +159,8 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
       for_each = var.environments[count.index].edge_lambdas
 
       content {
-        event_type = lambda_function_association.value.event_type
-        lambda_arn = lambda_function_association.value.lambda_arn
+        event_type   = lambda_function_association.value.event_type
+        lambda_arn   = lambda_function_association.value.lambda_arn
         include_body = coalesce(lambda_function_association.value.include_body, false)
       }
     }
@@ -164,7 +172,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = module.cf_geo_restriction.restriction_type
-      locations = module.cf_geo_restriction.locations
+      locations        = module.cf_geo_restriction.locations
     }
   }
 
@@ -180,7 +188,7 @@ resource "aws_cloudfront_distribution" "domain_distribution" {
 
 // Create an identity allowing Cloudfront to access the origin.
 resource "aws_cloudfront_origin_access_identity" "edge" {
-  count = length(var.environments)
+  count   = length(var.environments)
   comment = "Cloudfront ID for ${var.name}:${var.environments[count.index].name}"
 }
 

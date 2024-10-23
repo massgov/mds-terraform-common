@@ -18,11 +18,6 @@ variable "newrelic_access_key" {
   description = "The new relic access key."
 }
 
-variable "newrelic_aws_account_name" {
-  type        = string
-  description = "Nickname for AWS account in New Relic."
-}
-
 variable "newrelic_account_id" {
   type        = string
   description = "The account number for the New Relic account."
@@ -47,14 +42,14 @@ variable "retry_duration" {
 }
 
 variable "include_filters" {
-  type        = list(object({
-                  namespace = string,
-                  metric_names = list(string)
-                }))
+  type = list(object({
+    namespace    = string,
+    metric_names = list(string)
+  }))
   description = "List of metrics to include. See aws_cloudwatch_metric_stream.include_filter. Note - empty metric_names list will include all metrics."
 }
 
 variable "tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }

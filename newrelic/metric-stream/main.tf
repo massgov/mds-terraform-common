@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "metric_stream_assume_role" {
 
 
 resource "aws_iam_role_policy" "metric_stream_policy" {
-  role = aws_iam_role.metric_stream_role.id
+  role   = aws_iam_role.metric_stream_role.id
   policy = data.aws_iam_policy_document.metric_stream_policy.json
 }
 
@@ -48,9 +48,9 @@ data "aws_iam_policy_document" "metric_stream_policy" {
     actions = [
       "firehose:PutRecord",
       "firehose:PutRecordBatch",
-     ]
-     resources = [
-       aws_kinesis_firehose_delivery_stream.default.arn
-     ]
+    ]
+    resources = [
+      aws_kinesis_firehose_delivery_stream.default.arn
+    ]
   }
 }

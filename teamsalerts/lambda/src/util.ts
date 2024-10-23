@@ -10,6 +10,9 @@ import {
 } from "./types";
 import { IncomingWebhook } from "ms-teams-webhook";
 import assert from "assert";
+import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+
+const ssm = new SSMClient({});
 
 type TopicInfo = Pick<TopicMap[number], "icon_url" | "human_name">;
 
@@ -63,6 +66,28 @@ const getLogStreamConsoleURI = (context: Context): string => {
     encodeURIComponent(context.logStreamName)
   ).replace("%", "$");
   return `https://${process.env.AWS_REGION}.console.aws.amazon.com/cloudwatch/home?region=${process.env.AWS_REGION}#logsV2:log-groups/log-group/${logGroupPart}/log-events/${logStreamPart}`;
+};
+
+export const getWebhookUrl = async (): Promise<string> => {
+  if (process.env.TEAMS_WEBHOOK_URL) {
+    return process.env.TEAMS_WEBHOOK_URL;
+  }
+  if (process.env.TEAMS_WEBHOOK_URL_PARAM_ARN) {
+    const getParameterResult = await ssm.send(
+      new GetParameterCommand({
+        WithDecryption: true,
+        Name: process.env.TEAMS_WEBHOOK_URL_PARAM_ARN,
+      })
+    );
+    assert(
+      getParameterResult?.Parameter?.Value,
+      `${process.env.TEAMS_WEBHOOK_URL_PARAM_ARN} not found or is empty`
+    );
+    return getParameterResult.Parameter.Value;
+  }
+  throw new Error(
+    "Either TEAMS_WEBHOOK_URL or TEAMS_WEBHOOK_URL_PARAM_ARN environment variable required"
+  );
 };
 
 export const enrichWithMessageCards = async function* (

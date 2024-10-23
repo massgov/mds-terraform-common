@@ -1,0 +1,20 @@
+name: PR Check
+on:
+  pull_request: {}
+
+jobs:
+  check:
+    name: Check code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -recursive -check || echo "Terraform fmt check failed. Run 'terraform fmt -recursive' to fix the formatting issues."
+      - name: Check Terraform docs
+        uses: terraform-docs/gh-actions@v1.1.0
+        with:
+          working-dir: ssm-session-monitor/,jump-box/,assume-role-alerts/,gha-environment/,gha-role/,terraform-bootstrap/
+          git-push: false
+          fail-on-diff: true

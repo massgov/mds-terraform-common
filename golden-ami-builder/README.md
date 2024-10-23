@@ -9,13 +9,15 @@ This module implements infrastructure which builds, tests, and releases an EOTSS
 The module creates the following resources:
 
 - A simple Image Builder recipe based on Amazon Linux 2 with a few extra components and tests:
-  - Cortex XDR agent (implemented as a [custom Image Builder component](https://docs.aws.amazon.com/imagebuilder/latest/userguide/create-component-console.html))
-  - Cloudwatch agent
-  - AWS CLI v2
-  - Package patches
-  - Instance boot test
-  - ENI attachment test
-  - `yum` repository test
+  - [COMPONENT] update yum packages
+  - [COMPONENT] install New Relic agent
+  - [COMPONENT] install chamber
+  - [COMPONENT] install postgresql14 
+  - [COMPONENT] install Cortex XDR agent
+  - [COMPONENT] install Cloudwatch agent
+  - [COMPONENT] install AWS CLI v2
+  - [TEST] perform Instance boot test
+  - [TEST] perform ENI attachment test
 - An Image Builder infrastructure configuration, which determines how the pipeline will create and network build instance(s)
 - An Image Builder distribution configuration, which describes how output AMIs will be named, permissioned, etc.
 - A private S3 bucket to capture pipeline logs

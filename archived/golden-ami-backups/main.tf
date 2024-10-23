@@ -92,8 +92,8 @@ data "aws_iam_policy_document" "copy_image" {
     ]
   }
   statement {
-    effect    = "Allow"
-    actions   = [
+    effect = "Allow"
+    actions = [
       "ec2:CopyImage",
       "ec2:DescribeImages"
     ]

@@ -20,6 +20,8 @@ output "port" {
 
 // RDS Instance ID.
 output "rds_instance_id" {
+  # NOTE: You probably want `rds_instance_identifier` instead, as this changed
+  # in version 5 of the aws provider.
   value = aws_db_instance.default.id
 }
 
@@ -36,4 +38,14 @@ output "rds_resource_id" {
 // Security group that is allowed to access the database.
 output "accessor_security_group" {
   value = aws_security_group.db_accessor.id
+}
+
+output "rds_instance_identifier" {
+  value = aws_db_instance.default.identifier
+}
+
+output "master_password_secret_arn" {
+  value = var.manage_master_user_password ? try(
+    aws_db_instance.default.master_user_secret[0].secret_arn, null
+  ) : null
 }
