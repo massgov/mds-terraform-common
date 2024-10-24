@@ -41,16 +41,16 @@ module "throughput" {
   name = format("%s - Less than %d requests per %d seconds for over %d seconds",
     var.name_prefix,
     var.throughput_threshold,
-    var.aggregation_window,
-    var.critical_threshold_duration
+    var.throughput_aggregation_window,
+    var.throughput_threshold_duration
   )
 
   nrql_query = "SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name"
 
   critical_operator           = "below"
   critical_threshold          = var.throughput_threshold
-  critical_threshold_duration = var.critical_threshold_duration
-  aggregation_window          = var.aggregation_window
+  critical_threshold_duration = var.throughput_threshold_duration
+  aggregation_window          = var.throughput_aggregation_window
   aggregation_method          = "event_flow"
   aggregation_delay           = 120
   tags                        = var.tags

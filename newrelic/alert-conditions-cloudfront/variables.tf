@@ -55,6 +55,18 @@ variable "throughput_threshold" {
   default     = 5
 }
 
+variable "throughput_threshold_duration" {
+  type        = number
+  description = "See newrelic_nrql_alert_condition.critical.threshold_duration. Defaults to 300 seconds."
+  default     = 300
+}
+
+variable "throughput_aggregation_window" {
+  type        = number
+  description = "See newrelic_nrql_alert_condition.aggregation_window. Defaults to 60 seconds"
+  default     = 60
+}
+
 variable "tags" {
   type        = map(any)
   description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
