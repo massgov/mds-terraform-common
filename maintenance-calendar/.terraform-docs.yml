@@ -18,7 +18,7 @@ content: |-
   ## Example
 
   ```hcl
-    module "calendar" {
+  module "calendar" {
     source = "example.com/maintenance-calendar"
 
     maintenance_sns_topic   = "testsnstopic"

@@ -9,6 +9,7 @@ import {
   DescribeImageScanFindingsCommand,
   DescribeImageScanFindingsRequest,
   DescribeImageScanFindingsResponse,
+  DescribeImagesCommand,
   ECR,
   FindingSeverity,
   ScanNotFoundException,
@@ -16,7 +17,7 @@ import {
   StartImageScanCommand,
   waitUntilImageScanComplete,
 } from "@aws-sdk/client-ecr";
-import { isFindingIgnored } from "./ignore";
+import { isFindingIgnored, isClusterSnoozed } from "./ignore";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import assert from "assert";
 
@@ -27,6 +28,8 @@ type Input = {
 type Env = {
   ERROR_TOPIC_ARN: string;
   ALERT_SEVERITY_LEVEL: Severity;
+  AWS_ACCOUNT_ID: string;
+  AWS_REGION: string;
 };
 
 const defaultLogger = pino({ level: process.env.LOG_LEVEL ?? "debug" });
@@ -36,7 +39,8 @@ const ecs = new ECS();
 const snsClient = new SNSClient();
 
 const getEnv = (): Env => {
-  const { ERROR_TOPIC_ARN, ALERT_SEVERITY_LEVEL } = process.env;
+  const { ERROR_TOPIC_ARN, ALERT_SEVERITY_LEVEL, AWS_ACCOUNT_ID, AWS_REGION } =
+    process.env;
 
   assert(
     typeof ERROR_TOPIC_ARN === "string",
@@ -48,6 +52,16 @@ const getEnv = (): Env => {
     "'ALERT_SEVERITY_LEVEL' missing from environment",
   );
 
+  assert(
+    typeof AWS_ACCOUNT_ID === "string",
+    "'AWS_ACCOUNT_ID' missing from environment",
+  );
+
+  assert(
+    typeof AWS_REGION === "string",
+    "'AWS_REGION' missing from environment",
+  );
+
   const severity = Severity[ALERT_SEVERITY_LEVEL as keyof typeof Severity];
 
   assert(severity !== undefined, "Invalid 'ALERT_SEVERITY_LEVEL'");
@@ -55,6 +69,8 @@ const getEnv = (): Env => {
   return {
     ERROR_TOPIC_ARN,
     ALERT_SEVERITY_LEVEL: severity,
+    AWS_ACCOUNT_ID,
+    AWS_REGION,
   };
 };
 
@@ -71,6 +87,7 @@ type ImageDescriptor = {
   repositoryName: string;
   imageId: {
     imageDigest: string;
+    imageTag?: string;
   };
 };
 
@@ -142,8 +159,14 @@ const getContainerImages = async (
   return images;
 };
 
-function parseImageURI(uri: string): ImageDescriptor {
-  const match = uri.match(/\/([A-Za-z0-9_-]+)@(sha256:[A-Fa-f0-9]+)$/);
+const parseImageURI = async (
+  ecrClient: ECR,
+  logger: pino.Logger,
+  uri: string,
+): Promise<ImageDescriptor> => {
+  const match = uri.match(
+    /\/([A-Za-z0-9_-]+).(sha256:[A-Fa-f0-9]{64}|[A-Fa-f0-9]{40})$/,
+  );
 
   if (
     match === null ||
@@ -154,14 +177,50 @@ function parseImageURI(uri: string): ImageDescriptor {
     // doesn't know that.
     throw new Error("Unable to parse ECR Image URI.");
   }
+  const repo = match[1];
+  const imageID = match[2];
 
-  return {
-    repositoryName: match[1],
-    imageId: {
-      imageDigest: match[2],
-    },
-  };
-}
+  // 64 character hash + 'sha256: = 71'
+  if (imageID.length === 71) {
+    logger.debug(`We got a digest in the image URI: ${imageID}`);
+
+    return {
+      repositoryName: repo,
+      imageId: {
+        imageDigest: imageID,
+      },
+    };
+  } else if (imageID.length === 40) {
+    logger.debug(`We got a tag in the image URI: ${imageID}`);
+
+    const input = {
+      repositoryName: repo,
+      imageIds: [
+        {
+          imageTag: imageID,
+        },
+      ],
+    };
+
+    const details = await ecrClient.send(new DescribeImagesCommand(input));
+
+    assert(
+      details.imageDetails !== undefined &&
+        details.imageDetails[0]?.imageDigest,
+      `DescribeImagesCommand failed for repo ${repo} on image ${imageID}`,
+    );
+
+    return {
+      repositoryName: repo,
+      imageId: {
+        imageDigest: details.imageDetails[0].imageDigest,
+        imageTag: imageID,
+      },
+    };
+  } else {
+    throw new Error("Something went wrong with our regex");
+  }
+};
 
 // See if a scan exists for the given image. If a scan doesn't exist, or the
 // scan is more than 1 day old, a new scan is started.
@@ -223,6 +282,7 @@ const updateImageScan = async (
 
 const scanNeedsAlert = async (
   ecrClient: ECR,
+  cluster: string,
   request: DescribeImageScanFindingsRequest,
   alertLevel: Severity,
   logger: pino.Logger,
@@ -253,8 +313,10 @@ const scanNeedsAlert = async (
         return false;
       }
 
-      if (isFindingIgnored(finding)) {
+      if (await isFindingIgnored(finding)) {
         logger.debug(`Ignoring vulnerability '${finding.name}'`);
+      } else if (await isClusterSnoozed(cluster)) {
+        logger.debug(`Cluster '${cluster}' has been snoozed. Skipping alert`);
       } else {
         // There was a vulnerability >= our alert level that was not ignored.
         logger.debug(`Found open vulnerability '${finding.name}'.`);
@@ -314,7 +376,7 @@ function formatResults(
     }
 
     lines.push("");
-    const scanUrl = `https://us-east-1.console.aws.amazon.com/ecr/repositories/private/786775234217/${value.image.repositoryName}/_/image/${value.image.imageId.imageDigest}/scan-results?region=us-east-1`;
+    const scanUrl = `https://${AWS_REGION}.console.aws.amazon.com/ecr/repositories/private/${AWS_ACCOUNT_ID}/${value.image.repositoryName}/_/image/${value.image.imageId.imageDigest}/details?region=${AWS_REGION}`;
     lines.push(
       `    The full results of the scan can be found here: ${scanUrl}`,
     );
@@ -346,7 +408,7 @@ const handler: Handler<Input, void> = async (
   // Request all scans before waiting for any of them. These can take a
   // few minutes to run.
   for (const imageURI of images.keys()) {
-    const imageDescriptor = parseImageURI(imageURI);
+    const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
     const img = await updateImageScan(ecr, imageDescriptor, now, logger);
     scanResults.set(imageURI, img);
   }
@@ -354,7 +416,7 @@ const handler: Handler<Input, void> = async (
   const alertResults = new Map();
 
   for (const imageURI of scanResults.keys()) {
-    const imageDescriptor = parseImageURI(imageURI);
+    const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
     let result = scanResults.get(imageURI);
 
     if (result.imageScanStatus?.status !== ScanStatus.COMPLETE) {
@@ -366,6 +428,7 @@ const handler: Handler<Input, void> = async (
 
     let needsAlert = await scanNeedsAlert(
       ecr,
+      cluster,
       imageDescriptor,
       ALERT_SEVERITY_LEVEL,
       logger,

@@ -6,7 +6,7 @@ description: |-
   #### Parameters
   - `AutomationAssumeRole` - (required) role to assume while performing this automation
   - `ClusterArn` - (string, required); the ARN of the ECS Cluster to scan
-  - `AlertsTopicArn` - (string, optional); the ARN of the SNS Topic to which results should be pushed (default: `arn:aws:sns:us-east-1:786775234217:ssr-maintenance-notifications`)
+  - `AlertsTopicArn` - (string, optional); the ARN of the SNS Topic to which results should be pushed
 assumeRole: '{{AutomationAssumeRole}}'
 parameters:
   ClusterArn:
@@ -37,4 +37,4 @@ mainSteps:
       DocumentName: AWS-PublishSNSNotification
       RuntimeParameters:
         TopicArn: '{{AlertsTopicArn}}'
-        Message: 'There was an error running the `SSR-ScanECRImage` automation on {{ClusterArn}}. More details here: https://us-east-1.console.aws.amazon.com/systems-manager/automation/execution/{{ automation:EXECUTION_ID }}?region=us-east-1'
+        Message: 'There was an error running the `SSR-ScanECRImage` automation on {{ClusterArn}}. More details here: https://${region}.console.aws.amazon.com/systems-manager/automation/execution/{{ automation:EXECUTION_ID }}?region=${region}'

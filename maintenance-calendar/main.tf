@@ -25,6 +25,8 @@ module "ecs_scans" {
   publish_alerts_policy = aws_iam_policy.maintenance_publish_alerts.arn
   scan_ecs_clusters     = var.scan_ecs_clusters
   scan_ecr_repositories = var.scan_ecr_repositories
+  image_scan_ignore_arn = var.image_scan_ignore_arn
+  image_scan_snooze_arn = var.image_scan_snooze_arn
 }
 
 module "github_inactive_user_reminder" {

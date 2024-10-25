@@ -19,6 +19,10 @@ module "ecs_cluster_image_scan" {
     variables = {
       ERROR_TOPIC_ARN      = var.sns_topic_arn
       ALERT_SEVERITY_LEVEL = "CRITICAL"
+      IGNORE_SPECS         = var.image_scan_ignore_arn
+      SNOOZED_CLUSTERS     = var.image_scan_snooze_arn
+      AWS_ACCOUNT_ID       = var.account_id
+      AWS_REGION           = var.region
     }
   }
   tags = {
@@ -46,9 +50,20 @@ data "aws_iam_policy_document" "maintenance_ecs_scan_lambda" {
     effect = "Allow"
     actions = [
       "ecr:StartImageScan",
-      "ecr:DescribeImageScanFindings"
+      "ecr:DescribeImageScanFindings",
+      "ecr:DescribeImages"
     ]
     resources = local.ecr_repository_arns
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:GetParameter"
+    ]
+    resources = [
+      var.image_scan_ignore_arn,
+      var.image_scan_snooze_arn
+    ]
   }
 }
 

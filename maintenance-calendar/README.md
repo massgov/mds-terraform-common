@@ -14,7 +14,7 @@ The `teamsalerts` module is also required if notifications are desired
 ## Example
 
 ```hcl
-  module "calendar" {
+module "calendar" {
   source = "example.com/maintenance-calendar"
 
   maintenance_sns_topic   = "testsnstopic"
@@ -66,10 +66,12 @@ The `teamsalerts` module is also required if notifications are desired
 | <a name="input_create_ecs_scans"></a> [create\_ecs\_scans](#input\_create\_ecs\_scans) | Determines if maintenance calendar tasks for ECS/ECR scanning will be created | `bool` | `false` | no |
 | <a name="input_create_github_inactive_user_reminder"></a> [create\_github\_inactive\_user\_reminder](#input\_create\_github\_inactive\_user\_reminder) | Determines if the inactive github user reminder will be created | `bool` | `false` | no |
 | <a name="input_create_rds_snapshots"></a> [create\_rds\_snapshots](#input\_create\_rds\_snapshots) | Determines if maintenance calendar tasks for managaing RDS snapshots will be created | `bool` | `false` | no |
+| <a name="input_image_scan_ignore_arn"></a> [image\_scan\_ignore\_arn](#input\_image\_scan\_ignore\_arn) | ARN of an SSM parameter containing CVEs that can safely be ignored.<br/>    This parameter must be created manually if it doesn't already exist.<br/><br/>    Parameter format: `[{"name":"CVE-2024-1", "packageName":"cowsay", "packageVersion":["1.2.3", "1.2.4"]},{"name"...}]` | `string` | `null` | no |
+| <a name="input_image_scan_snooze_arn"></a> [image\_scan\_snooze\_arn](#input\_image\_scan\_snooze\_arn) | ARN of an SSM parameter containing ECS cluster names and a date to snooze alerts.<br/>    This parameter must be created manually if it doesn't already exist.<br/><br/>    Parameter format: `[{"cluster":"ecs-cluster-1", "date":"2024-10-24"},{"cluster"...}]` | `string` | `null` | no |
 | <a name="input_maintenance_sns_display_name"></a> [maintenance\_sns\_display\_name](#input\_maintenance\_sns\_display\_name) | (Optional) Display name for the maintenance notifications SNS topic | `string` | `null` | no |
 | <a name="input_rds_instance_names"></a> [rds\_instance\_names](#input\_rds\_instance\_names) | A list of RDS instance names we want to manage snapshots for | `list(string)` | `null` | no |
-| <a name="input_scan_ecr_repositories"></a> [scan\_ecr\_repositories](#input\_scan\_ecr\_repositories) | Map relating project titles to a list of ECR repository names which ought to be scanned periodically | <pre>map(<br>    list(string)<br>  )</pre> | `{}` | no |
-| <a name="input_scan_ecs_clusters"></a> [scan\_ecs\_clusters](#input\_scan\_ecs\_clusters) | Map relating project titles to a list of ECS cluster names which ought to be scanned periodically | <pre>map(<br>    list(string)<br>  )</pre> | `{}` | no |
+| <a name="input_scan_ecr_repositories"></a> [scan\_ecr\_repositories](#input\_scan\_ecr\_repositories) | Map relating project titles to a list of ECR repository names which ought to be scanned periodically | <pre>map(<br/>    list(string)<br/>  )</pre> | `{}` | no |
+| <a name="input_scan_ecs_clusters"></a> [scan\_ecs\_clusters](#input\_scan\_ecs\_clusters) | Map relating project titles to a list of ECS cluster names which ought to be scanned periodically | <pre>map(<br/>    list(string)<br/>  )</pre> | `{}` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | `{}` | no |
 
 ## Outputs
@@ -84,7 +86,6 @@ The `teamsalerts` module is also required if notifications are desired
 |------|------|
 | [aws_iam_policy.maintenance_logs_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.maintenance_publish_alerts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role_policy_attachment.maintenance_logs_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_s3_bucket.maintenance_logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.maintenance_logs_acl](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_lifecycle_configuration.maintenance_logs_lifecycle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_lifecycle_configuration) | resource |
