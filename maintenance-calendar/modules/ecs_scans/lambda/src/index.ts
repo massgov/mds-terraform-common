@@ -421,7 +421,7 @@ const handler: Handler<Input, void> = async (
 
     if (result.imageScanStatus?.status !== ScanStatus.COMPLETE) {
       result = await waitUntilImageScanComplete(
-        { client: ecr, maxWaitTime: 300 },
+        { client: ecr, maxWaitTime: 600 },
         imageDescriptor,
       );
     }
