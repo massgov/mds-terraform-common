@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.106] - 2024-11-01
+- [Fargate Ecs] Add Fargate Ecs Module
+
 ## [1.0.105] - 2024-11-01
 
 - [New Relic] Add ECS Cluster alerts for applications running in Fargate
