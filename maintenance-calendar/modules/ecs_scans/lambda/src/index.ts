@@ -338,6 +338,7 @@ function formatResults(
   alertResults: Map<string, AlertResults>,
 ): string {
   const now = new Date();
+  const { AWS_ACCOUNT_ID, AWS_REGION } = getEnv();
 
   const sortedLevels = [
     FindingSeverity.CRITICAL,

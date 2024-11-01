@@ -4,13 +4,14 @@
 // vulnerability info to parameter store so that it will be ignored by the scan.
 //
 // We can add the cluster name and a timestamp to another parameter to temporarily
-// snooze _all_ alerts on that cluster. Valid for timestamp + seven days.
-// Intended for cases where a vulnerability is patched but deployment is delayed
+// snooze _all_ alerts on that cluster. Intended for cases where a vulnerability
+// is patched but deployment is delayed.
 
 import { Attribute, ImageScanFinding } from "@aws-sdk/client-ecr";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import assert from "assert";
 import pino from "pino";
+import { ZonedDateTime, ZoneId, LocalDate } from "@js-joda/core";
 
 const logger = pino({ level: process.env.LOG_LEVEL ?? "debug" });
 const ssmClient = new SSMClient();
@@ -23,7 +24,7 @@ type IgnoreSpec = {
 
 type SnoozeList = {
   cluster: string;
-  date: string;
+  snoozeUntil: string;
 };
 
 assert(process.env.IGNORE_SPECS, "Ignore spec ARN is required");
@@ -35,7 +36,6 @@ const ignoreSpecs = async (arn: string): Promise<IgnoreSpec[]> => {
   const getParameterResult = await ssmClient.send(
     new GetParameterCommand({
       Name: arn,
-      WithDecryption: true,
     }),
   );
 
@@ -103,17 +103,13 @@ const isFindingIgnored = async (
   finding: ImageScanFinding,
 ): Promise<boolean> => {
   const ignored = await ignoreSpecs(ignoreSpecARN);
-  if (isFindingIgnoredBySpecs(finding, ignored)) {
-    return true;
-  }
-  return false;
+  return isFindingIgnoredBySpecs(finding, ignored);
 };
 
 const snoozeList = async (parameterARN: string): Promise<SnoozeList[]> => {
   const getParameterResult = await ssmClient.send(
     new GetParameterCommand({
       Name: parameterARN,
-      WithDecryption: true,
     }),
   );
 
@@ -128,13 +124,15 @@ const clusterSnoozed = async (
   cluster: string,
   snoozed: Array<SnoozeList>,
 ): Promise<boolean> => {
-  const expiry = Date.now() - 604800000;
+  const today = ZonedDateTime.now(ZoneId.UTC);
   for (const snooze of snoozed) {
-    const snoozeDate = Date.parse(snooze.date);
-    logger.debug(
-      `Cluster: ${snooze.cluster} Date: ${snoozeDate} Expiry: ${expiry}`,
-    );
-    if (snooze.cluster === cluster && snoozeDate >= expiry) {
+    const snoozeDate = LocalDate.parse(snooze.snoozeUntil)
+      .atStartOfDay()
+      .atZone(ZoneId.of("UTC"));
+    if (snooze.cluster === cluster && snoozeDate.isAfter(today)) {
+      logger.debug(
+        `Cluster: ${snooze.cluster} is snoozed until: ${snoozeDate}. It is now: ${today}`,
+      );
       return true;
     }
   }
