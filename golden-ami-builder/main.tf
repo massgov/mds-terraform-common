@@ -164,11 +164,14 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
     }
   }
 
-  resource_tags = {
-    # 'CreatedBy' and 'Ec2ImageBuilderArn' are reserved tags for instances created by
-    # Image Builder. Trying to provide either will kill deployments
-    for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], lower(k))
-  }
+  resource_tags = merge(
+    var.instance_tags,
+    {
+      # 'CreatedBy' and 'Ec2ImageBuilderArn' are reserved tags for instances created by
+      # Image Builder. Trying to provide either will kill deployments
+      for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], lower(k))
+    }
+  )
   tags = var.tags
 }
 
@@ -239,7 +242,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     ebs {
       kms_key_id            = data.aws_kms_key.volume_key.arn
       encrypted             = true
-      delete_on_termination = false
+      delete_on_termination = true
       volume_size           = 20
       volume_type           = "gp3"
     }

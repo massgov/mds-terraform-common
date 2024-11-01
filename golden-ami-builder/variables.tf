@@ -37,6 +37,19 @@ variable "pipeline_schedule_expression" {
   type        = string
 }
 
+variable "instance_tags" {
+  description = "Map of key-value pairs used to tag build and test instances created by the Image Builder pipeline. Will be merged with `var.tags`."
+  type        = map(string)
+  # Defaults to tags required by EOTSS
+  default = {
+    backup        = "na"
+    os            = "al2"
+    "Patch Group" = "na"
+    platform      = "linux"
+    schedulev2    = "na"
+  }
+}
+
 variable "tags" {
   description = <<EOF
     Map of key-value pairs used to tag resources created by this module. Provider-level default tags may not be applied to infrastructure as

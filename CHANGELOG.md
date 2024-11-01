@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.104] - 2024-11-01
+
+- [Golden AMI Builder]
+  - Add variable to enable tagging of build/test instances created by image pipeline
+  - Image pipeline will automatically destroy EBS volumes mounted to build/test instances
+
 ## [1.0.103] - 2024-09-12
 
 - [New Relic/Synthetics Certificate Alert] - Add required parameters to `newrelic` Synthetics monitor resource
