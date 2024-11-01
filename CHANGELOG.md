@@ -1,13 +1,14 @@
 # Changelog
 
-## [1.0.104] - 2024-11-01
+## [1.0.105] - 2024-11-01
 
 - [New Relic] Add ECS Cluster alerts for applications running in Fargate
 - [Golden AMI Builder]
   - Add variable to enable tagging of build/test instances created by image pipeline
   - Image pipeline will automatically destroy EBS volumes mounted to build/test instances
+- [Maintenance Calendar] Add maintenance calendar module
 
-## [1.0.103] - 2024-09-12
+## [1.0.104] - 2024-10-14
 
 - [New Relic/Synthetics Certificate Alert] - Add required parameters to `newrelic` Synthetics monitor resource
 
