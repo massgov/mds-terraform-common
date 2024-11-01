@@ -1,4 +1,5 @@
 data "aws_lb" "alb" {
+  count = var.ec2_alb_arn != null ? 1 : 0
   arn   = var.ec2_alb_arn
 }
 
