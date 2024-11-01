@@ -25,7 +25,7 @@ resource "aws_lb_target_group" "alb" {
     timeout             = 5
     unhealthy_threshold = 5
     healthy_threshold   = 5
-    matcher             = "200"
+    matcher             = lookup(each.value, "health_check_matcher", "200")
   }
   tags = {}
 }
