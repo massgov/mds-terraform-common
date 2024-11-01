@@ -1,6 +1,10 @@
 # Changelog
 
-## [1.0.103] - 2024-09-12
+## [1.0.105] - 2024-11-04
+
+- [Maintenance Calendar] Add maintenance calendar module
+
+## [1.0.104] - 2024-10-14
 
 - [New Relic/Synthetics Certificate Alert] - Add required parameters to `newrelic` Synthetics monitor resource
 
