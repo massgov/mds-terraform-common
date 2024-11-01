@@ -1,13 +1,17 @@
 import assert from "assert";
 import { Handler, ScheduledEvent } from "aws-lambda";
-import { LocalDateTime, DateTimeFormatter} from '@js-joda/core';
-import RDS, { CreateDBSnapshotMessage } from "aws-sdk/clients/rds";
+import { LocalDateTime, DateTimeFormatter } from "@js-joda/core";
+import {
+  RDSClient,
+  CreateDBSnapshotMessage,
+  CreateDBSnapshotCommand,
+} from "@aws-sdk/client-rds";
 
-const rds = new RDS();
+const rds = new RDSClient();
 
 type RunOpts = {
   dryRun?: boolean;
-  rdsIdentifier?: string
+  rdsIdentifier?: string;
 };
 type Event = Partial<ScheduledEvent> & RunOpts;
 
@@ -29,22 +33,18 @@ const handler: Handler<Event> = async (event: Event) => {
       assert(instanceId);
       return {
         DBInstanceIdentifier: instanceId,
-        DBSnapshotIdentifier: `${instanceId}-${snapshotTimeStamp}-snapshot`
+        DBSnapshotIdentifier: `${instanceId}-${snapshotTimeStamp}-snapshot`,
       };
     }
   );
 
-  return Promise.all(
+  await Promise.all(
     params.map((param) => {
       return dryRun
-        ? console.log(
-            `CreateDBSnapshotMessage: ${JSON.stringify(param)}`
-          )
-        : rds.createDBSnapshot(param).promise();
+        ? console.log(`CreateDBSnapshotMessage: ${JSON.stringify(param)}`)
+        : rds.send(new CreateDBSnapshotCommand(param));
     })
   );
 };
 
-export {
-  handler
-};
+export { handler };

@@ -23,7 +23,7 @@ variable "period" {
   type        = string
   description = "See newrelic_synthetics_monitor.period."
   # Every hour is excessive, but it makes the alert much easier to create.
-  default     = "EVERY_HOUR"
+  default = "EVERY_HOUR"
 }
 
 variable "certificate_expiration" {

@@ -1,27 +1,27 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 locals {
-  region = coalesce(var.region, data.aws_region.current.name)
-  account_id = coalesce(var.account_id, data.aws_caller_identity.current.account_id)
+  region            = coalesce(var.region, data.aws_region.current.name)
+  account_id        = coalesce(var.account_id, data.aws_caller_identity.current.account_id)
   secrets_namespace = "tf/${var.namespace}"
 }
 
 resource "aws_iam_policy" "chamber_read" {
-  name = "${var.project_name}-deployment-chamber-policy"
+  name        = "${var.project_name}-deployment-chamber-policy"
   description = "Policy for ${var.project_name} chamber access."
-  policy = data.aws_iam_policy_document.access_chamber_params.json
+  policy      = data.aws_iam_policy_document.access_chamber_params.json
 }
 
 resource "aws_iam_policy" "logging_write" {
-  name = "${var.project_name}-deployment-logging-policy"
+  name        = "${var.project_name}-deployment-logging-policy"
   description = "Policy for ${var.project_name} logging."
-  policy = data.aws_iam_policy_document.logging.json
+  policy      = data.aws_iam_policy_document.logging.json
 }
 
 resource "aws_iam_policy" "ecr_readwrite" {
-  name = "${var.project_name}-deployment-ecr-policy"
+  name        = "${var.project_name}-deployment-ecr-policy"
   description = "Policy for ${var.project_name} ecr access."
-  policy = data.aws_iam_policy_document.ecr.json
+  policy      = data.aws_iam_policy_document.ecr.json
 }
 
 data "aws_iam_policy_document" "access_chamber_params" {

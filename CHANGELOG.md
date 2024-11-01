@@ -1,5 +1,83 @@
 # Changelog
 
+## [1.0.106] - 2024-11-01
+- [Fargate Ecs] Add Fargate Ecs Module
+
+## [1.0.105] - 2024-11-01
+
+- [New Relic] Add ECS Cluster alerts for applications running in Fargate
+- [Golden AMI Builder]
+  - Add variable to enable tagging of build/test instances created by image pipeline
+  - Image pipeline will automatically destroy EBS volumes mounted to build/test instances
+- [Maintenance Calendar] Add maintenance calendar module
+
+## [1.0.104] - 2024-10-14
+
+- [New Relic/Synthetics Certificate Alert] - Add required parameters to `newrelic` Synthetics monitor resource
+
+## [1.0.103] - 2024-09-12
+
+- [Jump Box] - Add `instance_tags` variable.
+
+## [1.0.102] - 2024-09-02
+
+- [RDS] Update module to enable AWS-managed master passwords
+- [Teams alert] Update module to support reading Teams webhook URL from Parameter Store
+
+### Breaking
+
+- [New Relic] Remove New Relic-AWS link from `metrics-stream` submodule
+
+## [1.0.101] - 2024-08-31
+
+- [Role Escalation Alerts] Add module
+
+## [1.0.100] - 2024-08-05
+
+- [Entrypoint Monitor] Update permissions so Lambda can read bucket location
+
+## [1.0.99] - 2024-07-24
+
+- [Static Site] Replace deprecated `website` block with `aws_s3_bucket_website_configuration`.
+
+## [1.0.98] - 2024-07-22
+
+- [ASG] Add optional `AmazonECSManaged` tag to autoscaling group to be compatible with aws provider v5.
+- [ECS] Add variable to disable `AmazonECSManaged` tag in autoscaling group.
+- [RDS] Add `rds_instance_identifier` output for aws provider v5.
+- [RDS] Switch `aws_db_instance.id` to `aws_db_instance.identifier` to be compatible with aws provider v5.
+
+## [1.0.97] - 2024-07-17
+
+- [RDS] Add `ca_cert_identifier` variable.
+
+## [1.0.96] - 2024-07-17
+
+- [Entrypoint Monitor] Update (again) so CloudFront S3 uses regional endpoint
+
+## [1.0.95] - 2024-06-25
+
+- [Golden AMI Builder] Update Golden AMI recipe to install commonly-used tools
+
+## [1.0.94] - 2024-05-23
+
+- [ECS Fargate] Fargate PoC
+
+## [1.0.93] - 2024-05-13
+
+- [Github to Teams] Upgrade lambda runtime to node20
+- [Teams Alerts] Upgrade lambda runtime to node20
+- [Entrypoint Monitor] Upgrade lambda runtime to node20
+- [RDS] Upgrade backup and cleanup lambda runtimes to node20
+
+## [1.0.92] - 2024-05-13
+
+- [RDS] Add option for RDS auto scaling with max_allocatable_storage
+
+## [1.0.91] - 2024-04-25
+
+- [Golden AMI Lookup] Update regex to look up SSR Image Builder AMI instead
+
 ## [1.0.90] - 2024-04-25
 
 - [Golden AMI Builder] Adds new module which sets up an Image Builder pipeline for creating an EOTSS-compliant Golden AMI.

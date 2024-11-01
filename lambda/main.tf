@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "default" {
   function_name    = var.name
-  description     = var.human_name
+  description      = var.human_name
   filename         = var.package
   handler          = var.handler
   role             = aws_iam_role.default.arn
@@ -14,9 +14,9 @@ resource "aws_lambda_function" "default" {
     security_group_ids = var.security_groups
     subnet_ids         = var.subnets
   }
-  
+
   ephemeral_storage {
-    size = var.ephemeral_storage_size 
+    size = var.ephemeral_storage_size
   }
 
   # The aws_lambda_function resource has a schema for the environment
@@ -33,10 +33,10 @@ resource "aws_lambda_function" "default" {
     }
   }
   tags = merge(
-  var.tags,
-  {
-    "Name" = var.name
-  },
+    var.tags,
+    {
+      "Name" = var.name
+    },
   )
 }
 
@@ -47,10 +47,10 @@ resource "aws_cloudwatch_log_group" "logs" {
   name              = "/aws/lambda/${var.name}"
   retention_in_days = 30
   tags = merge(
-  var.tags,
-  {
-    "Name" = var.name
-  },
+    var.tags,
+    {
+      "Name" = var.name
+    },
   )
 }
 
@@ -102,7 +102,7 @@ resource "aws_cloudwatch_event_rule" "schedule" {
 }
 
 resource "aws_cloudwatch_event_target" "schedule_target" {
-  count = length(var.schedule)
+  count     = length(var.schedule)
   arn       = aws_lambda_function.default.arn
   rule      = element(aws_cloudwatch_event_rule.schedule.*.name, count.index)
   target_id = "${var.name}_${count.index}"
@@ -167,8 +167,8 @@ data "aws_iam_policy_document" "developer" {
     ]
     resources = ["*"]
     condition {
-      test = "ArnLike"
-      values = [aws_lambda_function.default.arn]
+      test     = "ArnLike"
+      values   = [aws_lambda_function.default.arn]
       variable = "lambda:FunctionArn"
     }
   }

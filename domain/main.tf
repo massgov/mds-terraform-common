@@ -24,9 +24,9 @@ data "aws_route53_zone" "tld" {
 resource "aws_route53_record" "validation" {
   for_each = {
     for dvo in aws_acm_certificate.default.domain_validation_options : dvo.domain_name => {
-      name = dvo.resource_record_name
+      name   = dvo.resource_record_name
       record = dvo.resource_record_value
-      type = dvo.resource_record_type
+      type   = dvo.resource_record_type
     }
   }
 
@@ -88,7 +88,7 @@ resource "aws_cloudwatch_metric_alarm" "domain_watch" {
 }
 
 module "cf_geo_restriction" {
-  source = "../cloudfront_geo_restriction"
+  source  = "../cloudfront_geo_restriction"
   enabled = var.geo_restriction
 }
 
@@ -137,7 +137,7 @@ resource "aws_cloudfront_distribution" "dashboards" {
   restrictions {
     geo_restriction {
       restriction_type = module.cf_geo_restriction.restriction_type
-      locations = module.cf_geo_restriction.locations
+      locations        = module.cf_geo_restriction.locations
     }
   }
 

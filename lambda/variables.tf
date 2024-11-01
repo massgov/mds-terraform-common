@@ -22,7 +22,7 @@ variable "runtime" {
 }
 
 variable "publish" {
-  type = bool
+  type    = bool
   default = true
 }
 
@@ -32,14 +32,14 @@ variable "timeout" {
 }
 
 variable "memory_size" {
-  type = string
-  default = 128
+  type        = string
+  default     = 128
   description = "The memory limit for the Lambda Function"
 }
 
 variable "ephemeral_storage_size" {
-  type = string
-  default = 512
+  type        = string
+  default     = 512
   description = "The amount of ephemeral storage to provision for the Lambda"
 }
 

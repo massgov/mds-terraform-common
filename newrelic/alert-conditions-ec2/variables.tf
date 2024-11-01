@@ -88,5 +88,5 @@ variable "use_agent_metrics" {
 variable "tags" {
   type        = map(any)
   description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
-  default = {}
+  default     = {}
 }

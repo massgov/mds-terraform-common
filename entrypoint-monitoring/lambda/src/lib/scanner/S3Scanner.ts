@@ -1,11 +1,15 @@
 import {
   Bucket,
+  GetBucketLocationCommand,
   GetBucketWebsiteCommand,
+  GetBucketWebsiteCommandOutput,
+  HeadBucketCommand,
   ListBucketsCommand,
   ListBucketsCommandInput,
   ListBucketsCommandOutput,
   S3Client,
-  WebsiteConfiguration
+  WebsiteConfiguration,
+  _Error,
 } from "@aws-sdk/client-s3";
 import Interconnections from "../Interconnections";
 import getPaginated from "../util/getPaginated";
@@ -29,10 +33,28 @@ export default class S3Scanner extends BaseScanner implements Scanner {
     this.client = client
   }
 
+  protected async tryGetBucketRegion(bucketName: string): Promise<string | null> {
+    try {
+      const headBucketResult = await this.client.send(
+        new GetBucketLocationCommand({
+          Bucket: bucketName
+        })
+      )
+      return headBucketResult.LocationConstraint ?? null;
+    } catch (e) {
+      if ((e as _Error).Code === 'AccessDenied') {
+        this.logger.error(`Insufficient permissions to get ${bucketName} bucket location`);
+      } else {
+        this.logger.error([bucketName, e]);
+      }
+    }
+    return null;
+  }
+
   protected async doScan(interconnections: Interconnections) {
     this.logger.log('==== Scanning S3 Buckets... ====')
 
-    const region = await this.client.config.region()
+    const defaultRegion = await this.client.config.region()
     const requestPromises: Promise<any>[] = [];
     for await (const bucket of this.getBuckets()) {
       const bucketName = bucket.Name
@@ -40,22 +62,23 @@ export default class S3Scanner extends BaseScanner implements Scanner {
         this.logger.error(`Bucket without a name!`);
         continue;
       }
+      const bucketRegion = await this.tryGetBucketRegion(bucketName) ?? defaultRegion;
 
       this.logger.debug(`- ${bucketName} bucket.`)
 
       // CloudFront links to an S3 bucket the following way.
-      const cfOriginPoint = `${bucketName}.s3.${region}.amazonaws.com`;
+      const cfOriginPoint = `${bucketName}.s3.${bucketRegion}.amazonaws.com`;
       interconnections.addPointToServiceLink(
         cfOriginPoint,
         this.serviceType,
         bucketName
-      )
-      this.logger.debug(`-- CF-specific entrypoint: ${cfOriginPoint}`)
+      );
+      this.logger.debug(`-- CF-specific entrypoint: ${cfOriginPoint}`);
 
       const websiteConfigPromise = this.getBucketWebsiteConfig(bucketName)
         .then((websiteConfig: WebsiteConfiguration|undefined) => {
           this.doScanBucketWebsiteConfig(
-            region,
+            bucketRegion,
             bucketName,
             websiteConfig,
             interconnections
@@ -138,7 +161,7 @@ export default class S3Scanner extends BaseScanner implements Scanner {
       Bucket: bucketName
     })
 
-    let data = undefined
+    let data: GetBucketWebsiteCommandOutput | undefined = undefined;
     try {
       data = await this.client.send(command)
     }

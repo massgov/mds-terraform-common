@@ -14,8 +14,11 @@ const run = async (): Promise<void> => {
     entryPoints: [path.join(__dirname, "..", "src", "index.ts")],
     bundle: true,
     platform: "node",
-    target: "node16",
+    target: "node20",
     outfile: path.join(tmp, "lambda.js"),
+    external: [
+      "@aws-sdk/client-ssm"
+    ]
   });
   const archivePath = path.join(__dirname, "..", "dist", "archive.zip");
   const output = createWriteStream(archivePath);

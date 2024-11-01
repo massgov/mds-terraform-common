@@ -4,7 +4,7 @@ variable "software_distribution_bucket_id" {
 }
 
 variable "software_distribution_bucket_key_arn" {
-  description = "ARN of KMS key used to encrypt/decrypt files in the distribution bucket" 
+  description = "ARN of KMS key used to encrypt/decrypt files in the distribution bucket"
   type        = string
 }
 
@@ -35,6 +35,19 @@ variable "pipeline_schedule_expression" {
   description = "Cron expression of how often, in UTC, the Image Builder pipeline start condition is evaluated (default: 'cron(0 6 1 * ? *)')"
   default     = "cron(0 6 1 * ? *)" # First day of every month, 6AM UTC
   type        = string
+}
+
+variable "instance_tags" {
+  description = "Map of key-value pairs used to tag build and test instances created by the Image Builder pipeline. Will be merged with `var.tags`."
+  type        = map(string)
+  # Defaults to tags required by EOTSS
+  default = {
+    backup        = "na"
+    os            = "al2"
+    "Patch Group" = "na"
+    platform      = "linux"
+    schedulev2    = "na"
+  }
 }
 
 variable "tags" {

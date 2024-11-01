@@ -22,6 +22,6 @@ variable "oidc_subject_claims" {
   // variable to additionally filter on a specific branch, tag, or environment,
   // as well as on pull request events.
   // To use a branch name (for example `develop`), use "ref:refs/heads/develop"
-  type = list(string)
+  type    = list(string)
   default = ["*"]
 }

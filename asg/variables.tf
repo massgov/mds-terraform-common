@@ -7,7 +7,7 @@ variable "ami" {
   type        = string
   description = "The AMI ID to use for the instances. Keep this at the default value to automatically receive AMI updates to Amazon Linux 2"
   // AMI Built from packer/base.json
-  default     = "ami-0e8eb11a5429219ed"
+  default = "ami-0e8eb11a5429219ed"
 }
 
 variable "capacity" {
@@ -106,27 +106,33 @@ variable "tags" {
 }
 
 variable "block_devices" {
-  type         = list(object({
-                   device_name = string,
-                   delete_on_termination = bool,
-                   encrypted = bool,
-                   iops = number,
-                   snapshot_id = string,
-                   throughput = number,
-                   volume_size = number,
-                   volume_type = string
-                 }))
+  type = list(object({
+    device_name           = string,
+    delete_on_termination = bool,
+    encrypted             = bool,
+    iops                  = number,
+    snapshot_id           = string,
+    throughput            = number,
+    volume_size           = number,
+    volume_type           = string
+  }))
   description = "List of block_device_mappings for the launch template. See the `block_device_mappings` block in the aws_launch_template resource for descriptions of the fields."
   default = [
     {
-      device_name = "/dev/xvda",
+      device_name           = "/dev/xvda",
       delete_on_termination = true,
-      encrypted = false,
-      iops = null,
-      snapshot_id = null,
-      throughput = null,
-      volume_size = 30,
-      volume_type = "gp2"
+      encrypted             = false,
+      iops                  = null,
+      snapshot_id           = null,
+      throughput            = null,
+      volume_size           = 30,
+      volume_type           = "gp2"
     }
   ]
+}
+
+variable "amazon_ecs_managed_tag" {
+  type        = bool
+  description = "Whether or not to include the AmazonECSManaged tag."
+  default     = true
 }

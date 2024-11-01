@@ -4,13 +4,13 @@ data "aws_caller_identity" "default" {
 
 
 module "firehose_bucket" {
-  source = "../../private-bucket"
+  source      = "../../private-bucket"
   bucket_name = "${var.name_prefix}-newrelic-firehose-data"
-  tags = var.tags
+  tags        = var.tags
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "default" {
-  name = "${var.name_prefix}-newrelic-firehose-stream"
+  name        = "${var.name_prefix}-newrelic-firehose-stream"
   destination = "http_endpoint"
 
   http_endpoint_configuration {
@@ -22,7 +22,7 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
     role_arn           = aws_iam_role.firehose_role.arn
     retry_duration     = var.retry_duration #60
 
-    s3_backup_mode     = "FailedDataOnly"
+    s3_backup_mode = "FailedDataOnly"
 
     request_configuration {
       content_encoding = "GZIP"
@@ -33,18 +33,16 @@ resource "aws_kinesis_firehose_delivery_stream" "default" {
       log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
       log_stream_name = aws_cloudwatch_log_stream.firehose_logs_http.name
     }
-  }
 
-  # NOTE: When we upgrade the aws terraform provider to >=5, this needs to be
-  # moved inside the http_endpoint_configuration
-  s3_configuration {
-    bucket_arn = module.firehose_bucket.bucket_arn
-    role_arn   = aws_iam_role.firehose_role.arn
+    s3_configuration {
+      bucket_arn = module.firehose_bucket.bucket_arn
+      role_arn   = aws_iam_role.firehose_role.arn
 
-    cloudwatch_logging_options {
-      enabled         = true
-      log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
-      log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.name
+      cloudwatch_logging_options {
+        enabled         = true
+        log_group_name  = aws_cloudwatch_log_group.firehose_logs.name
+        log_stream_name = aws_cloudwatch_log_stream.firehose_logs_s3.name
+      }
     }
   }
 
@@ -71,15 +69,15 @@ data "aws_iam_policy_document" "firehose_assume_role" {
 
     # https://docs.aws.amazon.com/firehose/latest/dev/controlling-access.html#firehose-assume-role
     condition {
-      test  = "StringEquals"
+      test     = "StringEquals"
       variable = "sts:ExternalId"
-      values = [data.aws_caller_identity.default.account_id]
+      values   = [data.aws_caller_identity.default.account_id]
     }
   }
 }
 
 resource "aws_iam_role_policy" "firehose_policy" {
-  role = aws_iam_role.firehose_role.id
+  role   = aws_iam_role.firehose_role.id
   policy = data.aws_iam_policy_document.firehose_policy.json
 }
 
@@ -94,11 +92,11 @@ data "aws_iam_policy_document" "firehose_policy" {
       "s3:ListBucket",
       "s3:ListBucketMultipartUploads",
       "s3:PutObject"
-     ]
-     resources = [
-       module.firehose_bucket.bucket_arn,
-       "${module.firehose_bucket.bucket_arn}/*"
-     ]
+    ]
+    resources = [
+      module.firehose_bucket.bucket_arn,
+      "${module.firehose_bucket.bucket_arn}/*"
+    ]
   }
 
   statement {
@@ -117,7 +115,7 @@ resource "aws_cloudwatch_log_group" "firehose_logs" {
   name              = "/kinesisfirehose/${var.name_prefix}-newrelic-firehose"
   retention_in_days = 30
   skip_destroy      = true # We don't have permission to delete these anyways.
-  tags              = merge(
+  tags = merge(
     var.tags,
     {
       "Name" = "${var.name_prefix}-newrelic-firehose"

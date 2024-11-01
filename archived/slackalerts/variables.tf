@@ -1,8 +1,8 @@
 variable "ARCHIVED" {
-  type = bool
+  type        = bool
   description = "The slackalerts module is no longer supported and has been archived."
   validation {
-    condition = false
+    condition     = false
     error_message = "The slackalerts module is no longer supported and has been archived."
   }
 }
@@ -41,9 +41,9 @@ variable "sns_topic_count" {
 variable "topic_map" {
   description = "SNS topics mapped to Slack channels."
   type = list(object({
-    topic_arn = string
-    channel = string
-    username = string
+    topic_arn  = string
+    channel    = string
+    username   = string
     icon_emoji = string
   }))
   default = []

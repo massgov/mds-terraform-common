@@ -14,25 +14,25 @@ variable "namespace" {
 }
 
 variable "region" {
-  type = string
+  type        = string
   description = "The AWS region to scope access to (defaults to current region)."
-  default = ""
+  default     = ""
 }
 
 variable "account_id" {
-  type = string
+  type        = string
   description = "The AWS account ID to scope access to (defaults to current account)."
-  default = ""
+  default     = ""
 }
 
 variable "logging_namespace" {
-  type = string
+  type        = string
   description = "The logging namespace for logs."
-  default = ""
+  default     = ""
 }
 
 variable "ecr_resources" {
   description = "Resource names for ECR repositories this policy will access."
-  type = list(string)
-  default = ["*"]
+  type        = list(string)
+  default     = ["*"]
 }
