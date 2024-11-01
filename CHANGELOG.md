@@ -2,6 +2,7 @@
 
 ## [1.0.104] - 2024-11-01
 
+- [New Relic] Add ECS Cluster alerts for applications running in Fargate
 - [Golden AMI Builder]
   - Add variable to enable tagging of build/test instances created by image pipeline
   - Image pipeline will automatically destroy EBS volumes mounted to build/test instances
