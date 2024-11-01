@@ -83,6 +83,7 @@ module "task_count" {
     ${local.filter_subquery}
     FACET aws.ecs.containerinsights.ClusterName
   EOF
+  critical_operator           = "below"
   critical_threshold          = var.task_count_threshold
   critical_threshold_duration = var.task_count_threshold_duration
   aggregation_window          = var.aggregation_window

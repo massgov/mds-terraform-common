@@ -51,7 +51,7 @@ variable "memory_threshold" {
 
 variable "task_count_threshold" {
   type        = number
-  description = "Minimum number of tasks in cluster before triggering alert"
+  description = "Minimum number of tasks observed running in cluster before triggering alert."
   default     = 3
 }
 
