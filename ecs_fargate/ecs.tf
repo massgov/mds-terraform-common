@@ -77,10 +77,6 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   tags                     = {}
 
-  volume {
-    name = ""
-  }
-
   dynamic "volume" {
     for_each = var.ecs_task_efs_volumes
     content {
