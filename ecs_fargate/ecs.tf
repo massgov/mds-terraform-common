@@ -23,7 +23,7 @@ locals {
       }
       volumesFrom : lookup(t, "volumesFrom", [])
       mountPoints : lookup(t, "mountPoints", [])
-      dependsOn :   lookup(t, "dependsOn", [])
+      dependsOn : lookup(t, "dependsOn", [])
 
       cpu : 0
     }

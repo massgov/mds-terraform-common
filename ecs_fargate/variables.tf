@@ -165,8 +165,10 @@ variable "ecs_load_balancers" {
   description = "Connect service to load balancer"
   type = map(object(
     {
-      container_port = number
-      tls            = bool
+      container_port       = number
+      tls                  = bool
+      health_check_path    = optional(string)
+      health_check_matcher = optional(string)
       conditions = optional(object({
         host_header  = optional(list(string))
         path_pattern = optional(list(string))
