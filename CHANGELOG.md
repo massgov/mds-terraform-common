@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.107] - 2024-11-05
+
+- [Maintenance Calendar]
+  - Remove definition for reserved lambda environment variable
+  - Update documentation
+
 ## [1.0.106] - 2024-11-01
 - [Fargate Ecs] Add Fargate Ecs Module
 
