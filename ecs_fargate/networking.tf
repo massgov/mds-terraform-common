@@ -4,7 +4,7 @@ data "aws_lb" "alb" {
 }
 
 data "aws_lb_listener" "selected" {
-  count             = data.aws_lb.alb != null ? 1 : 0
+  count             = var.ec2_alb_arn != null ? 1 : 0
   load_balancer_arn = data.aws_lb.alb[0].arn
   port              = coalesce(var.lb_listener_port, 443)
 }
