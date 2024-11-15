@@ -129,7 +129,7 @@ const clusterSnoozed = async (
     const snoozeDate = LocalDate.parse(snooze.snoozeUntil)
       .atStartOfDay()
       .atZone(ZoneId.of("UTC"));
-    if (snooze.cluster === cluster && snoozeDate.isAfter(today)) {
+    if (cluster.includes(snooze.cluster) && snoozeDate.isAfter(today)) {
       logger.debug(
         `Cluster: ${snooze.cluster} is snoozed until: ${snoozeDate}. It is now: ${today}`,
       );

@@ -164,9 +164,7 @@ const parseImageURI = async (
   logger: pino.Logger,
   uri: string,
 ): Promise<ImageDescriptor> => {
-  const match = uri.match(
-    /\/([A-Za-z0-9_-]+).(sha256:[A-Fa-f0-9]{64}|[A-Fa-f0-9]{40})$/,
-  );
+  const match = uri.match(/\.amazonaws\.com\/([A-Za-z0-9_-]+):(.+)$/);
 
   if (
     match === null ||
@@ -175,13 +173,14 @@ const parseImageURI = async (
   ) {
     // If match is an array, 1 and 2 will always be strings, but typescript
     // doesn't know that.
+    logger.fatal(`Attempted to parse URI: ${uri}`);
     throw new Error("Unable to parse ECR Image URI.");
   }
   const repo = match[1];
   const imageID = match[2];
 
   // 64 character hash + 'sha256: = 71'
-  if (imageID.length === 71) {
+  if (imageID.length === 71 && imageID.includes("sha256:")) {
     logger.debug(`We got a digest in the image URI: ${imageID}`);
 
     return {
@@ -190,7 +189,7 @@ const parseImageURI = async (
         imageDigest: imageID,
       },
     };
-  } else if (imageID.length === 40) {
+  } else {
     logger.debug(`We got a tag in the image URI: ${imageID}`);
 
     const input = {
@@ -217,8 +216,6 @@ const parseImageURI = async (
         imageTag: imageID,
       },
     };
-  } else {
-    throw new Error("Something went wrong with our regex");
   }
 };
 
@@ -315,12 +312,9 @@ const scanNeedsAlert = async (
 
       if (await isFindingIgnored(finding)) {
         logger.debug(`Ignoring vulnerability '${finding.name}'`);
-      } else if (await isClusterSnoozed(cluster)) {
-        logger.debug(`Cluster '${cluster}' has been snoozed. Skipping alert`);
       } else {
         // There was a vulnerability >= our alert level that was not ignored.
         logger.debug(`Found open vulnerability '${finding.name}'.`);
-
         return true;
       }
     }
@@ -399,6 +393,12 @@ const handler: Handler<Input, void> = async (
     awsRequestId: context.awsRequestId,
   });
   const { ERROR_TOPIC_ARN, ALERT_SEVERITY_LEVEL } = getEnv();
+
+  // Check if the cluster is snoozed before doing anything else
+  if (await isClusterSnoozed(cluster)) {
+    logger.debug(`Cluster '${cluster}' has been snoozed. Skipping it`);
+    return;
+  }
 
   const now = new Date();
   const alertLevel = ALERT_SEVERITY_LEVEL;
