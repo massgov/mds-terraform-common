@@ -22,7 +22,6 @@ module "ecs_cluster_image_scan" {
       IGNORE_SPECS         = var.image_scan_ignore_arn
       SNOOZED_CLUSTERS     = var.image_scan_snooze_arn
       AWS_ACCOUNT_ID       = var.account_id
-      AWS_REGION           = var.region
     }
   }
   tags = {

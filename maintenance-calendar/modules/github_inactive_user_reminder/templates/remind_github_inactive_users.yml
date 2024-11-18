@@ -30,7 +30,10 @@ mainSteps:
             Check for inactive GitHub accounts
             Check for GitHub accounts with non-commonweath email addresses
             Check for for access tokens more than 90 days old
-
+    
+          Also should export and review GitHub Security Logs:
+            https://github.com/organizations/massgov/settings/audit-log
+    
           Accounts with no activity in the last 180 days should be removed from the massgov org
           For accounts we can't identify, email them directly and ask if they still need access to repos in the massgov org
 
