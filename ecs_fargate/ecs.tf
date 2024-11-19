@@ -282,7 +282,7 @@ resource "aws_sns_topic_subscription" "cb_email_targets" {
 }
 
 
-module "massgov_teamsalerts" {
+module "teamsalerts" {
   count = var.ecs_circuit_breaker ? 1 : 0
   source                      = "../teamsalerts"
   name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
