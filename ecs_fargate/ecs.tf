@@ -120,6 +120,7 @@ resource "aws_ecs_service" "main" {
   deployment_circuit_breaker {
     enable   = var.ecs_circuit_breaker
     rollback = var.ecs_circuit_breaker
+
   }
 
   dynamic "volume_configuration" {
@@ -278,4 +279,21 @@ resource "aws_sns_topic_subscription" "cb_email_targets" {
   topic_arn = aws_sns_topic.cb[0].arn
   protocol  = "email"
   endpoint  = var.ecs_circuit_breaker_alert_email[count.index]
+}
+
+
+module "teamsalerts" {
+  count = var.ecs_circuit_breaker ? 1 : 0
+  source                      = "../teamsalerts"
+  name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
+  human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
+  teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
+  topic_map = [
+    {
+      topic_arn  = aws_sns_topic.cb.arn
+      human_name = join("", [var.ecs_cluster_name, var.ecs_service_name, "Teams", "Alert"])
+      icon_url   = "https://static.vecteezy.com/system/resources/previews/024/392/058/non_2x/alert-mark-failed-to-load-something-went-wrong-tap-to-retry-concept-illustration-flat-design-eps10-simple-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg"
+    }
+  ]
+
 }
