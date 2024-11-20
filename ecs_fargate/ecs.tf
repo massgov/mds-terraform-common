@@ -295,7 +295,5 @@ module "teamsalerts" {
       icon_url   = "https://static.vecteezy.com/system/resources/previews/024/392/058/non_2x/alert-mark-failed-to-load-something-went-wrong-tap-to-retry-concept-illustration-flat-design-eps10-simple-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg"
     }
   ]
-  tags = {
-    "application" = "massgov-teams-notifications"
-  }
+
 }
