@@ -258,4 +258,5 @@ variable "ecr_repo_retention" {
 variable "teams_webhook_param_arn" {
   description = "Param name for Team Webhook: "
   type        = string
+  default     = ""
 }
