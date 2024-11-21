@@ -288,6 +288,7 @@ module "teamsalerts" {
   name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
   human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
   teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
+  teams_webhook_url_param_key = var.teams_webhook_url_param_key
   topic_map = [
     {
       topic_arn  = aws_sns_topic.cb.arn

@@ -260,3 +260,8 @@ variable "teams_webhook_param_arn" {
   type        = string
   default     = ""
 }
+variable "teams_webhook_url_param_key" {
+  description = "KMS Key used for Decrypt Param:"
+  type        = string
+  default     = null
+}
