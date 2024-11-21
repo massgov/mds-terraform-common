@@ -283,7 +283,7 @@ resource "aws_sns_topic_subscription" "cb_email_targets" {
 
 
 module "teamsalerts" {
-  count = var.ecs_circuit_breaker ? 1 : 0
+  count = var.ecs_circuit_breaker && var.teams_webhook_param_arn != "" ? 1 : 0
   source                      = "../teamsalerts"
   name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
   human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
