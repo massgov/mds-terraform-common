@@ -291,7 +291,7 @@ module "teamsalerts" {
   teams_webhook_url_param_key = var.teams_webhook_url_param_key
   topic_map = [
     {
-      topic_arn  = aws_sns_topic.cb.arn
+      topic_arn  = aws_sns_topic.cb[0].arn
       human_name = join("", [var.ecs_cluster_name, var.ecs_service_name, "Teams", "Alert"])
       icon_url   = "https://static.vecteezy.com/system/resources/previews/024/392/058/non_2x/alert-mark-failed-to-load-something-went-wrong-tap-to-retry-concept-illustration-flat-design-eps10-simple-graphic-element-for-landing-page-empty-state-ui-infographic-icon-vector.jpg"
     }
