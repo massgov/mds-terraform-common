@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.108] - 2024-12-04
+
+- [Maintenance Calendar]
+  - Accept freeform image tags
+  - Use the ECS cluster name to snooze instead of its arn
+
 ## [1.0.107] - 2024-11-05
 
 - [Maintenance Calendar]
