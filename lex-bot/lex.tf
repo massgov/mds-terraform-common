@@ -1,6 +1,6 @@
 resource "aws_lexv2models_bot" "main" {
   count = var.lex_separate_env ? length(var.environments) : 1
-  name  = "${var.lex_separate_env ? "${var.environments[count.index]}-${var.prefix}" : "${var.prefix}"}-${var.lex_botname}"
+  name  = "${var.lex_separate_env ? "${var.environments[count.index]}-${var.lex_botname}" : ${var.lex_botname}}"
 
   data_privacy {
     child_directed = false
