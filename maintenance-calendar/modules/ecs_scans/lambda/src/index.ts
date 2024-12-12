@@ -164,7 +164,7 @@ const parseImageURI = async (
   logger: pino.Logger,
   uri: string,
 ): Promise<ImageDescriptor> => {
-  const match = uri.match(/\.amazonaws\.com\/([A-Za-z0-9_-]+):(.+)$/);
+  const match = uri.match(/.+\/([a-z]+[./a-z0-9_-]*)[:|@](.+)$/);
 
   if (
     match === null ||
