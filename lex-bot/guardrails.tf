@@ -1,5 +1,5 @@
 resource "aws_bedrock_guardrail" "main" {
-  for_each                  = toset(var.environments)
+  for_each                  = var.guardrail_arns == null ? toset(var.environments) : toset([])
   name                      = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-guardrail"
   blocked_input_messaging   = "Sorry, we cannot help you with this query. Please rephrase and try asking again. This is blocked input."
   blocked_outputs_messaging = "Sorry, we cannot answer this question. Please rephrase and try asking again. This is blocked output."
@@ -38,4 +38,9 @@ resource "aws_bedrock_guardrail" "main" {
       type = var.guardrail_word_policy
     }
   }
+
+  lifecycle {
+    ignore_changes = [content_policy_config, contextual_grounding_policy_config, sensitive_information_policy_config, word_policy_config]
+  }
+
 }

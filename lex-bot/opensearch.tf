@@ -1,100 +1,57 @@
-resource "aws_opensearchserverless_security_policy" "main" {
-  for_each = toset(var.environments)
 
-  name        = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-os-encrypt"
-  type        = "encryption"
-  description = "Custom encryption policy created by Amazon Bedrock Knowledge Base service to allow a created IAM role to have permissions on Amazon Open Search collections and indexes"
-  policy = jsonencode({
-    "Rules" = [
-      {
-        "Resource" = [
-          join("/", ["collection", aws_opensearchserverless_collection.main[each.key].name])
-        ],
-        "ResourceType" = "collection"
+provider "opensearch" {
+  url = var.opensearch_endpoint
+  aws_region = data.aws_region.current.name
+  healthcheck         = false
+}
 
+resource "opensearch_index" "main" {
+  for_each                       = toset(var.environments)
+  name                           = "bedrock-kb-${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-index"
+  number_of_shards               = "2"
+  number_of_replicas             = "0"
+  index_knn                      = true
+  index_knn_algo_param_ef_search = "512"
+  mappings                       = jsonencode(
+        {
+      "properties": {
+        "bedrock-knowledge-base-default-vector": {
+          "type": "knn_vector",
+          "dimension": 1024,
+          "method": {
+            "name": "hnsw",
+            "engine": "faiss",
+            "parameters": {
+              "m": 16,
+              "ef_construction": 512
+            },
+            "space_type": "l2"
+          }
+        },
+        "AMAZON_BEDROCK_METADATA": {
+          "type": "text",
+          "index": false
+        },
+        "AMAZON_BEDROCK_TEXT_CHUNK": {
+          "type": "text"
+        },
+        "id": {
+          "type": "text"
+        },
+        "title": {
+          "type": "text"
+        },
+        "url": {
+          "type": "text"
+        },
+        "x-amz-bedrock-kb-data-source-id": {
+          "type": "text"
+        },
+        "x-amz-bedrock-kb-source-uri": {
+          "type": "text"
+        }
       }
-    ],
-    "AWSOwnedKey" = true
-  })
-}
-
-resource "aws_opensearchserverless_security_policy" "network" {
-  for_each = toset(var.environments)
-
-  name        = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-os-network"
-  type        = "network"
-  description = "Custom network policy created by Amazon Bedrock Knowledge Base service to allow a created IAM role to have permissions on Amazon Open Search collections and indexes."
-  policy = jsonencode([
-    {
-      Description : "",
-      Rules : [
-        {
-          ResourceType : "collection",
-          Resource = [
-            join("/", ["collection", aws_opensearchserverless_collection.main[each.key].name])
-          ]
-        },
-        {
-          ResourceType : "dashboard",
-          Resource = [
-            join("/", ["collection", aws_opensearchserverless_collection.main[each.key].name])
-          ]
-        }
-      ],
-      AllowFromPublic : true
     }
-  ])
+  )
+
 }
-
-resource "aws_opensearchserverless_access_policy" "main" {
-  for_each = toset(var.environments)
-
-  name        = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-os-access"
-  description = "Custom data access policy created by Amazon Bedrock Knowledge Base service to allow a created IAM role to have permissions on Amazon Open Search collections and indexes."
-  type        = "data"
-  policy = jsonencode([
-    {
-      Description = ""
-      Rules = [
-        {
-          ResourceType = "collection",
-          Resource = [
-            join("/", ["collection", aws_opensearchserverless_collection.main[each.key].name])
-          ],
-          Permission = [
-            "aoss:DescribeCollectionItems",
-            "aoss:CreateCollectionItems",
-            "aoss:UpdateCollectionItems"
-          ]
-        },
-        {
-          ResourceType = "index",
-          Resource = [
-            join("/", ["index", aws_opensearchserverless_collection.main[each.key].name, "*"])
-          ],
-          Permission = [
-            "aoss:UpdateIndex",
-            "aoss:DescribeIndex",
-            "aoss:ReadDocument",
-            "aoss:WriteDocument",
-            "aoss:CreateIndex"
-          ]
-        }
-      ],
-      Principal = [
-        data.aws_caller_identity.current.arn,
-        aws_iam_role.bedrock[each.key].arn
-      ]
-    }
-  ])
-}
-
-resource "aws_opensearchserverless_collection" "main" {
-  for_each = toset(var.environments)
-
-  name        = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-os"
-  type        = "VECTORSEARCH"
-  description = "Default collection created by Amazon Bedrock Knowledge base"
-}
-
-

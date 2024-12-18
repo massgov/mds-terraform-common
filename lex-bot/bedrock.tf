@@ -1,9 +1,12 @@
-
+resource "time_sleep" "os_index_wait" {
+  create_duration = "60s"
+  depends_on      = [opensearch_index.main]
+}
 
 resource "aws_bedrockagent_knowledge_base" "main" {
   for_each = toset(var.environments)
 
-  depends_on  = [aws_opensearchserverless_collection.main, aws_opensearchserverless_security_policy.network]
+  depends_on  = [time_sleep.os_index_wait]
   name        = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-knowledge-base"
   description = "Knowledge base for ${join(" ", [each.key, var.prefix])} content"
   role_arn    = aws_iam_role.bedrock[each.key].arn
@@ -16,9 +19,10 @@ resource "aws_bedrockagent_knowledge_base" "main" {
   storage_configuration {
     type = "OPENSEARCH_SERVERLESS"
     opensearch_serverless_configuration {
-      collection_arn    = aws_opensearchserverless_collection.main[each.key].arn
-      vector_index_name = "bedrock-knowledge-base-default-index"
+      collection_arn    = var.opensearch_arn
+      vector_index_name = "bedrock-kb-${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-index"
       field_mapping {
+
         vector_field   = "bedrock-knowledge-base-default-vector"
         text_field     = "AMAZON_BEDROCK_TEXT_CHUNK"
         metadata_field = "AMAZON_BEDROCK_METADATA"
@@ -28,6 +32,7 @@ resource "aws_bedrockagent_knowledge_base" "main" {
 }
 
 resource "aws_bedrockagent_data_source" "main" {
+  depends_on           = [aws_s3_bucket.source_bucket]
   for_each             = toset(var.environments)
   knowledge_base_id    = aws_bedrockagent_knowledge_base.main[each.key].id
   name                 = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-knowledge-base-source"

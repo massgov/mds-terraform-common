@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "bedrock" {
     }
     condition {
       test     = "ArnLike"
-      values   = ["arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:knowledge-base/*"]
+      values   = ["arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
       variable = "aws:SourceArn"
     }
   }
@@ -100,7 +100,7 @@ resource "aws_iam_role" "lex" {
             "bedrock:ApplyGuardrail"
           ],
           "Resource" : [
-            values(aws_bedrock_guardrail.main)[*].guardrail_arn
+           "*"
           ]
         }
       ]
@@ -118,7 +118,7 @@ resource "aws_iam_role" "lex" {
             "bedrock:Retrieve"
           ],
           "Resource" : [
-            values(aws_bedrockagent_knowledge_base.main)[*].arn
+            "*"
           ]
         }
       ]
@@ -137,7 +137,7 @@ resource "aws_iam_role" "lex" {
             "logs:PutLogEvents"
           ],
           "Resource" : [
-            aws_cloudwatch_log_group.conversations[*].arn
+            "*"
           ]
         }
       ]
@@ -187,7 +187,6 @@ resource "aws_iam_policy" "AmazonBedrockFoundationModelPolicyForKnowledgeBase" {
 }
 resource "aws_iam_policy" "AmazonBedrockOSSPolicyForKnowledgeBase" {
   for_each   = toset(var.environments)
-  depends_on = [aws_opensearchserverless_collection.main]
 
   name = "${lower(each.key != "" ? "${each.key}-" : "")}${lower(var.prefix)}-bedrock-oss"
   path = "/service-role/"
@@ -201,7 +200,7 @@ resource "aws_iam_policy" "AmazonBedrockOSSPolicyForKnowledgeBase" {
           "aoss:APIAccessAll"
         ],
         "Resource" : [
-          join("/", [aws_opensearchserverless_collection.main[each.key].arn, "*"])
+          "arn:aws:aoss:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:collection/*"
         ]
       }
     ]
@@ -261,9 +260,9 @@ resource "aws_iam_policy" "AmazonBedrockS3PolicyForGuardrail" {
         Action = "bedrock:ApplyGuardrail"
         Effect = "Allow"
         Resource = [
-          aws_bedrock_guardrail.main[each.key].guardrail_arn
+          var.guardrail_arns == null ? aws_bedrock_guardrail.main[each.key].guardrail_arn : join(",", var.guardrail_arns)
         ]
-        Sid = "AmazonBedrockAgentBedrockApplyGuardrailPolicyProd"
+        Sid = "AmazonBedrockAgentBedrockApplyGuardrailPolicy"
       },
     ]
     Version = "2012-10-17"

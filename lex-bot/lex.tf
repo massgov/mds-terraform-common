@@ -8,7 +8,7 @@ resource "aws_lexv2models_bot" "main" {
 
   idle_session_ttl_in_seconds = 300
   role_arn                    = aws_iam_role.lex.arn
-  description                 = "${var.lex_separate_env ? var.environments[count.index] : ""} Chatbot for ${var.prefix}"
+  description                 = "${var.lex_separate_env ? "${var.environments[count.index]} " : ""}Chatbot for ${var.prefix}"
 }
 
 
