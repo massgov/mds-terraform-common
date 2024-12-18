@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.108] - 2024-12-18
+
+- [Github-To-Teams]
+  - Update Lambda to use body from both public entrypoint and routing from ALB
+
 ## [1.0.107] - 2024-11-05
 
 - [Maintenance Calendar]
