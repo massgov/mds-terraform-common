@@ -13,7 +13,7 @@ const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyRe
   logger.debug('Config: ', config);
 
   // Validate the token passed in the path before anything else.
-  const tokenInput = event.rawPath.slice(1);
+  const tokenInput = event.rawPath ? event.rawPath.slice(1) : event.path.slice(1);
   logger.debug('Validating the token: ', tokenInput);
   const isTokenValid = validateToken({
     key: config.token,
