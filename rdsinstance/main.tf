@@ -19,9 +19,10 @@ resource "aws_db_instance" "default" {
   username                              = var.username
   password                              = var.password
   backup_retention_period               = var.backup_retention_period
+  backup_window                         = "05:10-06:00" # 12:10AM-1:00AM EST
   copy_tags_to_snapshot                 = true
   deletion_protection                   = var.deletion_protection
-  maintenance_window                    = "wed:04:00-wed:05:00"
+  maintenance_window                    = "wed:04:00-wed:05:00" # 11:00PM-12:00AM EST
   storage_encrypted                     = var.storage_encrypted
   parameter_group_name                  = var.parameter_group_name
   db_subnet_group_name                  = aws_db_subnet_group.default.name
