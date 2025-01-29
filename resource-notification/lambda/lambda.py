@@ -14,6 +14,7 @@ ses_client = boto3.client('ses')
 # Email configuration
 SENDER_EMAIL = os.environ['SENDER_EMAIL']
 DEFAULT_RECIPIENT = os.environ['DEFAULT_RECIPIENT']
+TESTING = os.environ['TESTING']
 
 def is_valid_email(email):
     """Check if the provided email is valid."""
@@ -21,10 +22,16 @@ def is_valid_email(email):
     return re.match(email_regex, email) is not None
 
 def send_email(recipient, subject, body):
+
+    if TESTING:
+        body = f"TEST EMAIL for ${recipient}\n\n" + body
+        recipient = DEFAULT_RECIPIENT
+
     response = ses_client.send_email(
         Source=SENDER_EMAIL,
         Destination={
             'ToAddresses': [recipient],
+            'CcAddresses': [DEFAULT_RECIPIENT]
         },
         Message={
             'Subject': {
