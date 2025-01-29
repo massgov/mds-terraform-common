@@ -11,3 +11,12 @@ variable "create_ses_email" {
   default = false
   description = "true/false create a ses identity for send email"
 }
+variable "schedule" {
+  type        = map(string)
+  description = "Schedule expressions to use to invoke scan (i.e: everyQtr = cron(0 0 1 1,4,7,10 ? *) )"
+  default = {
+  }
+}
+
+
+

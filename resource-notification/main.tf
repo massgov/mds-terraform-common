@@ -65,4 +65,5 @@ module "lambda" {
     DEFAULT_RECIPIENT = var.default_recipient
   }
   iam_policies = [data.aws_iam_policy_document.lambda_inline_policy.json]
+  schedule = var.schedule
 }
