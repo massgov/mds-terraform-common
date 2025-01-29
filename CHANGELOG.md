@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.109] - 2025-01-09
+
+- [New Relic]
+  - Output integration role ARN from `metric-stream` submodule
+
 ## [1.0.108] - 2024-12-18
 
 - [Github-To-Teams]
