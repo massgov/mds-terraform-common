@@ -5,7 +5,10 @@ locals {
   cluster_names_quoted   = join(", ", formatlist("'%s'", var.filter_cluster_names))
   cluster_names_subquery = length(var.filter_cluster_names) == 0 ? "" : "aws.ecs.ClusterName IN (${local.cluster_names_quoted})"
 
-  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.cluster_names_subquery]))
+  cluster_environments_quoted   = join(", ", formatlist("'%s'", var.filter_cluster_environments))
+  cluster_environments_subquery = length(var.filter_cluster_environments) == 0 ? "" : "`tags.environment` IN (${local.cluster_environments_quoted})"
+
+  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.cluster_names_subquery, local.cluster_environments_subquery]))
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 }

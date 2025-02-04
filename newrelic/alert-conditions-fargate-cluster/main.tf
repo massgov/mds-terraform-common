@@ -7,7 +7,10 @@ locals {
     "aws.ecs.containerinsights.ClusterName IN (${local.cluster_names_quoted})"
   )
 
-  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.cluster_names_subquery]))
+  cluster_environments_quoted   = join(", ", formatlist("'%s'", var.filter_cluster_environments))
+  cluster_environments_subquery = length(var.filter_cluster_environments) == 0 ? "" : "`tags.environment` IN (${local.cluster_environments_quoted})"
+
+  filter_subqueries_and = join(" AND ", compact([local.aws_accounts_subquery, local.cluster_names_subquery, local.cluster_environments_subquery]))
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 }
@@ -51,7 +54,7 @@ module "memory" {
     var.critical_threshold_duration
   )
 
-  nrql_query = <<EOF
+  nrql_query                  = <<EOF
     SELECT 100 * average(`aws.ecs.containerinsights.MemoryUtilized`) / average(`aws.ecs.containerinsights.MemoryReserved`)
     FROM Metric
     ${local.filter_subquery}
@@ -77,7 +80,7 @@ module "task_count" {
     var.critical_threshold_duration
   )
 
-  nrql_query = <<EOF
+  nrql_query                  = <<EOF
     SELECT average(`aws.ecs.containerinsights.TaskCount`)
     FROM Metric
     ${local.filter_subquery}
