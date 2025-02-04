@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.110] - 2025-02-04
+
+- [New Relic]
+  - By default, only ECS clusters and Lambda functions with prod and mgt tags will generate alerts
+- [RDS]
+  - Specify the backup window so it doesn't overlap with other scheduled tasks
+
 ## [1.0.109] - 2025-01-09
 
 - [New Relic]
