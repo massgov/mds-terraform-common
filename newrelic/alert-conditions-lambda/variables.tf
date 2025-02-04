@@ -31,6 +31,12 @@ variable "exclude_function_names" {
   default     = []
 }
 
+variable "filter_function_environments" {
+  type        = list(string)
+  description = "List of required environment tags. Functions without these tags will not be monitored"
+  default     = ["prod", "mgt"]
+}
+
 variable "aggregation_window" {
   type        = number
   description = "See newrelic_nrql_alert_condition.aggregation_window."
