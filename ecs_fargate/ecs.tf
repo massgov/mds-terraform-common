@@ -101,8 +101,43 @@ resource "aws_ecs_task_definition" "main" {
 
 }
 
+// create cw schedule to start task (task only)
+resource "aws_cloudwatch_event_rule" "schedule_task" {
+  count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+
+  name        = join("", [var.ecs_service_name, "CB", "Rule"])
+  description = "${var.ecs_cluster_name}-${var.ecs_task_name}-schedule"
+  schedule_expression = var.ecs_task_schedule
+  tags = merge(
+    var.tags,
+    {
+      "Name" = join("", [var.ecs_cluster_name, var.ecs_task_name, "Schedule", "Rule"])
+    },
+  )
+}
+
+// create cw target for scheduled task (task only)
+resource "aws_cloudwatch_event_target" "schedule_task_target" {
+  count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.schedule_task.name
+  arn       = aws_ecs_task_definition.main.execution_role_arn
+  role_arn  = aws_ecs_task_definition.main.execution_role_arn
+
+  ecs_target {
+    task_definition_arn = aws_ecs_task_definition.main.arn
+    task_count          = 1
+    launch_type         = "FARGATE"
+
+    network_configuration {
+      subnets          = var.ecs_subnet_ids
+      security_groups  = var.ecs_security_group_ids
+    }
+  }
+}
+
 // create ecs service under cluster
 resource "aws_ecs_service" "main" {
+  count = var.ecs_task_only ? 0 : 1
   depends_on      = [aws_ecs_task_definition.main, aws_lb_target_group.alb]
   name            = var.ecs_service_name
   cluster         = data.aws_ecs_cluster.main.cluster_name
@@ -156,7 +191,7 @@ resource "aws_appautoscaling_target" "main" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : 1
   max_capacity       = var.ecs_max_count
   min_capacity       = var.ecs_min_count
-  resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service.main[count.index].name}"
+  resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service[0].main[count.index].name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
   role_arn           = var.ecs_auto_scale_arn
@@ -167,7 +202,7 @@ resource "aws_appautoscaling_target" "main" {
 resource "aws_appautoscaling_policy" "memory" {
   count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_memory == 0 ? 0 : 1
 
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-mem-autoScalingPolicy"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-mem-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
@@ -185,7 +220,7 @@ resource "aws_appautoscaling_policy" "memory" {
 resource "aws_appautoscaling_policy" "cpu" {
   count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
 
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-cpu-autoScalingPolicy"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-cpu-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
@@ -203,7 +238,7 @@ resource "aws_appautoscaling_policy" "cpu" {
 // optional: spin service down on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_down" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_down == "0" ? 0 : 1
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-schedule-down"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
   service_namespace  = aws_appautoscaling_target.main[count.index].service_namespace
@@ -218,7 +253,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_down" {
 // optional: spin service up on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_up" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_up == "0" ? 0 : 1
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-schedule-down"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
   service_namespace  = aws_appautoscaling_target.main[count.index].service_namespace
@@ -252,7 +287,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
     "source" : ["aws.ecs"],
     "detail-type" : ["ECS Deployment State Change"],
     "resources" : [
-      aws_ecs_service.main.id
+      aws_ecs_service[0].main.id
     ]
     "detail" : {
       "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]

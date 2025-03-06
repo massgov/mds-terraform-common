@@ -41,6 +41,21 @@ variable "cw_kms_key" {
 }
 
 // ECS var:
+variable "ecs_task_only" {
+  description = "Skip Service to only create task"
+  type        = bool
+  default     = false
+}
+variable "ecs_task_schedule" {
+  description = "ECS Task Only Schedule"
+  type        = string
+  default     = ""
+}
+variable "ecs_task_name" {
+  description = "ECS task name"
+  type        = string
+  default     = ""
+}
 variable "ecs_cluster_name" {
   description = "Name of the ECS Cluster"
   type        = string
@@ -112,6 +127,7 @@ variable "ecs_task_efs_volumes" {
 variable "ecs_service_name" {
   description = "ECS Service Name"
   type        = string
+  default     = ""
 }
 variable "ecs_desire_count" {
   description = "Desire Count of tasks to run under service"
