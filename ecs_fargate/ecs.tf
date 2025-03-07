@@ -105,13 +105,13 @@ resource "aws_ecs_task_definition" "main" {
 resource "aws_cloudwatch_event_rule" "schedule_task" {
   count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
 
-  name        = join("", [var.ecs_service_name, "CB", "Rule"])
+  name        = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
   description = "${var.ecs_cluster_name}-${var.ecs_task_name}-schedule"
   schedule_expression = var.ecs_task_schedule
   tags = merge(
     var.tags,
     {
-      "Name" = join("", [var.ecs_cluster_name, var.ecs_task_name, "Schedule", "Rule"])
+      "Name" = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
     },
   )
 }
