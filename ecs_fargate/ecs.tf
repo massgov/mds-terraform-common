@@ -124,7 +124,7 @@ resource "aws_cloudwatch_event_target" "schedule_task_target" {
     task_definition_arn = aws_ecs_task_definition.main[count.index].arn
     task_count          = 1
     launch_type         = "FARGATE"
-
+    platform_version    = "LATEST"
     network_configuration {
       subnets          = var.ecs_subnet_ids
       security_groups  = var.ecs_security_group_ids
