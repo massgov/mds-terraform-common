@@ -131,7 +131,7 @@ resource "aws_cloudwatch_event_target" "schedule_task_target" {
     }
   }
 
-  input = var.ecs_task_input_override
+  input = var.ecs_task_input_override == "" ? jsonencode({}) : var.ecs_task_input_override
 
 }
 
