@@ -102,9 +102,9 @@ variable "ecs_task_def" {
   nullable = true
 }
 variable "ecs_task_input_override" {
-  type = string
+  type        = string
   description = "Ecs Schedule Task Input Override encoded JSON"
-  default = ""
+  default     = ""
 }
 variable "volume_configuration" {
   description = "Add Volume to ECS"

@@ -100,10 +100,10 @@ resource "aws_ecs_task_definition" "main" {
 
 // create cw schedule to start task (task only)
 resource "aws_cloudwatch_event_rule" "schedule_task" {
-  count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
-
-  name        = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
-  description = "${var.ecs_cluster_name}-${var.ecs_task_name}-schedule"
+  count               = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  state               = "ENABLED"
+  name                = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
+  description         = "${var.ecs_cluster_name}-${var.ecs_task_name}-schedule"
   schedule_expression = var.ecs_task_schedule
   tags = merge(
     var.tags,
@@ -115,10 +115,10 @@ resource "aws_cloudwatch_event_rule" "schedule_task" {
 
 // create cw target for scheduled task (task only)
 resource "aws_cloudwatch_event_target" "schedule_task_target" {
-  count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.schedule_task[count.index].name
-  arn       = data.aws_ecs_cluster.main.arn
-  role_arn  = aws_iam_role.ecs_schedule_role[0].arn
+  count    = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  rule     = aws_cloudwatch_event_rule.schedule_task[count.index].name
+  arn      = data.aws_ecs_cluster.main.arn
+  role_arn = aws_iam_role.ecs_schedule_role[0].arn
 
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.main[count.index].arn
@@ -126,8 +126,8 @@ resource "aws_cloudwatch_event_target" "schedule_task_target" {
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
     network_configuration {
-      subnets          = var.ecs_subnet_ids
-      security_groups  = var.ecs_security_group_ids
+      subnets         = var.ecs_subnet_ids
+      security_groups = var.ecs_security_group_ids
     }
   }
 
@@ -137,7 +137,7 @@ resource "aws_cloudwatch_event_target" "schedule_task_target" {
 
 // create ecs service under cluster
 resource "aws_ecs_service" "main" {
-  count = var.ecs_task_only ? 0 : 1
+  count           = var.ecs_task_only ? 0 : 1
   depends_on      = [aws_ecs_task_definition.main, aws_lb_target_group.alb]
   name            = var.ecs_service_name
   cluster         = data.aws_ecs_cluster.main.cluster_name
@@ -160,9 +160,9 @@ resource "aws_ecs_service" "main" {
   dynamic "volume_configuration" {
     for_each = length(coalesce(var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
     content {
-      name = lookup(volume_configuration.value, "name")
+      name = volume_configuration.value["name"]
       managed_ebs_volume {
-        role_arn = lookup(volume_configuration.value, "managed_ebs_volume").role_arn
+        role_arn = volume_configuration.value["managed_ebs_volume"].role_arn
       }
     }
   }
@@ -173,7 +173,7 @@ resource "aws_ecs_service" "main" {
     content {
       target_group_arn = aws_lb_target_group.alb[load_balancer.key].arn
       container_name   = load_balancer.key
-      container_port   = lookup(load_balancer.value, "container_port")
+      container_port   = load_balancer.value["container_port"]
     }
   }
 
@@ -317,9 +317,9 @@ resource "aws_sns_topic_subscription" "cb_email_targets" {
 
 
 module "teamsalerts" {
-  count = var.ecs_circuit_breaker && var.teams_webhook_param_arn != "" ? 1 : 0
+  count                       = var.ecs_circuit_breaker && var.teams_webhook_param_arn != "" ? 1 : 0
   source                      = "../teamsalerts"
-  name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
+  name                        = join("", [var.ecs_service_name, "Teams", "Alert"])
   human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
   teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
   teams_webhook_url_param_key = var.teams_webhook_url_param_key

@@ -1,5 +1,5 @@
 data "aws_iam_policy_document" "assume_role" {
-  count              = var.ecs_task_def != null ? 1 : 0
+  count = var.ecs_task_def != null ? 1 : 0
 
   statement {
     effect = "Allow"
@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 data "aws_iam_policy_document" "ecs_events_run_task_with_any_role" {
-  count              = var.ecs_task_def != null ? 1 : 0
+  count = var.ecs_task_def != null ? 1 : 0
   statement {
     effect    = "Allow"
     actions   = ["iam:PassRole"]
@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "ecs_events_run_task_with_any_role" {
   }
 }
 resource "aws_iam_role" "ecs_schedule_role" {
-  count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  count              = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
   name               = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "role"])
   assume_role_policy = data.aws_iam_policy_document.assume_role[0].json
 }

@@ -12,14 +12,14 @@ data "aws_lb_listener" "selected" {
 resource "aws_lb_target_group" "alb" {
   for_each = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
 
-  name                 = substr(join("-", [terraform.workspace, each.key, lookup(each.value, "tls") ? "HTTPS" : "HTTP"]), 0, 32)
-  port                 = lookup(each.value, "service_port", lookup(each.value, "container_port"))
-  protocol             = lookup(each.value, "tls") ? "HTTPS" : "HTTP"
+  name                 = substr(join("-", [terraform.workspace, each.key, each.value["tls"] ? "HTTPS" : "HTTP"]), 0, 32)
+  port                 = lookup(each.value, "service_port", each.value["container_port"])
+  protocol             = each.value["tls"] ? "HTTPS" : "HTTP"
   target_type          = "ip"
   vpc_id               = var.vpc_id
   deregistration_delay = "60"
   health_check {
-    protocol            = lookup(each.value, "tls") ? "HTTPS" : "HTTP"
+    protocol            = each.value["tls"] ? "HTTPS" : "HTTP"
     interval            = 10
     path                = lookup(each.value, "health_check_path", "/")
     timeout             = 5
@@ -43,31 +43,31 @@ resource "aws_lb_listener_rule" "static" {
   }
 
   dynamic "condition" {
-    for_each = try(lookup(each.value, "conditions").host_header, null) != null ? [1] : []
+    for_each = try(each.value["conditions"].host_header, null) != null ? [1] : []
 
     content {
       host_header {
-        values = lookup(each.value, "conditions").host_header
+        values = each.value["conditions"].host_header
       }
     }
   }
 
   dynamic "condition" {
-    for_each = try(lookup(each.value, "conditions").path_pattern, null) != null ? [1] : []
+    for_each = try(each.value["conditions"].path_pattern, null) != null ? [1] : []
 
     content {
       path_pattern {
-        values = lookup(each.value, "conditions").path_pattern
+        values = each.value["conditions"].path_pattern
       }
     }
   }
 
   dynamic "condition" {
-    for_each = try(lookup(each.value, "conditions").http_header, null) != null ? [1] : []
+    for_each = try(each.value["conditions"].http_header, null) != null ? [1] : []
     content {
       http_header {
-        values           = lookup(each.value, "conditions").http_header.values
-        http_header_name = lookup(each.value, "conditions").http_header.http_header_name
+        values           = each.value["conditions"].http_header.values
+        http_header_name = each.value["conditions"].http_header.http_header_name
       }
     }
   }
