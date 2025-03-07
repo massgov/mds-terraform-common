@@ -23,7 +23,7 @@ data "aws_iam_policy_document" "ecs_events_run_task_with_any_role" {
   statement {
     effect    = "Allow"
     actions   = ["ecs:RunTask"]
-    resources = [replace(aws_ecs_task_definition.main.arn, "/:\\d+$/", ":*")]
+    resources = [replace(aws_ecs_task_definition.main[0].arn, "/:\\d+$/", ":*")]
   }
 }
 resource "aws_iam_role" "ecs_schedule_role" {
