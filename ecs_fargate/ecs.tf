@@ -119,7 +119,7 @@ resource "aws_cloudwatch_event_rule" "schedule_task" {
 // create cw target for scheduled task (task only)
 resource "aws_cloudwatch_event_target" "schedule_task_target" {
   count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.schedule_task.name
+  rule      = aws_cloudwatch_event_rule.schedule_task[count.index].name
   arn       = aws_ecs_task_definition.main[count.index].execution_role_arn
   role_arn  = aws_ecs_task_definition.main[count.index].execution_role_arn
 
@@ -155,7 +155,6 @@ resource "aws_ecs_service" "main" {
   deployment_circuit_breaker {
     enable   = var.ecs_circuit_breaker
     rollback = var.ecs_circuit_breaker
-
   }
 
   dynamic "volume_configuration" {
