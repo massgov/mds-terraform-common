@@ -191,7 +191,7 @@ resource "aws_appautoscaling_target" "main" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : 1
   max_capacity       = var.ecs_max_count
   min_capacity       = var.ecs_min_count
-  resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service[0].main[count.index].name}"
+  resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service.main[count.index].name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"
   role_arn           = var.ecs_auto_scale_arn
@@ -287,7 +287,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
     "source" : ["aws.ecs"],
     "detail-type" : ["ECS Deployment State Change"],
     "resources" : [
-      aws_ecs_service[0].main.id
+      aws_ecs_service.main[0].id
     ]
     "detail" : {
       "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]
