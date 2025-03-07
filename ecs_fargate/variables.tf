@@ -101,7 +101,11 @@ variable "ecs_task_def" {
   })
   nullable = true
 }
-
+variable "ecs_task_input_override" {
+  type = string
+  description = "Ecs Schedule Task Input Override encoded JSON"
+  default = null
+}
 variable "volume_configuration" {
   description = "Add Volume to ECS"
   type = map(object({

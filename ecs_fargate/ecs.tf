@@ -117,8 +117,8 @@ resource "aws_cloudwatch_event_rule" "schedule_task" {
 resource "aws_cloudwatch_event_target" "schedule_task_target" {
   count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
   rule      = aws_cloudwatch_event_rule.schedule_task[count.index].name
-  arn       = aws_ecs_task_definition.main[count.index].execution_role_arn
-  role_arn  = aws_ecs_task_definition.main[count.index].execution_role_arn
+  arn       = data.aws_ecs_cluster.main.arn
+  role_arn  = aws_iam_role.ecs_schedule_role[0].arn
 
   ecs_target {
     task_definition_arn = aws_ecs_task_definition.main[count.index].arn
@@ -130,6 +130,9 @@ resource "aws_cloudwatch_event_target" "schedule_task_target" {
       security_groups  = var.ecs_security_group_ids
     }
   }
+
+  input = var.ecs_task_input_override
+
 }
 
 // create ecs service under cluster
