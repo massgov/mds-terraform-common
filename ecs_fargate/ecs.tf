@@ -120,11 +120,11 @@ resource "aws_cloudwatch_event_rule" "schedule_task" {
 resource "aws_cloudwatch_event_target" "schedule_task_target" {
   count = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
   rule      = aws_cloudwatch_event_rule.schedule_task.name
-  arn       = aws_ecs_task_definition.main.execution_role_arn
-  role_arn  = aws_ecs_task_definition.main.execution_role_arn
+  arn       = aws_ecs_task_definition.main[count.index].execution_role_arn
+  role_arn  = aws_ecs_task_definition.main[count.index].execution_role_arn
 
   ecs_target {
-    task_definition_arn = aws_ecs_task_definition.main.arn
+    task_definition_arn = aws_ecs_task_definition.main[count.index].arn
     task_count          = 1
     launch_type         = "FARGATE"
 
