@@ -77,9 +77,6 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = ["FARGATE"]
   tags                     = {}
 
-  volume {
-    name = ""
-  }
 
   dynamic "volume" {
     for_each = var.ecs_task_efs_volumes
@@ -101,8 +98,46 @@ resource "aws_ecs_task_definition" "main" {
 
 }
 
+// create cw schedule to start task (task only)
+resource "aws_cloudwatch_event_rule" "schedule_task" {
+  count               = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  state               = "ENABLED"
+  name                = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
+  description         = "${var.ecs_cluster_name}-${var.ecs_task_name}-schedule"
+  schedule_expression = var.ecs_task_schedule
+  tags = merge(
+    var.tags,
+    {
+      "Name" = join("-", [var.ecs_cluster_name, var.ecs_task_name, "schedule", "rule"])
+    },
+  )
+}
+
+// create cw target for scheduled task (task only)
+resource "aws_cloudwatch_event_target" "schedule_task_target" {
+  count    = var.ecs_task_only && var.ecs_task_schedule != "" ? 1 : 0
+  rule     = aws_cloudwatch_event_rule.schedule_task[count.index].name
+  arn      = data.aws_ecs_cluster.main.arn
+  role_arn = aws_iam_role.ecs_schedule_role[0].arn
+
+  ecs_target {
+    task_definition_arn = aws_ecs_task_definition.main[count.index].arn
+    task_count          = 1
+    launch_type         = "FARGATE"
+    platform_version    = "LATEST"
+    network_configuration {
+      subnets         = var.ecs_subnet_ids
+      security_groups = var.ecs_security_group_ids
+    }
+  }
+
+  input = var.ecs_task_input_override == "" ? jsonencode({}) : var.ecs_task_input_override
+
+}
+
 // create ecs service under cluster
 resource "aws_ecs_service" "main" {
+  count           = var.ecs_task_only ? 0 : 1
   depends_on      = [aws_ecs_task_definition.main, aws_lb_target_group.alb]
   name            = var.ecs_service_name
   cluster         = data.aws_ecs_cluster.main.cluster_name
@@ -120,15 +155,14 @@ resource "aws_ecs_service" "main" {
   deployment_circuit_breaker {
     enable   = var.ecs_circuit_breaker
     rollback = var.ecs_circuit_breaker
-
   }
 
   dynamic "volume_configuration" {
     for_each = length(coalesce(var.volume_configuration, {})) != 0 ? var.volume_configuration : {}
     content {
-      name = lookup(volume_configuration.value, "name")
+      name = volume_configuration.value["name"]
       managed_ebs_volume {
-        role_arn = lookup(volume_configuration.value, "managed_ebs_volume").role_arn
+        role_arn = volume_configuration.value["managed_ebs_volume"].role_arn
       }
     }
   }
@@ -139,7 +173,7 @@ resource "aws_ecs_service" "main" {
     content {
       target_group_arn = aws_lb_target_group.alb[load_balancer.key].arn
       container_name   = load_balancer.key
-      container_port   = lookup(load_balancer.value, "container_port")
+      container_port   = load_balancer.value["container_port"]
     }
   }
 
@@ -167,7 +201,7 @@ resource "aws_appautoscaling_target" "main" {
 resource "aws_appautoscaling_policy" "memory" {
   count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_memory == 0 ? 0 : 1
 
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-mem-autoScalingPolicy"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-mem-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
@@ -185,7 +219,7 @@ resource "aws_appautoscaling_policy" "memory" {
 resource "aws_appautoscaling_policy" "cpu" {
   count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
 
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-cpu-autoScalingPolicy"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-cpu-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
@@ -203,7 +237,7 @@ resource "aws_appautoscaling_policy" "cpu" {
 // optional: spin service down on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_down" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_down == "0" ? 0 : 1
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-schedule-down"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
   service_namespace  = aws_appautoscaling_target.main[count.index].service_namespace
@@ -218,7 +252,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_down" {
 // optional: spin service up on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_up" {
   count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_up == "0" ? 0 : 1
-  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main.name}-schedule-down"
+  name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
   service_namespace  = aws_appautoscaling_target.main[count.index].service_namespace
@@ -252,7 +286,7 @@ resource "aws_cloudwatch_event_rule" "cb" {
     "source" : ["aws.ecs"],
     "detail-type" : ["ECS Deployment State Change"],
     "resources" : [
-      aws_ecs_service.main.id
+      aws_ecs_service.main[0].id
     ]
     "detail" : {
       "eventName" : ["SERVICE_DEPLOYMENT_FAILED"]
@@ -283,9 +317,9 @@ resource "aws_sns_topic_subscription" "cb_email_targets" {
 
 
 module "teamsalerts" {
-  count = var.ecs_circuit_breaker && var.teams_webhook_param_arn != "" ? 1 : 0
+  count                       = var.ecs_circuit_breaker && var.teams_webhook_param_arn != "" ? 1 : 0
   source                      = "../teamsalerts"
-  name                        =  join("", [var.ecs_service_name, "Teams", "Alert"])
+  name                        = join("", [var.ecs_service_name, "Teams", "Alert"])
   human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
   teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
   teams_webhook_url_param_key = var.teams_webhook_url_param_key
