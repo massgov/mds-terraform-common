@@ -26,7 +26,7 @@ data "archive_file" "lambda_package" {
 
 # Create SES Email ID, would need to confirm that email used has been approved.
 resource "aws_sesv2_email_identity" "ses_sender_email" {
-  count = var.create_ses_email ? 1 : 0
+  count          = var.create_ses_email ? 1 : 0
   email_identity = var.sender_email
 }
 
@@ -56,14 +56,15 @@ data "aws_iam_policy_document" "lambda_inline_policy" {
 
 # Create lambda function
 module "lambda" {
-  source = "../lambda"
+  source  = "../lambda"
   name    = "resource-ownership-scanner"
   package = data.archive_file.lambda_package.output_path
   runtime = "python3.12"
   environment = {
-    SENDER_EMAIL = var.sender_email
+    SENDER_EMAIL      = var.sender_email
     DEFAULT_RECIPIENT = var.default_recipient
+    TESTING           = var.function_testing ? "1" : null
   }
   iam_policies = [data.aws_iam_policy_document.lambda_inline_policy.json]
-  schedule = var.schedule
+  schedule     = var.schedule
 }
