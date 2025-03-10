@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.111] - 2025-03-10
+
+- [resource-notification]
+  - Used to scan AWS account and send email to resource(business) owners to confirm ownership
+
+- [ecs_fargate]
+  - Updates to allow standup of fargate task as scheduled task to avoid starting ecs services.
+
 ## [1.0.110] - 2025-02-04
 
 - [New Relic]
