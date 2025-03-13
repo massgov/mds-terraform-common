@@ -17,13 +17,13 @@ module "error_rate" {
   account_id = var.account_id
   policy_id  = var.alert_policy_id
   name = format(
-    "%s - Error rate over %s%% for at least %d seconds",
+    "%s - 5xx rate over %s%% for at least %d seconds",
     var.name_prefix,
     replace(format("%f", var.error_rate_threshold), "/\\.0+$/", ""),
     var.critical_threshold_duration
   )
 
-  nrql_query                  = "SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name"
+  nrql_query                  = "SELECT average(aws.cloudfront.5xxErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name"
   critical_threshold          = var.error_rate_threshold
   critical_threshold_duration = var.critical_threshold_duration
   aggregation_window          = var.aggregation_window
