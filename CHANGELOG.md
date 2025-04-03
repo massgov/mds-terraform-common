@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.112] - 2025-04-03
+
+- [gha-role]
+  - Lower minimum terraform version requirement.
+
 ## [1.0.111] - 2025-03-10
 
 - [resource-notification]
