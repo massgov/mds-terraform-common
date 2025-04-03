@@ -7,7 +7,7 @@ This module creates an IAM role that can be assumed by GitHub Actions. The role 
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.7 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.45 |
 
 ## Providers
