@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.113] - 2025-04-17
+
+- [golden-ami-builder]
+  - Use `create_before_destroy` for image recipes in order to get around resource dependency issues
+  - Filter out invalid resource tags
+
 ## [1.0.112] - 2025-04-03
 
 - [gha-role]

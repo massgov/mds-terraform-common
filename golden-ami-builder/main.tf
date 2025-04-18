@@ -167,9 +167,9 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   resource_tags = merge(
     var.instance_tags,
     {
-      # 'CreatedBy' and 'Ec2ImageBuilderArn' are reserved tags for instances created by
-      # Image Builder. Trying to provide either will kill deployments
-      for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn"], lower(k))
+      # The following are reserved tags for instances created by
+      # Image Builder. Trying to use any of them will kill deployments
+      for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn", "patch group", "patchgroup"], lower(k))
     }
   )
   tags = var.tags
@@ -294,6 +294,10 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   version      = "1.0.0"
 
   tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_imagebuilder_image_pipeline" "golden_ami" {
