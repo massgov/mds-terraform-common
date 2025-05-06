@@ -173,7 +173,7 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
       for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn", "patch group", "patchgroup"], lower(k))
     }
   )
-  tags = coalesce(var.tags, {})
+  tags = var.tags
 }
 
 resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
