@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 data "aws_iam_account_alias" "current" {}
 data "aws_region" "current" {}
-
+data "aws_default_tags" "current" {}
 data "aws_kms_key" "volume_key" {
   key_id = var.volume_key_alias
 }
@@ -10,6 +10,7 @@ locals {
   account_id    = data.aws_caller_identity.current.account_id
   account_alias = data.aws_iam_account_alias.current.account_alias
   region        = data.aws_region.current.name
+  required_tags = data.aws_default_tags.current.tags != {} ? merge(var.instance_tags, data.aws_default_tags.current.tags) : var.instance_tags
 
   # Bucket names can be max 63 characters log
   logs_bucket_suffix = "golden-ami-image-builder-logs"
@@ -165,14 +166,14 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
   }
 
   resource_tags = merge(
-    var.instance_tags,
+    local.required_tags,
     {
       # The following are reserved tags for instances created by
       # Image Builder. Trying to use any of them will kill deployments
       for k, v in var.tags : k => v if !contains(["createdby", "ec2imagebuilderarn", "patch group", "patchgroup"], lower(k))
     }
   )
-  tags = var.tags
+  tags = coalesce(var.tags, {})
 }
 
 resource "aws_imagebuilder_component" "download_and_install_cortex_xdr" {
