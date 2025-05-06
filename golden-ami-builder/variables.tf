@@ -56,5 +56,4 @@ variable "tags" {
     expected; make sure to explicitly pass in all desired tags (default: {})
   EOF
   type        = map(string)
-  default     = {}
 }
