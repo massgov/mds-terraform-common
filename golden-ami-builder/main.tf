@@ -165,8 +165,9 @@ resource "aws_imagebuilder_infrastructure_configuration" "golden_ami" {
     }
   }
 
-  resource_tags = merge(
-    local.required_tags,
+  resource_tags = merge({
+    for k, v in local.required_tags : k => v if !contains(["createdby", "ec2imagebuilderarn", "patch group", "patchgroup"], lower(k))
+    },
     {
       # The following are reserved tags for instances created by
       # Image Builder. Trying to use any of them will kill deployments
