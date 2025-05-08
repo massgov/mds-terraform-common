@@ -5,6 +5,14 @@ data "aws_default_tags" "current" {}
 data "aws_kms_key" "volume_key" {
   key_id = var.volume_key_alias
 }
+data "aws_imagebuilder_image_recipes" "current" {
+  filter {
+    name = "name"
+    values = [
+      "${local.output_image_prefix}-recipe"
+    ]
+  }
+}
 
 locals {
   account_id    = data.aws_caller_identity.current.account_id
@@ -17,6 +25,10 @@ locals {
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
+
+  current_recipe_version = reverse(sort(
+    [for r in data.aws_imagebuilder_image_recipes.current : reverse(split(":", r.arn))[0]]
+  ))[0]
 }
 
 module "vpcread" {
@@ -293,7 +305,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
   name         = "${local.output_image_prefix}-recipe"
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
-  version      = "1.0.0"
+  version      = coalesce(local.current_recipe_version, "1.0.0")
 
   tags = var.tags
 }
