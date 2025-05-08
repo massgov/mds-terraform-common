@@ -5,6 +5,17 @@ data "aws_default_tags" "current" {}
 data "aws_kms_key" "volume_key" {
   key_id = var.volume_key_alias
 }
+data "aws_imagebuilder_image_recipes" "current" {
+  filter {
+    name   = "name"
+    values = [local.recipe_name]
+  }
+}
+data "semvers_list" "recipes" {
+  list = [
+    for arn in data.aws_imagebuilder_image_recipes.current.arns : reverse(split("/", arn))[0]
+  ]
+}
 
 locals {
   account_id    = data.aws_caller_identity.current.account_id
@@ -17,6 +28,10 @@ locals {
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
+  recipe_name         = "${local.output_image_prefix}-recipe"
+
+  current_recipe_version = length(data.semvers_list.recipes.list) == 0 ? null : data.semvers_list.recipes.last
+  next_recipe_version    = local.current_recipe_version == null ? "1.0.0" : "${local.current_recipe_version.major}.${local.current_recipe_version.minor}.${local.current_recipe_version.patch + 1}"
 }
 
 module "vpcread" {
@@ -291,9 +306,9 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     }
   }
 
-  name         = "${local.output_image_prefix}-recipe"
+  name         = local.recipe_name
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
-  version      = "1.0.0"
+  version      = local.next_recipe_version
 
   tags = var.tags
 }
