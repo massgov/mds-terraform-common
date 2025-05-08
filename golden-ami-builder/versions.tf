@@ -5,7 +5,7 @@ terraform {
       version = ">= 4.58"
     }
     semvers = {
-      source = "anapsix/semvers"
+      source  = "anapsix/semvers"
       version = ">= 0.7.1"
     }
   }
