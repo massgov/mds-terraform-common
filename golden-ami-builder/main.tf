@@ -31,7 +31,7 @@ locals {
 
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
 
-  current_recipe_version = data.semvers_list.recipes.list.length == 0 ? null : data.semvers_list.recipes.last
+  current_recipe_version = length(data.semvers_list.recipes.list) == 0 ? null : data.semvers_list.recipes.last
   next_recipe_version    = current_recipe_version == null ? "1.0.0" : "${current_recipe_version.major}.${current_recipe_version.minor}.${current_recipe_version.patch + 1}"
 }
 
