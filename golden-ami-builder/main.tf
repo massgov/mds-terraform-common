@@ -310,6 +310,10 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
   version      = local.next_recipe_version
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = var.tags
 }
 
