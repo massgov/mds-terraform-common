@@ -240,11 +240,12 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
   block_device_mapping {
     device_name = "/dev/xvda"
+    no_device   = false
 
     ebs {
-      kms_key_id            = data.aws_kms_key.volume_key.arn
       encrypted             = true
       delete_on_termination = true
+      kms_key_id            = data.aws_kms_key.volume_key.arn
       volume_size           = 20
       volume_type           = "gp3"
     }
@@ -296,6 +297,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   version      = "1.0.0"
 
   tags = var.tags
+
 }
 
 resource "aws_imagebuilder_image_pipeline" "golden_ami" {
@@ -310,10 +312,4 @@ resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   }
 
   tags = var.tags
-
-  depends_on = [
-    aws_imagebuilder_image_recipe.golden_ami,
-    aws_imagebuilder_infrastructure_configuration.golden_ami,
-    aws_imagebuilder_distribution_configuration.golden_ami
-  ]
 }
