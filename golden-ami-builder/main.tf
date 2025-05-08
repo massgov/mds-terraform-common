@@ -27,7 +27,7 @@ locals {
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
 
   current_recipe_version = reverse(sort(
-    [for r in data.aws_imagebuilder_image_recipes.current : reverse(split(":", r.arn))[0]]
+    [for arn in data.aws_imagebuilder_image_recipes.current.arns : reverse(split(":", arn))[0]]
   ))[0]
 }
 
