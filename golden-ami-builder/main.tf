@@ -296,10 +296,6 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
   version      = "1.0.0"
 
   tags = var.tags
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_imagebuilder_image_pipeline" "golden_ami" {
@@ -314,4 +310,10 @@ resource "aws_imagebuilder_image_pipeline" "golden_ami" {
   }
 
   tags = var.tags
+
+  depends_on = [
+    aws_imagebuilder_image_recipe.golden_ami,
+    aws_imagebuilder_infrastructure_configuration.golden_ami,
+    aws_imagebuilder_distribution_configuration.golden_ami
+  ]
 }
