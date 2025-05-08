@@ -7,10 +7,8 @@ data "aws_kms_key" "volume_key" {
 }
 data "aws_imagebuilder_image_recipes" "current" {
   filter {
-    name = "name"
-    values = [
-      "${local.output_image_prefix}-recipe"
-    ]
+    name   = "name"
+    values = [local.recipe_name]
   }
 }
 data "semvers_list" "recipes" {
@@ -30,6 +28,7 @@ locals {
   logs_bucket_prefix = substr(local.account_alias, 0, 63 - length(local.logs_bucket_suffix))
 
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
+  recipe_name         = "${local.output_image_prefix}-recipe"
 
   current_recipe_version = length(data.semvers_list.recipes.list) == 0 ? null : data.semvers_list.recipes.last
   next_recipe_version    = local.current_recipe_version == null ? "1.0.0" : "${local.current_recipe_version.major}.${local.current_recipe_version.minor}.${local.current_recipe_version.patch + 1}"
@@ -307,7 +306,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
     }
   }
 
-  name         = "${local.output_image_prefix}-recipe"
+  name         = local.recipe_name
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
   version      = local.next_recipe_version
 
