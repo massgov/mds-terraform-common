@@ -13,6 +13,11 @@ data "aws_imagebuilder_image_recipes" "current" {
     ]
   }
 }
+data "semvers_list" "recipe_versions" {
+  list = [
+    for arn in data.aws_imagebuilder_image_recipes.current.arns : reverse(split("/", arn))[0]
+  ]
+}
 
 locals {
   account_id    = data.aws_caller_identity.current.account_id
@@ -26,9 +31,7 @@ locals {
 
   output_image_prefix = "itd-mgt-ssr-golden-aws-linux-2"
 
-  current_recipe_version = reverse(sort(
-    [for arn in data.aws_imagebuilder_image_recipes.current.arns : reverse(split(":", arn))[0]]
-  ))[0]
+  next_recipe_version = "${data.semvers_list.last.major}.${data.semvers_list.last.minor}.${data.semvers_list.last.patch + 1}"
 }
 
 module "vpcread" {
@@ -305,7 +308,7 @@ resource "aws_imagebuilder_image_recipe" "golden_ami" {
 
   name         = "${local.output_image_prefix}-recipe"
   parent_image = "arn:aws:imagebuilder:${local.region}:aws:image/amazon-linux-2-x86/x.x.x"
-  version      = coalesce(local.current_recipe_version, "1.0.0")
+  version      = local.next_recipe_version
 
   tags = var.tags
 }
