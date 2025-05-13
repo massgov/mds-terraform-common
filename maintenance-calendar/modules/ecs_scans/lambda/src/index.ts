@@ -108,6 +108,14 @@ const getContainerImages = async (
     new ListTasksCommand({ cluster: cluster }),
   );
 
+  // if there aren’t any task ARNs, bail out early instead of calling DescribeTasks with []
+  // which would throw an error
+  // https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeTasks.html
+  if (!clusterTasks.taskArns || clusterTasks.taskArns.length === 0) {
+    logger.info(`No tasks found for ECS cluster '${cluster}', skipping image collection.`);
+    return new Map();
+  }
+
   if (clusterTasks.nextToken) {
     // We shouldn't ever hit this, but if we do, this error will let us know
     // that we need to make this function iterate over multiple pages.
@@ -206,7 +214,7 @@ const parseImageURI = async (
 
     assert(
       details.imageDetails !== undefined &&
-        details.imageDetails[0]?.imageDigest,
+      details.imageDetails[0]?.imageDigest,
       `DescribeImagesCommand failed for repo ${repo} on image ${imageID}`,
     );
 
