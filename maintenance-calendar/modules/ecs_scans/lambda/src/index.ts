@@ -113,7 +113,7 @@ const getContainerImages = async (
   // https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeTasks.html
   if (!clusterTasks.taskArns || clusterTasks.taskArns.length === 0) {
     logger.info(`No tasks found for ECS cluster '${cluster}', skipping image collection.`);
-    return {};
+    return new Map<string, Set<string>>();
   }
 
   if (clusterTasks.nextToken) {
