@@ -9,6 +9,13 @@ locals {
 
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 
+  error_rate_nql_query = var.custom_error_rate_nql_query != "" ? var.custom_error_rate_nql_query : <<-NRQL
+   SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+  NRQL
+
+  throughput_nql_query = var.custom_throughput_nql_query != "" ? var.custom_throughput_nql_query : <<-NRQL
+   SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name
+  NRQL
 }
 
 module "error_rate" {
@@ -23,7 +30,7 @@ module "error_rate" {
     var.critical_threshold_duration
   )
 
-  nrql_query                  = "SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name"
+  nrql_query                  = local.error_rate_nql_query
   critical_threshold          = var.error_rate_threshold
   critical_threshold_duration = var.critical_threshold_duration
   aggregation_window          = var.aggregation_window
@@ -45,7 +52,7 @@ module "throughput" {
     var.critical_threshold_duration
   )
 
-  nrql_query = "SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name"
+  nrql_query = local.throughput_nql_query
 
   critical_operator           = "below"
   critical_threshold          = var.throughput_threshold
