@@ -31,6 +31,19 @@ variable "aggregation_window" {
   default     = 60
 }
 
+variable "custom_error_rate_nql_query" {
+  type        = string
+  description = "Custom NRQL query to use for the alert error rate condition."
+  default     = ""
+
+}
+
+variable "custom_throughput_nql_query" {
+  type        = string
+  description = "Custom NRQL query to use for the alert throughput condition."
+  default     = ""
+}
+
 variable "critical_threshold_duration" {
   type        = number
   description = "See newrelic_nrql_alert_condition.critical.threshold_duration."
