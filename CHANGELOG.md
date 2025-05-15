@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.116] - 2025-05-15
+
+- [ecs_scans]
+  - added statement to exit if no task ARN's (tasks) are available when ecs-cluster-image-scan runs
+
 ## [1.0.115] - 2025-05-15
 
 - [alert-conditions-cloudfront]
