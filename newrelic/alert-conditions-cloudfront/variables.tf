@@ -35,7 +35,6 @@ variable "custom_error_rate_nql_query" {
   type        = string
   description = "Custom NRQL query to use for the alert error rate condition."
   default     = ""
-
 }
 
 variable "custom_throughput_nql_query" {
