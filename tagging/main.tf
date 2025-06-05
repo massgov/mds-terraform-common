@@ -8,6 +8,7 @@ data "terraform_remote_state" "tags" {
   }
 }
 
+# Mapping of tag names to tag values
 output "tags" {
   value = merge(var.additional_tags, lookup(data.terraform_remote_state.tags.outputs.tags, var.org, {})[var.repo])
 }

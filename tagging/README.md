@@ -54,13 +54,13 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | n/a | `map(string)` | `{}` | no |
-| <a name="input_org"></a> [org](#input\_org) | n/a | `string` | `"massgov"` | no |
-| <a name="input_repo"></a> [repo](#input\_repo) | n/a | `string` | n/a | yes |
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Tags which will be merged into the managed tags provided by the module | `map(string)` | `{}` | no |
+| <a name="input_org"></a> [org](#input\_org) | The name of the GitHub organization where calling code lives | `string` | `"massgov"` | no |
+| <a name="input_repo"></a> [repo](#input\_repo) | The name of the GitHub repository where calling code lives | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_tags"></a> [tags](#output\_tags) | n/a |
+| <a name="output_tags"></a> [tags](#output\_tags) | Mapping of tag names to tag values |
 <!-- END_TF_DOCS -->
