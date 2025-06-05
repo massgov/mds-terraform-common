@@ -108,6 +108,14 @@ const getContainerImages = async (
     new ListTasksCommand({ cluster: cluster }),
   );
 
+  // if there aren’t any task ARNs, bail out early instead of calling DescribeTasks with []
+  // which would throw an error
+  // https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DescribeTasks.html
+  if (!clusterTasks.taskArns || clusterTasks.taskArns.length === 0) {
+    logger.info(`No tasks found for ECS cluster '${cluster}', skipping image collection.`);
+    return new Map<string, Set<string>>();
+  }
+
   if (clusterTasks.nextToken) {
     // We shouldn't ever hit this, but if we do, this error will let us know
     // that we need to make this function iterate over multiple pages.
@@ -206,7 +214,7 @@ const parseImageURI = async (
 
     assert(
       details.imageDetails !== undefined &&
-        details.imageDetails[0]?.imageDigest,
+      details.imageDetails[0]?.imageDigest,
       `DescribeImagesCommand failed for repo ${repo} on image ${imageID}`,
     );
 
@@ -387,76 +395,84 @@ function formatResults(
   return lines.join("\n");
 }
 
-const handler: Handler<Input, void> = async (
+// Updated handler to process all clusters, skipping those with no running tasks/images
+const handler: Handler<void, void> = async (
   event,
   context,
   callback,
 ): Promise<void> => {
-  const cluster = event.cluster;
-
   const logger = defaultLogger.child({
     functionArn: context.invokedFunctionArn,
     awsRequestId: context.awsRequestId,
   });
   const { ERROR_TOPIC_ARN, ALERT_SEVERITY_LEVEL } = getEnv();
 
+  // 1. List all ECS clusters
+  const clustersResp = await ecs.listClusters({});
+  const clusters = clustersResp.clusterArns ?? [];
+
   const now = new Date();
-  const alertLevel = ALERT_SEVERITY_LEVEL;
-  const images = await getContainerImages(ecs, cluster, logger);
 
-  const scanResults = new Map();
+  for (const cluster of clusters) {
+    const images = await getContainerImages(ecs, cluster, logger);
+    if (images.size === 0) {
+      // No tasks/images for this cluster, skip to next
+      continue;
+    }
 
-  // Request all scans before waiting for any of them. These can take a
-  // few minutes to run.
-  for (const imageURI of images.keys()) {
-    const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
-    const img = await updateImageScan(ecr, imageDescriptor, now, logger);
-    scanResults.set(imageURI, img);
-  }
+    const scanResults = new Map();
 
-  const alertResults = new Map();
+    // Request all scans before waiting for any of them. These can take a few minutes to run.
+    for (const imageURI of images.keys()) {
+      const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
+      const img = await updateImageScan(ecr, imageDescriptor, now, logger);
+      scanResults.set(imageURI, img);
+    }
 
-  for (const imageURI of scanResults.keys()) {
-    const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
-    let result = scanResults.get(imageURI);
+    const alertResults = new Map();
 
-    if (result.imageScanStatus?.status !== ScanStatus.COMPLETE) {
-      result = await waitUntilImageScanComplete(
-        { client: ecr, maxWaitTime: 600 },
+    for (const imageURI of scanResults.keys()) {
+      const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
+      let result = scanResults.get(imageURI);
+
+      if (result.imageScanStatus?.status !== ScanStatus.COMPLETE) {
+        result = await waitUntilImageScanComplete(
+          { client: ecr, maxWaitTime: 600 },
+          imageDescriptor,
+        );
+      }
+
+      let needsAlert = await scanNeedsAlert(
+        ecr,
+        cluster,
         imageDescriptor,
+        ALERT_SEVERITY_LEVEL,
+        logger,
+      );
+
+      if (needsAlert) {
+        alertResults.set(imageURI, {
+          image: imageDescriptor,
+          results: result,
+          tasks: images.get(imageURI),
+        });
+      }
+    }
+
+    if (alertResults.size > 0) {
+      logger.info(formatResults(cluster, alertResults));
+      await snsClient.send(
+        new PublishCommand({
+          TopicArn: ERROR_TOPIC_ARN,
+          Message: formatResults(cluster, alertResults),
+        }),
       );
     }
 
-    let needsAlert = await scanNeedsAlert(
-      ecr,
-      cluster,
-      imageDescriptor,
-      ALERT_SEVERITY_LEVEL,
-      logger,
-    );
-
-    if (needsAlert) {
-      alertResults.set(imageURI, {
-        image: imageDescriptor,
-        results: result,
-        tasks: images.get(imageURI),
-      });
-    }
-  }
-
-  if (alertResults.size > 0) {
-    logger.info(formatResults(cluster, alertResults));
-    await snsClient.send(
-      new PublishCommand({
-        TopicArn: ERROR_TOPIC_ARN,
-        Message: formatResults(cluster, alertResults),
-      }),
+    logger.info(
+      `Completed scan of cluster '${cluster}' - ${images.size} images scanned, ${alertResults.size} contained vulnerabilities.`,
     );
   }
-
-  logger.info(
-    `Completed scan of cluster '${cluster}' - ${images.size} images scanned, ${alertResults.size} contained vulnerabilities.`,
-  );
 };
 
 export { handler };

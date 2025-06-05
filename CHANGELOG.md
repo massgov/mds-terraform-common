@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.116] - 2025-05-15
+
+- [ecs_scans]
+  - added statement to exit if no task ARN's are available when ecs-cluster-image-scan runs
+
+## [1.0.115] - 2025-05-15
+
+- [alert-conditions-cloudfront]
+  - added optionable passing custom newrelic queries for customized metrics
+
+## [1.0.114] - 2025-05-08
+
+- [golden-ami-builder]
+  - add `delete_on_termination` with EBS volumes for image recipes to resolve unattached volumes
+  - add required resource tags for all golden-ami-builder resources
+
 ## [1.0.113] - 2025-04-17
 
 - [golden-ami-builder]
