@@ -48,6 +48,13 @@ data "aws_iam_policy_document" "maintenance_ecs_scan_lambda" {
   statement {
     effect = "Allow"
     actions = [
+      "ecs:ListClusters"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
       "ecr:StartImageScan",
       "ecr:DescribeImageScanFindings",
       "ecr:DescribeImages"
