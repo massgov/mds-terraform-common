@@ -21,8 +21,9 @@ import { isFindingIgnored, isClusterSnoozed } from "./ignore";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 import assert from "assert";
 
+// Change: cluster is now a string or string[]
 type Input = {
-  cluster: string;
+  cluster: string | string[];
 };
 
 type Env = {
@@ -132,9 +133,6 @@ const getContainerImages = async (
   const images = new Map();
 
   if (tasks.failures && tasks.failures.length > 0) {
-    // I am not sure in what cases this would populated - the only thing I can
-    // think of is if maybe permissions only allowed describing specific tasks,
-    // or maybe if a task arn provided was invalid.
     logger.error(tasks.failures);
     throw new Error(
       `Encountered failures when describing tasks for ${cluster}`,
@@ -146,9 +144,6 @@ const getContainerImages = async (
   }
 
   for (const t of tasks.tasks) {
-    // I am not sure if this is necessarily an error. There may be legitimate
-    // cases where we have tasks with no containers, but right now I can't
-    // think of any.
     assert(t.containers, `No containers found for task ${t.taskDefinitionArn}`);
 
     for (const c of t.containers) {
@@ -181,8 +176,6 @@ const parseImageURI = async (
     typeof match[1] !== "string" ||
     typeof match[2] !== "string"
   ) {
-    // If match is an array, 1 and 2 will always be strings, but typescript
-    // doesn't know that.
     throw new Error("Unable to parse ECR Image URI.");
   }
   const repo = match[1];
@@ -230,8 +223,6 @@ const parseImageURI = async (
   }
 };
 
-// See if a scan exists for the given image. If a scan doesn't exist, or the
-// scan is more than 1 day old, a new scan is started.
 const updateImageScan = async (
   ecrClient: ECR,
   image: ImageDescriptor,
@@ -249,7 +240,6 @@ const updateImageScan = async (
       new DescribeImageScanFindingsCommand(image),
     );
   } catch (e) {
-    // We can ignore ScanNotFound. We're just going to do the scan now.
     if (e instanceof ScanNotFoundException) {
       logger.debug(`No existing scan found.`);
     } else {
@@ -273,8 +263,6 @@ const updateImageScan = async (
         `Existing scan is ${(now.getTime() - scanCompleted) / 1000} seconds old`,
       );
 
-      // Scan is less than 24 hours old. If we try to scan again, it will throw
-      // an error.
       if (now.getTime() - scanCompleted < 86400000) {
         return findings;
       }
@@ -299,7 +287,6 @@ const scanNeedsAlert = async (
     `Checking scan results for repo '${request.repositoryName}' digest '${request?.imageId?.imageDigest}'`,
   );
 
-  // We may need to scan multiple pages of results.
   do {
     let findings = await ecrClient.send(
       new DescribeImageScanFindingsCommand(request),
@@ -317,7 +304,6 @@ const scanNeedsAlert = async (
       }
 
       if (Severity[finding.severity] < alertLevel) {
-        // We've made it through all the findings >= our alert level.
         return false;
       }
 
@@ -326,18 +312,14 @@ const scanNeedsAlert = async (
       } else if (await isClusterSnoozed(cluster)) {
         logger.debug(`Cluster '${cluster}' has been snoozed. Skipping alert`);
       } else {
-        // There was a vulnerability >= our alert level that was not ignored.
         logger.debug(`Found open vulnerability '${finding.name}'.`);
-
         return true;
       }
     }
 
-    // Continue on to the next page.
     request.nextToken = findings.nextToken;
   } while (request.nextToken);
 
-  // We didn't find any vulnerabilities that would require an alert.
   return false;
 };
 
@@ -395,8 +377,8 @@ function formatResults(
   return lines.join("\n");
 }
 
-// Updated handler to process all clusters, skipping those with no running tasks/images
-const handler: Handler<void, void> = async (
+// Handler: only process clusters from input, not all clusters in the account!
+const handler: Handler<Input, void> = async (
   event,
   context,
   callback,
@@ -407,22 +389,18 @@ const handler: Handler<void, void> = async (
   });
   const { ERROR_TOPIC_ARN, ALERT_SEVERITY_LEVEL } = getEnv();
 
-  // 1. List all ECS clusters
-  const clustersResp = await ecs.listClusters({});
-  const clusters = clustersResp.clusterArns ?? [];
-
   const now = new Date();
+
+  const clusters = Array.isArray(event.cluster) ? event.cluster : [event.cluster];
 
   for (const cluster of clusters) {
     const images = await getContainerImages(ecs, cluster, logger);
     if (images.size === 0) {
-      // No tasks/images for this cluster, skip to next
       continue;
     }
 
     const scanResults = new Map();
 
-    // Request all scans before waiting for any of them. These can take a few minutes to run.
     for (const imageURI of images.keys()) {
       const imageDescriptor = await parseImageURI(ecr, logger, imageURI);
       const img = await updateImageScan(ecr, imageDescriptor, now, logger);
