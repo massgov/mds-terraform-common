@@ -14,3 +14,15 @@ variable "org" {
   type    = string
   default = "massgov"
 }
+
+variable "manifest" {
+  type    = string
+  default = null
+}
+
+locals {
+  manifest_path    = var.manifest
+  root_level_count = local.manifest_path != null ? length(local.manifest_path) - length(replace(local.manifest_path, "/", "")) : ""
+  relative_path    = local.manifest_path != null ? join("", [for i in range(local.root_level_count) : "../"]) : ""
+  file_list        = local.manifest_path != null ? split("\n", file(var.manifest)) : []
+}
