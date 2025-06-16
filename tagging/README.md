@@ -11,11 +11,12 @@ Terraform module for providing [managed tags](https://ssr-tagging.secure.digital
 // init.tf
 
 module "tagging" {
-  source = "github.com/massgov/mds-terraform-common//tagging?ref=1.x"
-  org    = "massgov"
-  repo   = "my-cool-repository"
+  source          = "github.com/massgov/mds-terraform-common//tagging?ref=1.x"
+  org             = "massgov"
+  repo            = "my-cool-repository"
+  manifest        = "../../docs.manifest"
   additional_tags = {
-    environment           = "prod"
+    environment = "prod"
   }
 }
 
@@ -52,11 +53,12 @@ No modules.
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Tags which will be merged into the managed tags provided by the module | `map(string)` | `{}` | no |
-| <a name="input_org"></a> [org](#input\_org) | The name of the GitHub organization where calling code lives | `string` | `"massgov"` | no |
-| <a name="input_repo"></a> [repo](#input\_repo) | The name of the GitHub repository where calling code lives | `string` | n/a | yes |
+| Name | Description                                                                       | Type | Default | Required |
+|------|-----------------------------------------------------------------------------------|------|---------|:--------:|
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Tags which will be merged into the managed tags provided by the module            | `map(string)` | `{}` |    no    |
+| <a name="input_org"></a> [org](#input\_org) | The name of the GitHub organization where calling code lives                      | `string` | `"massgov"` |    no    |
+| <a name="input_repo"></a> [repo](#input\_repo) | The name of the GitHub repository where calling code lives                        | `string` | n/a |   yes    |
+| <a name="input_manifest"></a> [manifest](#input\_manifest) | File path to docs.manifest file. See  [Manifest File](#manifest_file) for details | `string` | n/a |     no   |
 
 ## Outputs
 
@@ -64,3 +66,20 @@ No modules.
 |------|-------------|
 | <a name="output_tags"></a> [tags](#output\_tags) | Mapping of tag names to tag values |
 <!-- END_TF_DOCS -->
+
+
+## Manifest File
+
+This is a file that will find and upload to S3 Bucket. These files are then downloaded at build of doc/tagging site for central display. 
+
+Files to be added are from reference of the manifest file. 
+
+Example:
+
+`manifest = "../../docs.manifest"`
+
+Contents: 
+```
+./infra/README.md
+README.md
+```
