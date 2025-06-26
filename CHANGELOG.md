@@ -1,38 +1,42 @@
 # Changelog
 
+## [1.x] - 2025-06-26
+
+- [Maintenance Calendar]
+  - [ECS Cluster Scans] Enhanced snooze funcitonality to support snoozing alerts only for a configurable list of vulnerabilities
+
 ## [1.0.116] - 2025-05-15
 
-- [ecs_scans]
-  - added statement to exit if no task ARN's are available when ecs-cluster-image-scan runs
+- [Maintenance Calendar]
+  - [ECS Cluster Scans] added statement to exit if no task ARN's are available when ecs-cluster-image-scan runs
 
 ## [1.0.115] - 2025-05-15
 
-- [alert-conditions-cloudfront]
-  - added optionable passing custom newrelic queries for customized metrics
+- [New Relic]
+  - [CloudFront] added optionable passing custom newrelic queries for customized metrics
 
 ## [1.0.114] - 2025-05-08
 
-- [golden-ami-builder]
+- [Golden AMI Builder]
   - add `delete_on_termination` with EBS volumes for image recipes to resolve unattached volumes
   - add required resource tags for all golden-ami-builder resources
 
 ## [1.0.113] - 2025-04-17
 
-- [golden-ami-builder]
+- [Golden AMI Builder]
   - Use `create_before_destroy` for image recipes in order to get around resource dependency issues
   - Filter out invalid resource tags
 
 ## [1.0.112] - 2025-04-03
 
-- [gha-role]
+- [GitHub Actions Role]
   - Lower minimum terraform version requirement.
 
 ## [1.0.111] - 2025-03-10
 
-- [resource-notification]
+- [Resource Notification]
   - Used to scan AWS account and send email to resource(business) owners to confirm ownership
-
-- [ecs_fargate]
+- [ECS Fargate]
   - Updates to allow standup of fargate task as scheduled task to avoid starting ecs services.
 
 ## [1.0.110] - 2025-02-04
