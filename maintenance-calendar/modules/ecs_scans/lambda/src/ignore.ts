@@ -16,7 +16,7 @@ import { ZonedDateTime, ZoneId, LocalDate } from "@js-joda/core";
 const logger = pino({ level: process.env.LOG_LEVEL ?? "debug" });
 const ssmClient = new SSMClient();
 
-type IgnoreSpec = {
+type PackageSpec = {
   name: string;
   packageName: string;
   packageVersion?: Array<string>;
@@ -25,6 +25,7 @@ type IgnoreSpec = {
 type SnoozeList = {
   cluster: string;
   snoozeUntil: string;
+  snoozeFor?: Array<PackageSpec>;
 };
 
 assert(process.env.IGNORE_SPECS, "Ignore spec ARN is required");
@@ -32,24 +33,24 @@ assert(process.env.SNOOZED_CLUSTERS, "Snoozed cluster ARN is required");
 const ignoreSpecARN = process.env.IGNORE_SPECS;
 const snoozedClustersARN = process.env.SNOOZED_CLUSTERS;
 
-const ignoreSpecs = async (arn: string): Promise<IgnoreSpec[]> => {
+const getParameter = async <T>(parameterArn: string): Promise<T> => {
   const getParameterResult = await ssmClient.send(
     new GetParameterCommand({
-      Name: arn,
-    }),
+      Name: parameterArn,
+    })
   );
 
   assert(
     getParameterResult?.Parameter?.Value,
-    "Failed to fetch ignore list from Parameter Store",
+    "Failed to fetch value from Parameter Store"
   );
-  return JSON.parse(getParameterResult.Parameter.Value) as Array<IgnoreSpec>;
+  return JSON.parse(getParameterResult.Parameter.Value) as T;
 };
 
 function attributeMatch(
   attrs: Array<Attribute>,
   key: string,
-  value: Exclude<IgnoreSpec[keyof IgnoreSpec], undefined>,
+  value: Exclude<PackageSpec[keyof PackageSpec], undefined>
 ): boolean {
   for (const attr of attrs) {
     if (attr.key === key) {
@@ -61,9 +62,9 @@ function attributeMatch(
   return false;
 }
 
-function isFindingIgnoredBySpec(
+function findingMatchesSpec(
   finding: ImageScanFinding,
-  spec: IgnoreSpec,
+  spec: PackageSpec
 ): boolean {
   if (finding?.name !== spec.name) {
     return false;
@@ -87,42 +88,24 @@ function isFindingIgnoredBySpec(
   return true;
 }
 
-function isFindingIgnoredBySpecs(
+const findingMatchesAtLeastOneSpec = (
   finding: ImageScanFinding,
-  specs: Array<IgnoreSpec>,
-): boolean {
-  for (const spec of specs) {
-    if (isFindingIgnoredBySpec(finding, spec)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-const isFindingIgnored = async (
-  finding: ImageScanFinding,
-): Promise<boolean> => {
-  const ignored = await ignoreSpecs(ignoreSpecARN);
-  return isFindingIgnoredBySpecs(finding, ignored);
+  specs: Array<PackageSpec>
+): boolean => {
+  return specs.some((spec) => findingMatchesSpec(finding, spec));
 };
 
-const snoozeList = async (parameterARN: string): Promise<SnoozeList[]> => {
-  const getParameterResult = await ssmClient.send(
-    new GetParameterCommand({
-      Name: parameterARN,
-    }),
-  );
-
-  assert(
-    getParameterResult?.Parameter?.Value,
-    "Failed to fetch snooze list from Parameter Store",
-  );
-  return JSON.parse(getParameterResult.Parameter.Value) as Array<SnoozeList>;
+const isFindingIgnored = async (
+  finding: ImageScanFinding
+): Promise<boolean> => {
+  const ignoreSpecs = await getParameter<Array<PackageSpec>>(ignoreSpecARN);
+  return findingMatchesAtLeastOneSpec(finding, ignoreSpecs);
 };
 
 const clusterSnoozed = async (
   cluster: string,
-  snoozed: Array<SnoozeList>,
+  finding: ImageScanFinding,
+  snoozed: Array<SnoozeList>
 ): Promise<boolean> => {
   const today = ZonedDateTime.now(ZoneId.UTC);
   for (const snooze of snoozed) {
@@ -130,8 +113,14 @@ const clusterSnoozed = async (
       .atStartOfDay()
       .atZone(ZoneId.of("UTC"));
     if (snooze.cluster === cluster && snoozeDate.isAfter(today)) {
+      if (Array.isArray(snooze.snoozeFor)) {
+        const snoozeSpecs = snooze.snoozeFor;
+        if (!findingMatchesAtLeastOneSpec(finding, snoozeSpecs)) {
+          return false;
+        }
+      }
       logger.debug(
-        `Cluster: ${snooze.cluster} is snoozed until: ${snoozeDate}. It is now: ${today}`,
+        `Cluster finding: '${snooze.cluster}' (${finding.name}) is snoozed until: ${snoozeDate}. It is now: ${today}`
       );
       return true;
     }
@@ -139,8 +128,15 @@ const clusterSnoozed = async (
   return false;
 };
 
-const isClusterSnoozed = async (cluster: string): Promise<boolean> => {
-  return clusterSnoozed(cluster, await snoozeList(snoozedClustersARN));
+const isClusterSnoozed = async (
+  cluster: string,
+  finding: ImageScanFinding
+): Promise<boolean> => {
+  return clusterSnoozed(
+    cluster,
+    finding,
+    await getParameter<Array<SnoozeList>>(snoozedClustersARN)
+  );
 };
 
 export { isFindingIgnored, isClusterSnoozed };

@@ -309,8 +309,8 @@ const scanNeedsAlert = async (
 
       if (await isFindingIgnored(finding)) {
         logger.debug(`Ignoring vulnerability '${finding.name}'`);
-      } else if (await isClusterSnoozed(cluster)) {
-        logger.debug(`Cluster '${cluster}' has been snoozed. Skipping alert`);
+      } else if (await isClusterSnoozed(cluster, finding)) {
+        logger.debug(`Cluster finding '${cluster}' (${finding.name}) has been snoozed. Skipping alert`);
       } else {
         logger.debug(`Found open vulnerability '${finding.name}'.`);
         return true;
