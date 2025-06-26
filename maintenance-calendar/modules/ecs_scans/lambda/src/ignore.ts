@@ -16,7 +16,7 @@ import { ZonedDateTime, ZoneId, LocalDate } from "@js-joda/core";
 const logger = pino({ level: process.env.LOG_LEVEL ?? "debug" });
 const ssmClient = new SSMClient();
 
-type PackageSpec = {
+type VulnerabilitySpec = {
   name: string;
   packageName: string;
   packageVersion?: Array<string>;
@@ -25,7 +25,7 @@ type PackageSpec = {
 type SnoozeList = {
   cluster: string;
   snoozeUntil: string;
-  snoozeFor?: Array<PackageSpec>;
+  snoozeFor?: Array<VulnerabilitySpec>;
 };
 
 assert(process.env.IGNORE_SPECS, "Ignore spec ARN is required");
@@ -50,7 +50,7 @@ const getParameter = async <T>(parameterArn: string): Promise<T> => {
 function attributeMatch(
   attrs: Array<Attribute>,
   key: string,
-  value: Exclude<PackageSpec[keyof PackageSpec], undefined>
+  value: Exclude<VulnerabilitySpec[keyof VulnerabilitySpec], undefined>
 ): boolean {
   for (const attr of attrs) {
     if (attr.key === key) {
@@ -64,7 +64,7 @@ function attributeMatch(
 
 function findingMatchesSpec(
   finding: ImageScanFinding,
-  spec: PackageSpec
+  spec: VulnerabilitySpec
 ): boolean {
   if (finding?.name !== spec.name) {
     return false;
@@ -90,7 +90,7 @@ function findingMatchesSpec(
 
 const findingMatchesAtLeastOneSpec = (
   finding: ImageScanFinding,
-  specs: Array<PackageSpec>
+  specs: Array<VulnerabilitySpec>
 ): boolean => {
   return specs.some((spec) => findingMatchesSpec(finding, spec));
 };
@@ -98,7 +98,7 @@ const findingMatchesAtLeastOneSpec = (
 const isFindingIgnored = async (
   finding: ImageScanFinding
 ): Promise<boolean> => {
-  const ignoreSpecs = await getParameter<Array<PackageSpec>>(ignoreSpecARN);
+  const ignoreSpecs = await getParameter<Array<VulnerabilitySpec>>(ignoreSpecARN);
   return findingMatchesAtLeastOneSpec(finding, ignoreSpecs);
 };
 
