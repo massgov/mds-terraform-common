@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.117] - 2025-05-15
+
+- [Github-To-Teams] Bugfix to support separate generation and application of terraform plan files
+- [Entrypoint Monitor] Bugfix to support separate generation and application of terraform plan files
+
 ## [1.x] - 2025-06-26
 
 - [Maintenance Calendar]
