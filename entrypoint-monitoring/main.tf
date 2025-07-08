@@ -7,7 +7,7 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
 }
 
-data "archive_file" "monitor_package" {
+resource "archive_file" "monitor_package" {
   type        = "zip"
   source_file = "${path.module}/lambda/dist/lambda.js"
   output_path = "${path.module}/package/lambda.zip"
