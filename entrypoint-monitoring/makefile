@@ -8,7 +8,7 @@ clean:
 prepare:
 	mkdir -p package
 
-lambda/dist/lambda.js: clean
+lambda/dist/lambda.js:
 	cd lambda && npm run build
 
 package/lambda.zip: lambda/dist/lambda.js
