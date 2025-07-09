@@ -7,12 +7,6 @@ locals {
   aws_account_id = data.aws_caller_identity.current.account_id
 }
 
-resource "archive_file" "lambda_package" {
-  type        = "zip"
-  source_file = "${path.module}/lambda/dist/lambda.js"
-  output_path = "${path.module}/package/lambda.zip"
-}
-
 data "aws_iam_policy_document" "lambda_inline_policy" {
   statement {
     actions = [
@@ -32,7 +26,7 @@ resource "random_password" "path_token" {
 
 module "lambda" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
-  package = archive_file.lambda_package.output_path
+  package = "${path.module}/package/lambda.zip"
   runtime = "nodejs20.x"
   handler = "lambda.default"
   environment = {
