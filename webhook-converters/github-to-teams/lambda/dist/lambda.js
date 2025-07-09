@@ -48440,7 +48440,7 @@ var handler = async (event) => {
   const config = configBuilder.build();
   const logger = new ConsoleLogger(config.minLogLevel);
   logger.debug("Config: ", config);
-  const tokenInput = event.rawPath.slice(1);
+  const tokenInput = event.rawPath ? event.rawPath.slice(1) : event.path.slice(1);
   logger.debug("Validating the token: ", tokenInput);
   const isTokenValid = validateToken_default({
     key: config.token,
