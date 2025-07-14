@@ -13,6 +13,7 @@
 ## [1.0.116] - 2025-05-15
 
 - [Maintenance Calendar]
+  - [ECS Cluster Scans] added statement to exit if no task ARN's are available when ecs-cluster-image-scan runs
 
 ## [1.0.115] - 2025-05-15
 
