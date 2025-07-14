@@ -1,5 +1,13 @@
 # Common Terraform Modules
 
+## Table of Contents
+- [Overview](#overview)
+- [Project Contacts](#project-contacts)
+- [Knowledge History](#knowledge-history)
+
+
+## Overview
+
 This repository contains common Terraform modules that are used across the Massachussetts Digital Services infrastructure.
 
 Each module should have:
@@ -8,6 +16,17 @@ Each module should have:
 * A `main.tf` file.
 * A `variables.tf` file, if it takes input variables.
 * An `outputs.tf` file, if it produces outputs.
+
+## Project Contacts
+
+| Name     | Role  | Email                                                               |
+|----------|-------|---------------------------------------------------------------------|
+| SSR-Team | Infra | [EOTSS-DL-DigitalSSR@mass.gov](mailto:EOTSS-DL-DigitalSSR@mass.gov) |
+|          |       |                                                                     |
+
+## Knowledge History
+See [Change log](./CHANGELOG.md)
+
 
 Packer
 ------
