@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.x] - 2025-07-23
+
+- [Maintenance Calendar]
+  - [RDS Snapshots] upgrade all usages of `aws:executeScript` to python 3.11
+
 ## [1.0.117] - 2025-05-15
 
 - [Github-To-Teams] Bugfix to support separate generation and application of terraform plan files

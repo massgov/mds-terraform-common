@@ -36,7 +36,7 @@ mainSteps:
     onFailure: 'step:AlertOnError'
     onCancel: Abort
     inputs:
-      Runtime: python3.8
+      Runtime: python3.11
       Handler: clean_up_db_snapshots
       Script: |-
         import boto3
