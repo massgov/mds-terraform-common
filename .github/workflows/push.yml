@@ -22,6 +22,7 @@ jobs:
     name: Push docs to s3
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Configure AWS Creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -33,7 +34,7 @@ jobs:
         run: |
           if [ ! -f ${{ env.file_path }} ]; then
             echo "docs.manifest not found. Exiting."
-            exit 0
+            exit 1
           fi
 
       - name: Create _category_.json
