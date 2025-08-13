@@ -5,6 +5,18 @@ data "aws_db_instances" "dbinstance" {
   }
 }
 
+data "aws_ssm_parameters_by_path" "rds_snapshots" {
+  path = "/infrastructure/maintenance-calendar/rds_snapshots/"
+}
+
+locals {
+  rds_names_from_ssm = [for value in data.aws_ssm_parameters_by_path.rds_snapshots.names : basename(value)]
+  rds_names = toset(concat(
+    data.aws_db_instances.dbinstance.instance_identifiers,
+    local.rds_names_from_ssm
+  ))
+}
+
 // Maybe add handling for db clusters too? Otherwise this will silently ignore them
 
 resource "aws_ssm_document" "ssr_create_rds_snapshot" {
@@ -43,7 +55,7 @@ resource "aws_ssm_maintenance_window" "rds_backups_window" {
 }
 
 resource "aws_ssm_maintenance_window_task" "rds_create_backups" {
-  for_each = toset(data.aws_db_instances.dbinstance.instance_identifiers)
+  for_each = local.rds_names
 
   priority         = 1
   name             = "${each.key}-create-backup"
@@ -70,7 +82,7 @@ resource "aws_ssm_maintenance_window_task" "rds_create_backups" {
 }
 
 resource "aws_ssm_maintenance_window_task" "rds_destroy_backups" {
-  for_each = toset(data.aws_db_instances.dbinstance.instance_identifiers)
+  for_each = local.rds_names
 
   priority         = 2
   name             = "${each.key}-clean-up-backups"

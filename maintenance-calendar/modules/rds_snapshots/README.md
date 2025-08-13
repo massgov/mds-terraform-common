@@ -1,3 +1,11 @@
+# rds_snapshots
+
+RDS instances can be added in two ways:
+ - When calling this module
+ - By adding the instance name as an SSM parameter under `/infrastructure/maintenance-calendar/rds_snapshots/`
+
+The SSM parameter permits snapshots to be managed without granting access to the statefile where this module is called
+
 <!-- BEGIN_TF_DOCS -->
 
 
