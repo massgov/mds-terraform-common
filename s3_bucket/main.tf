@@ -69,6 +69,11 @@ resource "aws_s3_bucket_acl" "default_bucket_acl" {
   acl    = "private"
 }
 
+resource "aws_s3_bucket_policy" "default_bucket_policy" {
+  bucket = aws_s3_bucket.default_bucket.id
+  policy = data.aws_iam_policy_document.default_bucket_policy.json
+}
+
 # Only used if var.kms_encrypted = true
 resource "aws_s3_bucket_server_side_encryption_configuration" "s3_sse_config" {
   count  = var.kms_encrypted ? 1 : 0
@@ -101,13 +106,17 @@ resource "aws_s3_bucket_versioning" "default_bucket_versioning" {
   }
 }
 
-# Default bucket policy to deny unencrypted (non-SSL) requests
 data "aws_iam_policy_document" "default_bucket_policy" {
+  # HTTPS only for all actions on this bucket
   statement {
-    sid       = "DenyInsecureTransport"
-    effect    = "Deny"
-    actions   = ["s3:*"]
-    resources = ["${aws_s3_bucket.default_bucket.arn}/*"]
+    sid    = "DenyInsecureTransport"
+    effect = "Deny"
+
+    actions = ["s3:*"]
+    resources = [
+      aws_s3_bucket.default_bucket.arn,
+      "${aws_s3_bucket.default_bucket.arn}/*",
+    ]
 
     principals {
       type        = "*"
@@ -121,25 +130,34 @@ data "aws_iam_policy_document" "default_bucket_policy" {
     }
   }
 
-  # dynamic extra statement only if var.custom_policy is not empty
+  # Optional extra statement when var.custom_policy != ""
   dynamic "statement" {
     for_each = var.custom_policy != "" ? [jsondecode(var.custom_policy)] : []
     content {
-      sid       = statement.value.sid
+      sid       = try(statement.value.sid, null)
       effect    = statement.value.effect
       actions   = statement.value.actions
       resources = statement.value.resources
 
+      # principals can be one object OR a list of objects
       dynamic "principals" {
-        for_each = lookup(statement.value, "principals", [])
+        for_each = contains(keys(statement.value), "principals") ? (can(statement.value.principals[0]) ? statement.value.principals :
+        [statement.value.principals]) : []
+
         content {
           type        = principals.value.type
           identifiers = principals.value.identifiers
         }
       }
 
+      # condition can be single condition or list of conditions
       dynamic "condition" {
-        for_each = lookup(statement.value, "conditions", lookup(statement.value, "condition", []))
+        for_each = contains(keys(statement.value), "conditions") ? statement.value.conditions : (
+          contains(keys(statement.value), "condition")
+          ? [statement.value.condition]
+          : []
+        )
+
         content {
           test     = condition.value.test
           variable = condition.value.variable
