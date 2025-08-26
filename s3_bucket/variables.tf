@@ -1,13 +1,13 @@
 variable "bucket_name" {
   type        = string
   description = "Name of the backet (random numbers will be appended at the end)."
-  default     = "my-bucket"
+  default     = "default-bucket"
 }
 
 variable "guarantee_uniqueness" {
   type        = bool
   description = "Append some random characters to the bucket name in order to guarantee global uniqueness?"
-  default     = true
+  default     = false
 }
 
 variable "bucket_region" {
@@ -56,4 +56,10 @@ variable "enable_logging" {
   type        = bool
   description = "Should access logging be enabled for this bucket?"
   default     = false
+}
+
+variable "custom_policy" {
+  type        = string
+  description = "Optional custom bucket policy in JSON (as a string). If this is provided, it will override the default policy that is created."
+  default     = ""
 }
