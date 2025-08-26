@@ -64,14 +64,25 @@ resource "aws_s3_bucket" "default_bucket" {
   force_destroy = var.important ? false : true
 }
 
+# Only create if var.public = false (the default)
 resource "aws_s3_bucket_acl" "default_bucket_acl" {
+  count  = var.public ? 0 : 1
   bucket = aws_s3_bucket.default_bucket.id
   acl    = "private"
 }
 
+# Only create if var.non_ssl_requests = false (the default)
 resource "aws_s3_bucket_policy" "default_bucket_policy" {
+  count  = var.non_ssl_requests ? 0 : 1
   bucket = aws_s3_bucket.default_bucket.id
   policy = data.aws_iam_policy_document.default_bucket_policy.json
+}
+
+# Only used if var.non_ssl_requests = true and there is a custom policy passed in var.custom_policy
+resource "aws_s3_bucket_policy" "non_ssl_requests_policy" {
+  count  = var.non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.default_bucket.id
+  policy = data.aws_iam_policy_document.non_ssl_requests_policy[0].json
 }
 
 # Only used if var.kms_encrypted = true
@@ -106,7 +117,49 @@ resource "aws_s3_bucket_versioning" "default_bucket_versioning" {
   }
 }
 
+# Only used if var.non_ssl_requests = true and there is a custom policy passed in var.custom_policy
+data "aws_iam_policy_document" "non_ssl_requests_policy" {
+  count = var.non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
+  # Optional extra statement when var.custom_policy != ""
+  dynamic "statement" {
+    for_each = var.custom_policy != "" ? [jsondecode(var.custom_policy)] : []
+    content {
+      sid       = try(statement.value.sid, null)
+      effect    = statement.value.effect
+      actions   = statement.value.actions
+      resources = statement.value.resources
+
+      # principals can be one object OR a list of objects
+      dynamic "principals" {
+        for_each = contains(keys(statement.value), "principals") ? (can(statement.value.principals[0]) ? statement.value.principals :
+        [statement.value.principals]) : []
+
+        content {
+          type        = principals.value.type
+          identifiers = principals.value.identifiers
+        }
+      }
+      # condition can be single condition or list of conditions
+      dynamic "condition" {
+        for_each = contains(keys(statement.value), "conditions") ? statement.value.conditions : (
+          contains(keys(statement.value), "condition")
+          ? [statement.value.condition]
+          : []
+        )
+
+        content {
+          test     = condition.value.test
+          variable = condition.value.variable
+          values   = condition.value.values
+        }
+      }
+    }
+  }
+}
+
+# Only used if var.non_ssl_requests = false (the default)
 data "aws_iam_policy_document" "default_bucket_policy" {
+  count = var.non_ssl_requests ? 0 : 1
   # HTTPS only for all actions on this bucket
   statement {
     sid    = "DenyInsecureTransport"

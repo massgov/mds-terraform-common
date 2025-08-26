@@ -63,3 +63,9 @@ variable "custom_policy" {
   description = "Optional custom bucket policy in JSON (as a string). If this is provided, it will override the default policy that is created."
   default     = ""
 }
+
+variable "non_ssl_requests" {
+  type        = bool
+  description = "Allow non-SSL requests? Default is false (only allow SSL). CAUTION: Only disable SSL if you have a very good reason!"
+  default     = false
+}
