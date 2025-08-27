@@ -69,3 +69,30 @@ variable "non_ssl_requests" {
   description = "Allow non-SSL requests? Default is false (only allow SSL). CAUTION: Only disable SSL if you have a very good reason!"
   default     = false
 }
+
+variable "kms_policy" {
+  type        = string
+  description = "The KMS key policy JSON"
+  default     = ""
+}
+
+# Note: AWS creates a default KMS key policy if you don't provide one.
+### example for kms_policy allowing full access to a specific account:
+#  kms_policy =  <<POLICY
+# {
+#   "Version": "2012-10-17",
+#   "Id": "default",
+#   "Statement": [
+#     {
+#       "Sid": "DefaultAllow",
+#       "Effect": "Allow",
+#       "Principal": {
+#         "AWS": "arn:aws:iam::123456789012:root"
+#       },
+#       "Action": "kms:*",
+#       "Resource": "*"
+#     }
+#   ]
+# }
+# POLICY
+# }
