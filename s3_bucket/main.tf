@@ -15,8 +15,17 @@ locals {
 resource "aws_kms_key" "s3_key" {
   count                   = (var.kms_key_arn == "" && var.kms_encrypted) ? 1 : 0
   description             = "This key is used to encrypt bucket objects in ${local.bucket_root_name} and ${local.bucket_root_name}-logs"
-  deletion_window_in_days = 15 # Length of time the key will be retained when a deletion is scheduled.
+  deletion_window_in_days = var.deletion_window_in_days # Length of time the key will be retained when a deletion is scheduled.
   enable_key_rotation     = true
+
+  dynamic "policy" {
+    for_each = var.kms_policy != "" ? [1] : []
+    content {
+      # Use the provided policy if one is provided
+      # otherwise the default policy created by AWS will be used
+      policy = var.kms_policy
+    }
+  }
 }
 
 resource "aws_kms_alias" "s3_key_alias" {

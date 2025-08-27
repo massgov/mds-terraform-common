@@ -76,6 +76,12 @@ variable "kms_policy" {
   default     = ""
 }
 
+variable "deletion_window_in_days" {
+  type        = number
+  description = "Length of time (in days) the KMS key will be retained when a deletion is scheduled. Only used if a new KMS key is created by this module."
+  default     = 30
+}
+
 # Note: AWS creates a default KMS key policy if you don't provide one.
 ### example for kms_policy allowing full access to a specific account:
 #  kms_policy =  <<POLICY
