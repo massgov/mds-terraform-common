@@ -36,7 +36,7 @@ resource "aws_kms_alias" "s3_key_alias" {
 
 data "aws_kms_key" "s3_key_arn" {
   count  = var.kms_encrypted && var.kms_key_arn != "" ? 1 : 0
-  key_id = (var.kms_key_arn == "" && var.kms_encrypted) ? aws_kms_key.s3_key[0].arn : var.kms_key_arn
+  key_id = var.kms_key_arn
 }
 
 #############################################################################
