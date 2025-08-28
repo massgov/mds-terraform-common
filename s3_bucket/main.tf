@@ -80,18 +80,18 @@ resource "aws_s3_bucket_acl" "default_bucket_acl" {
   acl    = "private"
 }
 
-# Only create if var.non_ssl_requests = false (the default)
+# Only create if var.permit_non_ssl_requests = false (the default)
 resource "aws_s3_bucket_policy" "default_bucket_policy" {
-  count  = var.non_ssl_requests ? 0 : 1
+  count  = var.permit_non_ssl_requests ? 0 : 1
   bucket = aws_s3_bucket.default_bucket.id
   policy = data.aws_iam_policy_document.default_bucket_policy.json
 }
 
-# Only used if var.non_ssl_requests = true and there is a custom policy passed in var.custom_policy
-resource "aws_s3_bucket_policy" "non_ssl_requests_policy" {
-  count  = var.non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
+# Only used if var.permit_non_ssl_requests = true and there is a custom policy passed in var.custom_policy
+resource "aws_s3_bucket_policy" "permit_non_ssl_requests" {
+  count  = var.permit_non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
   bucket = aws_s3_bucket.default_bucket.id
-  policy = data.aws_iam_policy_document.non_ssl_requests_policy[0].json
+  policy = data.aws_iam_policy_document.permit_non_ssl_requests[0].json
 }
 
 # Only used if var.kms_encrypted = true
@@ -100,7 +100,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_sse_config" {
   bucket = aws_s3_bucket.default_bucket.bucket
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = (var.kms_key_arn == "" && var.kms_encrypted) ? aws_kms_key.s3_key[0].arn : var.kms_key_arn
+      kms_master_key_id = (var.kms_key_arn == "" && var.kms_encrypted) ? aws_kms_key.s3_key[0].arn : data.aws_kms_key.s3_key_arn.id[0]
       sse_algorithm     = "aws:kms"
     }
   }
@@ -126,9 +126,9 @@ resource "aws_s3_bucket_versioning" "default_bucket_versioning" {
   }
 }
 
-# Only used if var.non_ssl_requests = true and there is a custom policy passed in var.custom_policy
-data "aws_iam_policy_document" "non_ssl_requests_policy" {
-  count = var.non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
+# Only used if var.permit_non_ssl_requests = true and there is a custom policy passed in var.custom_policy
+data "aws_iam_policy_document" "permit_non_ssl_requests" {
+  count = var.permit_non_ssl_requests == true && length(var.custom_policy) > 0 ? 1 : 0
   # Optional extra statement when var.custom_policy != ""
   dynamic "statement" {
     for_each = var.custom_policy != "" ? [jsondecode(var.custom_policy)] : []
@@ -166,9 +166,9 @@ data "aws_iam_policy_document" "non_ssl_requests_policy" {
   }
 }
 
-# Only used if var.non_ssl_requests = false (the default)
+# Only used if var.permit_non_ssl_requests = false (the default)
 data "aws_iam_policy_document" "default_bucket_policy" {
-  count = var.non_ssl_requests ? 0 : 1
+  count = var.permit_non_ssl_requests ? 0 : 1
   # HTTPS only for all actions on this bucket
   statement {
     sid    = "DenyInsecureTransport"

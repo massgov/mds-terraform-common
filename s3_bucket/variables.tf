@@ -64,7 +64,7 @@ variable "custom_policy" {
   default     = ""
 }
 
-variable "non_ssl_requests" {
+variable "permit_non_ssl_requests" {
   type        = bool
   description = "Allow non-SSL requests? Default is false (only allow SSL). CAUTION: Only disable SSL if you have a very good reason!"
   default     = false
