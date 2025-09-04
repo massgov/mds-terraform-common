@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.x] - 2025-09-04
+  - [Cloudwatch Metric] module to add metric to CloudWatch for pattern alerts
+
 ## [1.x] - 2025-07-23
 
 - [Maintenance Calendar]
