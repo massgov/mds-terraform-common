@@ -8,6 +8,11 @@ output "state_bucket_name" {
   description = "Name of the S3 bucket used to store Terraform state"
 }
 
+output "state_bucket_kms_key_arn" {
+  value       = one(aws_kms_key.state_sse.*.arn)
+  description = "ARN of the KMS Key for the state bucket."
+}
+
 output "lock_table_arn" {
   value       = aws_dynamodb_table.lock.arn
   description = "ARN of the DynamoDB table used to store Terraform state lock"
