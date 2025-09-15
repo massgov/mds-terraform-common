@@ -58,5 +58,6 @@ No modules.
 | <a name="output_lock_table_name"></a> [lock\_table\_name](#output\_lock\_table\_name) | Name of the DynamoDB table used to store Terraform state lock |
 | <a name="output_plan_policy_arn"></a> [plan\_policy\_arn](#output\_plan\_policy\_arn) | ARN of the IAM policy used to plan Terraform state |
 | <a name="output_state_bucket_arn"></a> [state\_bucket\_arn](#output\_state\_bucket\_arn) | ARN of the S3 bucket used to store Terraform state |
+| <a name="output_state_bucket_kms_key_arn"></a> [state\_bucket\_kms\_key\_arn](#output\_state\_bucket\_kms\_key\_arn) | ARN of the KMS Key for the state bucket. |
 | <a name="output_state_bucket_name"></a> [state\_bucket\_name](#output\_state\_bucket\_name) | Name of the S3 bucket used to store Terraform state |
 <!-- END_TF_DOCS -->

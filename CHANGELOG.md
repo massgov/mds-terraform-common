@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.118] - 2025-09-12
+
+- [Terraform Boostreap] Export KMS key ARN for S3 bucket.
+- [S3 Backend Policy Documents] Create IAM policy documents for use with the terraform S3 backend.
+
 ## [1.x] - 2025-09-04
   - [Cloudwatch Metric] module to add metric to CloudWatch for pattern alerts
 
