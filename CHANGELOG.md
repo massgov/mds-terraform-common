@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.x] - 2025-09-19
+  - [Cloudwatch Metric] module to allow hashicorp/aws version greater than 5
+
 ## [1.0.118] - 2025-09-12
 
 - [Terraform Boostreap] Export KMS key ARN for S3 bucket.
