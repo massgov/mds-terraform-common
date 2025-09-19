@@ -53,7 +53,7 @@ These Terraform modules are used by other Terraform code.  Development happens i
 Contributing
 ------------
 
-When you update a module in this repository, please update [CHANGELOG.md](./CHANGELOG.MD) with a description of the change made to each module headed under a new version tag and the release date. For example, if the current version tag is `1.0.99` and you're planning to release changes to [asg](./asg/) and [ecscluster](./ecscluster) on January 1 2025, a possible CHANGELOG line might look like
+When you update a module in this repository, please update [CHANGELOG.md](./CHANGELOG.md) with a description of the change made to each module headed under a new version tag and the release date. For example, if the current version tag is `1.0.99` and you're planning to release changes to [asg](./asg/) and [ecscluster](./ecscluster) on January 1 2025, a possible CHANGELOG line might look like
 
 ```md
 ## [1.0.100] - 2025-01-01
