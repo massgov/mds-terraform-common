@@ -84,15 +84,25 @@ variable "key_name" {
 
 variable "user_volume_size" {
   type        = number
-  description = "Size, in gigabytes, of the user volume"
+  description = "Size, in GiB, of the user volume"
   default     = 100
+}
+
+variable "user_volume_iops" {
+  type        = number
+  description = "Number input/output operations per second (IOPS) provisioned to user volume"
+  default     = 1250
+  validation {
+    condition = var.user_volume_iops <= 64000
+    error_message = "EBS does not support be more than 64000 IOPS"
+  }
 }
 
 variable "instance_role_name" {
   type        = string
   description = <<EOF
-    Friendly name of IAM role to attach to instance profile. If none is provided, module will default
-    to creating a bespoke role with ViewOnlyAccess.
+    Friendly name of IAM role to attach to instance profile. Defaults to creating bespoke role
+    with AmazonSSMManagedInstanceCore managed policy attached.
   EOF
   default     = null
 }

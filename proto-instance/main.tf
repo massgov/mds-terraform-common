@@ -51,7 +51,7 @@ resource "aws_iam_role_policy_attachment" "default" {
   count = var.instance_role_name == null ? 1 : 0
 
   role       = aws_iam_role.default[count.index].id
-  policy_arn = "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 data "cloudinit_config" "default" {
@@ -63,10 +63,8 @@ data "cloudinit_config" "default" {
     content_type = "text/x-shellscript"
 
     content = templatefile(
-      "${path.module}/templates/install_ssm_agent.sh",
-      {
-        device_name = local.user_mount_device_name
-      }
+      "${path.module}/templates/install_ssm_agent.sh.tmpl",
+      {}
     )
   }
 
@@ -75,9 +73,9 @@ data "cloudinit_config" "default" {
     content_type = "text/x-shellscript"
 
     content = templatefile(
-      "${path.module}/templates/mount_user_volume.sh",
+      "${path.module}/templates/mount_user_volume.sh.tmpl",
       {
-        device_name = local.user_mount_device_name
+        device_name = locals.user_mount_device_name
       }
     )
   }
@@ -121,14 +119,6 @@ resource "aws_launch_template" "default" {
   disable_api_termination = false
 
   ebs_optimized = true
-  block_device_mappings {
-    device_name = local.user_mount_device_name
-
-    ebs {
-      encrypted   = true
-      volume_size = var.user_volume_size
-    }
-  }
 
   cpu_options {
     core_count       = var.cpu_options.core_count
@@ -188,9 +178,36 @@ resource "aws_launch_template" "default" {
   }
 }
 
+resource "aws_ebs_volume" "default" {
+  availability_zone = data.aws_subnet.default.availability_zone
+  size              = var.user_volume_size
+
+  type = "io1"
+  iops = var.user_volume_iops
+
+  multi_attach_enabled = true
+  final_snapshot       = true
+}
+
+resource "aws_volume_attachment" "default" {
+  volume_id   = aws_ebs_volume.default.id
+  instance_id = aws_ebs_volume.default.id
+  device_name = local.user_mount_device_name
+
+  lifecycle {
+    # Once created, the lambda function will take over management of this attachment
+    ignore_changes = all
+  }
+}
+
 resource "aws_instance" "default" {
   launch_template {
     id      = aws_launch_template.default.id
     version = "$Latest"
+  }
+
+  lifecycle {
+    # Once created, the lambda function will take over management of this instance
+    ignore_changes = all
   }
 }
