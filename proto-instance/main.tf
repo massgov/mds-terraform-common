@@ -1,8 +1,7 @@
 locals {
-  user_mount_device_name = "/dev/sdf"
   region                 = data.aws_region.default.region
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
-  vpc_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
+  eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
 data "aws_region" "default" {}
@@ -63,7 +62,7 @@ data "cloudinit_config" "default" {
     content_type = "text/x-shellscript"
 
     content = templatefile(
-      "${path.module}/templates/install_ssm_agent.sh.tmpl",
+      "${path.module}/templates/install_ssm_agent.sh.tftpl",
       {}
     )
   }
@@ -73,9 +72,9 @@ data "cloudinit_config" "default" {
     content_type = "text/x-shellscript"
 
     content = templatefile(
-      "${path.module}/templates/mount_user_volume.sh.tmpl",
+      "${path.module}/templates/mount_user_volume.sh.tftpl",
       {
-        device_name = locals.user_mount_device_name
+        device_name = "/dev/xvdf"
       }
     )
   }
@@ -141,7 +140,7 @@ resource "aws_launch_template" "default" {
   network_interfaces {
     associate_public_ip_address = false
     subnet_id                   = var.subnet_id
-    security_groups             = local.vpc_security_group_ids
+    security_groups             = local.eni_security_group_ids
     delete_on_termination       = false
   }
 
@@ -185,25 +184,31 @@ resource "aws_ebs_volume" "default" {
   type = "io1"
   iops = var.user_volume_iops
 
-  multi_attach_enabled = true
   final_snapshot       = true
 }
 
 resource "aws_volume_attachment" "default" {
   volume_id   = aws_ebs_volume.default.id
-  instance_id = aws_ebs_volume.default.id
-  device_name = local.user_mount_device_name
+  instance_id = aws_instance.default.id
+  device_name = "/dev/sdf"
 
   lifecycle {
     # Once created, the lambda function will take over management of this attachment
-    ignore_changes = all
+    ignore_changes = [instance_id]
   }
 }
 
 resource "aws_instance" "default" {
+  # Ensure that EBS volume is created before instance so that it can be
+  # mounted
+  depends_on = [aws_ebs_volume.default]
+
   launch_template {
     id      = aws_launch_template.default.id
     version = "$Latest"
+  }
+  tags = {
+    "Name" = "${var.name_prefix}-instance"
   }
 
   lifecycle {
