@@ -38,3 +38,28 @@ This deployment uses two Lambda functions to rotate IAM user access keys for eve
 - Only users with at least one ACTIVE key are processed.
 - Keys older than the configured rotation threshold are deactivated and replaced.
 - Secrets are stored in Secrets Manager with user-specific access policies.
+
+## Modifying or Packaging Lambda Functions with PowerShell (cross-platform:pwsh)
+
+To package or make modifications to your Lambda functions written in PowerShell, follow these steps:
+
+1. Install the AWS Lambda PowerShell module:
+   ```powershell
+   Install-Module AWSLambdaPSCore -Force
+   ```
+
+2. Import the module:
+   ```powershell
+   Import-Module AWSLambdaPSCore
+   ```
+   
+3. Navigate to the directory containing the raw PowerShell scripts (e.g., `raw/remove_inactive_keys.ps1` , `raw/secret_rotation_lambda.ps1`) and make any necessary changes to your code, and save the updated files.
+
+4. Package your PowerShell script for Lambda deployment (this is used in the terraform resource):
+   ```powershell
+   New-AWSPowerShellLambdaPackage `
+     -ScriptPath .\remove_inactive_keys.ps1 `
+     -OutputPackage .\remove_inactive_keys.zip
+   ```
+
+The resulting `.zip` file can be used for deployment with Terraform.
