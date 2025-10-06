@@ -8,7 +8,7 @@ This solution rotates IAM user access keys for only the users defined in the `ta
 
 ## Overview
 
-- Access keys and secret keys are rotated for IAM users listed in `targeted_users` if created on or after `<x>` days (defaults to 30 days unless specified).
+- Access keys and secret keys are rotated for IAM users only listed in `targeted_users` if created on or after `<x>` days (defaults to 30 days unless specified).
 - Keys are stored in AWS Secrets Manager. After a user retrieves their secret key, you can delete the secret, but it will be re-created upon the next rotation.
 - If a user has only **INACTIVE** keys, no rotation or modification takes place; that user is skipped.
 - If a user has **NO** keys, they are skipped.
