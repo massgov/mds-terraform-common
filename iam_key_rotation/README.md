@@ -2,6 +2,10 @@
 
 This solution rotates IAM user access keys for only the users defined in the `targeted_users` variable. If a user is not listed in `targeted_users`, no rotation or modification will take place for that user.
 
+> **Note:**  
+> This module was designed and tested for deploying ONCE per AWS account.  
+> Multi-services within same account scenarios have not been tested. (i.e, deploying this same module multiple times within the same account)
+
 ## Overview
 
 - Access keys and secret keys are rotated for IAM users listed in `targeted_users` if created on or after `<x>` days (defaults to 30 days unless specified).
@@ -52,7 +56,7 @@ To package or make modifications to your Lambda functions written in PowerShell,
    ```powershell
    Import-Module AWSLambdaPSCore
    ```
-   
+
 3. Navigate to the directory containing the raw PowerShell scripts (e.g., `raw/remove_inactive_keys.ps1` , `raw/secret_rotation_lambda.ps1`) and make any necessary changes to your code, and save the updated files.
 
 4. Package your PowerShell script for Lambda deployment (this is used in the terraform resource):
