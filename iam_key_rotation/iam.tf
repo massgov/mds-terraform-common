@@ -82,7 +82,10 @@ resource "aws_iam_policy" "iam_policy_for_lambda_key_rotation" {
         "lambda:UpdateFunctionConfiguration"
       ],
       "Effect": "Allow",
-      "Resource": "*"
+      "Resource": [
+        aws_lambda_function.key_rotation.arn,
+        aws_lambda_function.secret_key_rotation.arn
+      ]
     }
   ]
 }
