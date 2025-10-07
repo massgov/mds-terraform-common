@@ -44,7 +44,10 @@ variable "ami_search_filters" {
     name   = string
     values = list(string)
   }))
-  description = "List of filters to be applied to AMI search"
+  description = <<EOF
+    List of filters to be applied to AMI search. Note that changing the OS distribution may
+    have unintended consequences, as user data scripts have only been tested in RHEL 10.x.
+  EOF
   default = [
     {
       name   = "name"
@@ -77,9 +80,15 @@ variable "tag_specifications" {
 }
 
 variable "key_name" {
-  type = string
+  type        = string
   description = "Name of SSH key pair installed on instance"
-  default = null
+  default     = null
+}
+
+variable "user_volume_id" {
+  type        = string
+  description = "ID of EBS volume to attach to instance. By default, a new EBS volume will be created"
+  default     = null
 }
 
 variable "user_volume_size" {
@@ -93,7 +102,7 @@ variable "user_volume_iops" {
   description = "Number input/output operations per second (IOPS) provisioned to user volume"
   default     = 1250
   validation {
-    condition = var.user_volume_iops <= 64000
+    condition     = var.user_volume_iops <= 64000
     error_message = "EBS does not support be more than 64000 IOPS"
   }
 }

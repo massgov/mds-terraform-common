@@ -1,6 +1,7 @@
 locals {
   region                 = data.aws_region.default.region
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
+  user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -108,7 +109,6 @@ resource "aws_security_group_rule" "default" {
 
 resource "aws_launch_template" "default" {
   name          = "${var.name_prefix}-launch-template"
-  image_id      = data.aws_ami.default.image_id
   instance_type = var.instance_type
   user_data     = data.cloudinit_config.default.rendered
 
@@ -171,48 +171,94 @@ resource "aws_launch_template" "default" {
       )
     }
   }
-
-  lifecycle {
-    ignore_changes = [image_id]
-  }
 }
 
 resource "aws_ebs_volume" "default" {
+  count = var.user_volume_id == null ? 1 : 0
+
   availability_zone = data.aws_subnet.default.availability_zone
   size              = var.user_volume_size
 
   type = "io1"
   iops = var.user_volume_iops
 
-  final_snapshot       = true
+  final_snapshot = true
 }
 
-resource "aws_volume_attachment" "default" {
-  volume_id   = aws_ebs_volume.default.id
-  instance_id = aws_instance.default.id
-  device_name = "/dev/sdf"
+data "external" "make" {
+  program     = ["bash", "build-lambda.sh"]
+  working_dir = path.module
+}
 
-  lifecycle {
-    # Once created, the lambda function will take over management of this attachment
-    ignore_changes = [instance_id]
+module "lambda" {
+  source     = "terraform-aws-modules/lambda/aws"
+  depends_on = [data.external.make]
+
+  function_name = "${var.name_prefix}-management-lambda"
+  description   = "Lambda that manages lifecycle of proto instance"
+
+  handler                = "index.handler"
+  runtime                = "nodejs22.x"
+  local_existing_package = "${path.module}/lambda/.dist/handler/package.zip"
+  create_package         = false
+}
+
+/**
+  Resources for creating the proto instance just once. We do this because the Lambda function
+  becomes responsible for (re)creating the instance once the terraform has been applied the
+  first time
+
+  In order to accomplish this, we create the instance outside of the AWS provider with
+  terraform_data blocks which never recreate themselves
+**/
+
+resource "terraform_data" "instance" {
+  triggers_replace = []
+  depends_on       = [local.user_volume_id]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      aws ec2 run-instances \
+        --image-id=${data.aws_ami.default.id} \
+        --launch-template="LaunchTemplateId=${aws_launch_template.default.id},Version=$Latest" \
+        --query="Instances[0].InstanceId"
+    EOF 
   }
 }
 
-resource "aws_instance" "default" {
-  # Ensure that EBS volume is created before instance so that it can be
-  # mounted
-  depends_on = [aws_ebs_volume.default]
+resource "time_sleep" "wait" {
+  depends_on = [terraform_data.instance]
 
-  launch_template {
-    id      = aws_launch_template.default.id
-    version = "$Latest"
-  }
-  tags = {
-    "Name" = "${var.name_prefix}-instance"
-  }
+  create_duration = "10s"
+}
 
-  lifecycle {
-    # Once created, the lambda function will take over management of this instance
-    ignore_changes = all
+data "aws_instances" "instance" {
+  depends_on = [terraform_data.instance]
+
+  instance_tags = {
+    Name = "${var.name_prefix}-instance"
+  }
+  instance_state_names = ["running", "pending"]
+}
+
+resource "terraform_data" "instance_ok" {
+  triggers_replace = []
+
+  provisioner "local-exec" {
+    command = "aws ec2 wait instance-running --instance-ids=${one(data.aws_instances.instance.ids)}"
+  }
+}
+
+resource "terraform_data" "volume_attachment" {
+  triggers_replace = []
+  depends_on       = [terraform_data.instance_ok]
+
+  provisioner "local-exec" {
+    command = <<EOF
+      aws ec2 attach-volume \
+        --instance-id=${one(data.aws_instances.instance.ids)} \
+        --volume-id=${local.user_volume_id} \
+        --device=/dev/sdf
+    EOF 
   }
 }

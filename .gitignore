@@ -25,3 +25,6 @@ override.tf.json
 #
 # !example_override.tf
 .idea/
+
+# macOS files that store information about the containing folder
+.DS_Store
