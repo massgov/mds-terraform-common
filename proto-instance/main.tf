@@ -1,11 +1,14 @@
 locals {
   region                 = data.aws_region.default.region
+  account                = data.aws_caller_identity.default.account_id
+  proto_id               = random_uuid.default.result
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
   user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
 data "aws_region" "default" {}
+data "aws_caller_identity" "default" {}
 data "aws_default_tags" "default" {}
 data "aws_subnet" "default" {
   id = var.subnet_id
@@ -23,6 +26,8 @@ data "aws_ami" "default" {
     }
   }
 }
+
+resource "random_uuid" "default" {}
 
 resource "aws_iam_instance_profile" "default" {
   name = "${var.name_prefix}-instance-profile"
@@ -152,7 +157,8 @@ resource "aws_launch_template" "default" {
     resource_type = "instance"
     tags = merge(
       {
-        "Name" = "${var.name_prefix}-instance"
+        "Name"   = "${var.name_prefix}-instance",
+        proto-id = local.proto_id
       },
       data.aws_default_tags.default.tags,
       coalesce(var.tag_specifications["instance"], {})
@@ -185,14 +191,89 @@ resource "aws_ebs_volume" "default" {
   final_snapshot = true
 }
 
-data "external" "make" {
+data "external" "lambda" {
   program     = ["bash", "build-lambda.sh"]
   working_dir = path.module
 }
 
+data "aws_iam_policy_document" "lambda" {
+  statement {
+    actions   = ["ec2:DescribeImages"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+  statement {
+    actions   = ["ec2:DescribeInstances"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+  statement {
+    actions = ["ssm:SendCommand"]
+    effect  = "Allow"
+    resources = [
+      "arn:aws:ssm:${local.region}:${local.account}:document/AWS-RunShellScript"
+    ]
+    condition {
+      variable = "aws:ResourceTag/proto-id"
+      test     = "StringEquals"
+      values   = [local.proto_id]
+    }
+  }
+  statement {
+    actions   = ["ssm:GetCommandInvocation"]
+    effect    = "Allow"
+    resources = ["*"]
+  }
+  statement {
+    actions = [
+      "ec2:DetachVolume",
+      "ec2:AttachVolume"
+    ]
+    resources = ["arn:aws:ec2:${local.region}:${local.account}:instance/*"]
+    effect    = "Allow"
+    condition {
+      test     = "StringEquals"
+      values   = [local.proto_id]
+      variable = "ec2:ResourceTag/proto-id"
+    }
+  }
+  statement {
+    actions   = ["ec2:DescribeVolumes"]
+    effect    = "Allow"
+    resources = ["arn:aws:ec2:${local.region}:${local.account}:volume/*"]
+  }
+  statement {
+    actions = ["ec2:RunInstances"]
+    effect  = "Allow"
+    resources = concat(
+      [
+        "arn:aws:ec2:${local.region}::image/*",
+        "arn:aws:ec2:${local.region}:${local.account}:instance/*",
+        "arn:aws:ec2:${local.region}:${local.account}:network-interface/*",
+        "arn:aws:ec2:${local.region}:${local.account}:volume/${local.user_volume_id}",
+        data.aws_subnet.default.arn,
+        aws_launch_template.default.arn,
+      ],
+      formatlist("arn:aws:ec2:${local.region}:${local.account}:security-group/%s", local.eni_security_group_ids)
+    )
+  }
+  statement {
+    actions = ["ec2:TerminateInstances"]
+    effect  = "Allow"
+    resources = [
+      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      values   = [local.proto_id]
+      variable = "ec2:ResourceTag/proto-id"
+    }
+  }
+}
+
 module "lambda" {
   source     = "terraform-aws-modules/lambda/aws"
-  depends_on = [data.external.make]
+  depends_on = [data.external.lambda]
 
   function_name = "${var.name_prefix}-management-lambda"
   description   = "Lambda that manages lifecycle of proto instance"
@@ -201,6 +282,19 @@ module "lambda" {
   runtime                = "nodejs22.x"
   local_existing_package = "${path.module}/lambda/.dist/handler/package.zip"
   create_package         = false
+
+  environment_variables = {
+    PROTO_ID           = local.proto_id
+    VOLUME_ID          = local.user_volume_id
+    LAUNCH_TEMPLATE_ID = aws_launch_template.default.id
+    PARTITION_NAME     = "/dev/sdf"
+    AMI_QUERY_JSON     = jsonencode(var.ami_search_filters)
+  }
+
+  attach_policy_json            = true
+  attach_cloudwatch_logs_policy = true
+  policy_json                   = data.aws_iam_policy_document.lambda.json
+  create_role                   = true
 }
 
 /**
@@ -236,7 +330,7 @@ data "aws_instances" "instance" {
   depends_on = [terraform_data.instance]
 
   instance_tags = {
-    Name = "${var.name_prefix}-instance"
+    proto-id = local.proto_id
   }
   instance_state_names = ["running", "pending"]
 }

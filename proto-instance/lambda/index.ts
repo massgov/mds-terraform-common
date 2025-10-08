@@ -1,6 +1,5 @@
 import {
   AttachVolumeCommand,
-  CreateTagsCommand,
   DescribeImagesCommand,
   DescribeInstancesCommand,
   DetachVolumeCommand,
@@ -23,7 +22,7 @@ import {
   waitUntilCommandExecuted,
 } from "@aws-sdk/client-ssm";
 import assert from "assert";
-import type { EventBridgeHandler } from "aws-lambda";
+import type { EventBridgeEvent, Handler } from "aws-lambda";
 import { config } from "dotenv";
 import pino from "pino";
 import zod from "zod";
@@ -38,7 +37,7 @@ const ssm = new SSMClient();
 const DELETED_BY_TAG = "deletedby";
 
 interface Env {
-  INSTANCE_NAME: string;
+  PROTO_ID: string;
   VOLUME_ID: string;
   LAUNCH_TEMPLATE_ID: string;
   PARTITION_NAME: string;
@@ -47,8 +46,8 @@ interface Env {
 
 const getEnv = (env: Record<string, string | undefined>): Env => {
   assert(
-    typeof env["INSTANCE_NAME"] === "string",
-    "Required variable INSTANCE_NAME missing from env"
+    typeof env["PROTO_ID"] === "string",
+    "Required variable PROTO_ID missing from env"
   );
   assert(
     typeof env["VOLUME_ID"] === "string",
@@ -68,7 +67,7 @@ const getEnv = (env: Record<string, string | undefined>): Env => {
   );
 
   return {
-    INSTANCE_NAME: env["INSTANCE_NAME"],
+    PROTO_ID: env["PROTO_ID"],
     VOLUME_ID: env["VOLUME_ID"],
     LAUNCH_TEMPLATE_ID: env["LAUNCH_TEMPLATE_ID"],
     PARTITION_NAME: env["PARTITION_NAME"],
@@ -160,9 +159,9 @@ const unmountPartitionOnInstance = async (
   return { success: getCommandInvicationResult.Status === "Success" };
 };
 
-const getInstance = async (instanceName: string): Promise<Instance> => {
+const getInstance = async (protoId: string): Promise<Instance> => {
   logger.debug(
-    { instanceName },
+    { protoId },
     "Looking up AMI currently being used by instance"
   );
   const describeInstancesResult = await ec2.send(
@@ -178,8 +177,8 @@ const getInstance = async (instanceName: string): Promise<Instance> => {
           ],
         },
         {
-          Name: "tag:Name",
-          Values: [instanceName],
+          Name: "tag:proto-id",
+          Values: [protoId],
         },
       ],
     })
@@ -191,7 +190,7 @@ const getInstance = async (instanceName: string): Promise<Instance> => {
   const instance = allInstances.length === 1 ? allInstances[0] : undefined;
   assert(
     instance,
-    `Expected exactly 1 instance to match INSTANCE_NAME, but got ${allInstances.length}`
+    `Expected exactly 1 instance to match PROTO_ID, but got ${allInstances.length}`
   );
   return instance;
 };
@@ -273,17 +272,6 @@ const recreateInstance = async (
 
   logger.debug({ instanceId }, "Terminating old instance");
   await ec2.send(
-    new CreateTagsCommand({
-      Resources: [instanceId],
-      Tags: [
-        {
-          Key: DELETED_BY_TAG,
-          Value: deletedByTagValue,
-        },
-      ],
-    })
-  );
-  await ec2.send(
     new TerminateInstancesCommand({
       InstanceIds: [instanceId],
     })
@@ -294,14 +282,11 @@ const recreateInstance = async (
   };
 };
 
-export const handler: EventBridgeHandler<
-  "Scheduled Event",
-  { force?: boolean },
-  void
-> = async (event, context) => {
-  const force = event.detail.force ?? false;
+type Event = EventBridgeEvent<"Scheduled Event", {}> & { force?: boolean };
+
+export const handler: Handler<Event, void> = async (event, context) => {
+  const force = event.force ?? false;
   logger.setBindings({
-    region: event.region,
     invokedFunctionArn: context.invokedFunctionArn,
     awsRequestId: context.awsRequestId,
   });
@@ -320,7 +305,7 @@ export const handler: EventBridgeHandler<
     "Found no available AMIs matching AMI_QUERY_JSON"
   );
 
-  const instance = await getInstance(env.INSTANCE_NAME);
+  const instance = await getInstance(env.PROTO_ID);
   assert(
     instance?.InstanceId,
     "Instance doesn't have an ID. How is that even possible?"
