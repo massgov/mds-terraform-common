@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.x] - 2025-10-03
+  - [Cloudwatch Metric] module to allow terraform version greater than 1.9.2
+
 ## [1.x] - 2025-09-19
   - [Cloudwatch Metric] module to allow hashicorp/aws version greater than 5
 
