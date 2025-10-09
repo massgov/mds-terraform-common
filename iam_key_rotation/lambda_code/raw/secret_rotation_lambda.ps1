@@ -36,7 +36,7 @@ function rotate-accesskeys {
     # gets todays date minus the days specified to rotate
     $days_to_rotate = (Get-Date).AddDays(-$days)
 
-    # Get only targeted users if specified, otherwise nothing happens
+    # rotate only the targeted users specified, other users are ignored
     if ($targeted_usernames) {
         $targets = $targeted_usernames -split ","
         $targeted_list = $targets.trim() -join "|"
@@ -55,7 +55,8 @@ function rotate-accesskeys {
             $getactive_key = (Get-IAMAccessKey -UserName $user | where { $_.Status -eq "Active" }) 
 
             # if there is no active key, continue
-            if ($getactive_key.count -eq 0) { 
+            if (($null -eq $getactive_key) -or ($getactive_key.count -eq 0)) { 
+                Write-Host "$user has no active accesskeys, skipping $user"
                 continue
             }
             # if there is one active key, get it
@@ -68,9 +69,10 @@ function rotate-accesskeys {
                 $get_key = ($getactive_key | Sort-Object -Property CreateDate | select -First 1).AccessKeyId
                 $creation_date = ($getactive_key | Sort-Object -Property CreateDate | select -First 1).CreateDate
             }
-        } # if only inactive keys exist, continue
+        } # if an error occurs here, a statement above has failed for an unknown reason, we skip this user
         catch {
-            Write-Host "no active key was found for user $user, skipping $user since no accesskey or only existing key(s) are inactive"
+            Write-Host "an error occurred getting active keys for user $user, skipping $user"
+            continue
         }
 
         # if the key is older than the days to rotate, rotate it..
@@ -79,29 +81,34 @@ function rotate-accesskeys {
             $access_key_id = ($get_key).trim()
 
             try { 
-                # we want the new key before deactivating the old one, in case something goes wrong
+                # we try to deactivate the current active key first
                 Update-IAMAccessKey -UserName $user -AccessKeyId $access_key_id -Status Inactive -Force &&
+                # then we try to create a new key
                 New-IAMAccessKey -UserName $user -Force | Tee-Object -Variable var_username
             }
             catch {
-                # something is off, maybe someone had 2 active keys and/or manually deactivated an accesskey just recently. 
+                # very likely there are 2 active keys or changes were made outside of this script
+                # so we will REMOVE the OLDEST ACTIVE key and create a new one
+                # We cannot make the oldest active key inactive, because we already determined this is the oldest active key
+                # and if we try to make it inactive, it will fail because there are still 2 active keys
                 Remove-IAMAccessKey -AccessKeyId $access_key_id -UserName $user -Force && 
                 Write-Host "too many keys exist for $user , removed previous active key" &&
-                New-IAMAccessKey -UserName $user -Force | Tee-Object -Variable var_username   
+                New-IAMAccessKey -UserName $user -Force | Tee-Object -Variable var_username 
             }
-            # new key created
+            # new key that was created
             $keyValuePairs = @{
                 "AccessKeyId"     = $var_username.AccessKeyId
                 "SecretAccessKey" = $var_username.SecretAccessKey
             }
 
             $secret_name = $user + '_credentials'
-            # try updating the secret first
+            # try updating the secret first, if it fails we create a new secret
             Try {
                 Update-SECSecret -SecretId $secret_name -SecretString (ConvertTo-Json -InputObject $keyValuePairs)
             }
             catch {
-                # if the entire secret was deleted we can restore it and update it
+                # here we check if the secret was deleted and still pending deletion
+                # if so we restore it and then update it
                 $message = ($Error[0].Exception.Message)
                 if ($message -match "You can't perform this operation on the secret because it was marked for deletion.") { 
                     Restore-SECSecret -SecretId $secret_name -Force &&
@@ -109,15 +116,17 @@ function rotate-accesskeys {
                     Update-SECSecret -SecretId $secret_name -SecretString (ConvertTo-Json -InputObject $keyValuePairs) -Force
                 }
                 else {
-                    # if the secret never existed, create it
+                    # otherwise we create a new secret since it likely never existed or was deleted and no longer pending deletion
                     Write-Host "Secret did not exist for user $user, new secret created" &&
                     New-SECSecret -Name $secret_name -SecretString (ConvertTo-Json -InputObject $keyValuePairs)
                 }
             }
-            # get the user's ARN to create a resource policy for the secret so only that user can access it
+            # get the user's ARN to create a resource policy for the secret so only that SPECIFIC user can access it
+            # this only really works properly if the IAM user has access to aws console and can assume their own identity
+            # otherwise admin users will be able to access the secrets for the users
             $policyarn = (Get-IAMUser -UserName $user).Arn
 
-            # resource policy for the secret so only that user can access it
+            # resource policy for the secret so only that user can access it (admins still can access it)
             $sec_policy = @"
  {
    "Version": "2012-10-17",
@@ -136,7 +145,7 @@ function rotate-accesskeys {
    ]
  }
 "@
-            # Write the resource policy for the secret
+            # Write the resource policy for the secret so only that specified user can access it (admins still can access it)
             Write-SECResourcePolicy -ResourcePolicy $sec_policy -SecretId $secret_name &&
             Write-Host "SEC resource policy written/updated.."
         }
@@ -157,35 +166,33 @@ function publish_snstopic {
     )
 
     $secrets = Get-SECSecretList -Region $region
+
     $a_list = @()
     foreach ($secret in $secrets) { 
-        $changed_recently = $secret | where { $_.LastChangedDate -ge (Get-Date).AddDays(0) }
-        $sec_name = ($changed_recently).Name   
-        $a_list += $sec_name
+        $changed_recently = $secret | where { $_.LastChangedDate -ge (Get-Date).Date }
+        $a_list += ($changed_recently).Name
     }
 
     if ($a_list.count -eq 0) {
-        Write-Host "no accesskeys for users were changed today"
+        Write-Host "no accesskeys for users were rotated today"
     }
 
-    if ($a_list.count -ge 1) { 
-        $a_list = $a_list -split '_credentials'
-        $a_list = $a_list | Out-String 
-        $a_list = Write-Output "$a_list"
-        $a_list
+    if ($a_list.Count -ge 1) {
+        $a_list = $a_list | ForEach-Object { $_ -replace '_credentials$', '' }
+        $listBlock = $a_list -join "`n"
         $rotated_message = @"
 Per credential rotation policy some AWS IAM users had their AccessKeys rotated.
 --------------------------------------------------------------------------------------------
-The New IAM User AccessKeys are in AWS SecretsManager named as ' $($user)_credentials '
+New IAM User AccessKeys are in AWS SecretsManager named as '<IAM_USER>_credentials '
 --------------------------------------------------------------------------------------------
 IAM users that had AccessKeys rotated are:
 -------------------------------------------------
-$a_list
+$listBlock
 "@
-        Publish-SNSMessage -Region $region -TopicArn $sns_arn -Subject "IAM user accesskey rotations" -Message $rotated_message 
+        Publish-SNSMessage -Region $region -TopicArn $sns_arn -Subject "Notification- IAM user accesskey rotated" -Message $rotated_message 
     }
 } 
 
 
-rotate-accesskeys -region $ENV:region -days $ENV:days -username_exceptions $ENV:targeted_usernames &&
+rotate-accesskeys -region $ENV:region -days $ENV:days -targeted_usernames $ENV:targeted_usernames &&
 publish_snstopic -region $ENV:region -sns_arn $ENV:sns_arn

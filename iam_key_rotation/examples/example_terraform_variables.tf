@@ -25,3 +25,9 @@ variable "sns_alert_emails" {
   type        = list(string)
   default     = []
 }
+
+variable "days_warning_before_inactive" {
+  description = "number of days before an inactive key is removed to send a warning notification"
+  type        = string
+  default     = 7
+}

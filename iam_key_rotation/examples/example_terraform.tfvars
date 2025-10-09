@@ -1,7 +1,7 @@
 #if you already have a terraform .tfvars for doing plan and applies, add these to it and delete this file.
 
 #Days till key is rotated at
-days_to_rotate = 30
+days_to_rotate = 90
 
 #Amount of Days Since current Active Accesskey creation date (to remove inactive key. default is 20)
 days_to_remove_inactive = 15
@@ -14,4 +14,4 @@ event_frequency = "rate(1 day)"
 targeted_usernames = ["scotty", "blueshirt.guy"]
 
 #email you want alerts sent to, comment out if N/A
-#sns_alert_emails = ["someemail1@myemail.com", "someemail2@myemail.com"]
+sns_alert_emails = ["someemail1@myemail.com", "someemail2@myemail.com"]

@@ -3,6 +3,7 @@ data "aws_region" "current" {}
 
 locals {
   targeted_usernames = join(", ", var.targeted_usernames)
+
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_event" {
@@ -27,7 +28,7 @@ resource "aws_cloudwatch_event_target" "key_rotate_event" {
 resource "aws_lambda_function" "remove_inactive_accesskeys" {
   filename         = "${path.module}/lambda_code/remove_inactive_keys.zip"
   function_name    = var.lambda_key_retire_name
-  handler          = "RemoveInactiveKeysLambda::RemoveInactiveKeysLambda.Function::FunctionHandler"
+  handler          = "remove_inactive_keys::remove_inactive_keys.Bootstrap::ExecuteFunction"
   source_code_hash = filebase64sha256("${path.module}/lambda_code/remove_inactive_keys.zip")
   memory_size      = 512
   package_type     = "Zip"
@@ -49,6 +50,8 @@ resource "aws_lambda_function" "remove_inactive_accesskeys" {
       days_to_remove_inactive        = var.days_to_remove_inactive
       targeted_usernames             = local.targeted_usernames
       accesskey_rotation_lambda_name = var.lambda_name
+      days_warning_before_inactive   = var.days_warning_before_inactive
+      sns_arn                        = aws_sns_topic.iamuser_accesskey_rotation.arn
     }
   }
 }
@@ -56,7 +59,7 @@ resource "aws_lambda_function" "remove_inactive_accesskeys" {
 resource "aws_lambda_function" "iam_user_rotate_accesskeys" {
   filename         = "${path.module}/lambda_code/secret_rotation_lambda.zip"
   function_name    = var.lambda_name
-  handler          = "SecretRotationLambda::SecretRotationLambda.Function::FunctionHandler"
+  handler          = "secret_rotation_lambda::secret_rotation_lambda.Bootstrap::ExecuteFunction"
   source_code_hash = filebase64sha256("${path.module}/lambda_code/secret_rotation_lambda.zip")
   memory_size      = 1024
   package_type     = "Zip"
@@ -74,10 +77,11 @@ resource "aws_lambda_function" "iam_user_rotate_accesskeys" {
 
   environment {
     variables = {
-      region             = data.aws_region.current.name
-      days               = var.days_to_rotate
-      targeted_usernames = local.targeted_usernames
-      sns_arn            = aws_sns_topic.iamuser_accesskey_rotation.arn
+      region                       = data.aws_region.current.name
+      days                         = var.days_to_rotate
+      targeted_usernames           = local.targeted_usernames
+      sns_arn                      = aws_sns_topic.iamuser_accesskey_rotation.arn
+      days_warning_before_inactive = var.days_warning_before_inactive
     }
   }
 }

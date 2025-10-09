@@ -22,8 +22,12 @@ function check_remove_accesskeys {
         [string]$days_to_remove_inactive,
         [Parameter(Mandatory = $true)]
         [string]$region,
-        [Parameter(Mandatory = $false)]
-        [string]$accesskey_rotation_lambda_name
+        [Parameter(Mandatory = $true)]
+        [string]$accesskey_rotation_lambda_name,
+        [Parameter(Mandatory = $true)]
+        [string]$days_warning_before_inactive,
+        [Parameter(Mandatory = $true)]
+        [string]$sns_arn
     )
 
     if ($targeted_usernames) { 
@@ -37,7 +41,10 @@ function check_remove_accesskeys {
     # gets todays date minus the days specified to remove inactive keys
     # this gives us the days ago date to compare against the active key creation date
     # in order to determine if the inactive key should be removed permenently (inactive keys are kept for $days_to_remove_inactive) 
-    $days_new_key_is_active_for = (Get-Date).AddDays(-$days_to_remove_inactive)
+    $days_new_key_is_active_for = (Get-Date).AddDays( - [int]$days_to_remove_inactive)
+
+    # calculate the warning date to be used in the accesskey rotation lambda to warn user before active key is made inactive
+    $days_warning_before_inactive = $days_new_key_is_active_for.AddDays( - [int]$days_warning_before_inactive)
 
     #for each user in targeted list, get their keys
     foreach ($user in $users) { 
@@ -48,19 +55,31 @@ function check_remove_accesskeys {
         $list_keys = (Get-IAMAccessKey -UserName $user)
         # get inactive key if any exist
         $inactive_key = ($list_keys | Where { $_.Status -eq "Inactive" }).AccessKeyId
+        # get inactive key create date if any exist
+        $inactive_create_date = ($list_keys | Where { $_.Status -eq "Inactive" }).CreateDate
         # get active key if any exist
         $active_create_date = ($list_keys | Where { $_.Status -eq "Active" }).CreateDate
 
-        # if there are 2 keys, and one is inactive, and the active key was created more than $days_to_remove_inactive days ago
+        if (($list_keys.count -ge 1) -and ($active_create_date -le $days_warning_before_inactive) -or ($inactive_create_date -le $days_warning_before_inactive)) {
+
+            $warning_message = @"
+-----------------WARNING: this is an AWS IAM user key deletion notification, per rotation policy--------------------------- 
+the INACTIVE accesskey or OLDEST ACTIVE accesskey (if 2 active accesskeys exist) for this user will be removed in $days_warning_before_inactive days.
+--------------------------------------------------------------------------------------------
+IAM users that will soon have an accesskey deleted is: $user
+"@
+            Publish-SNSMessage -Region $region -TopicArn $sns_arn -Subject "IAM user accesskey deletion warning" -Message $warning_message 
+        } 
+        # if there are 2 keys, and one is inactive, and the active key was created more than $days_new_key_is_active_for days ago
         # remove the inactive key
         if (($list_keys.count -ge 2) -and ($inactive_key.count -eq 1) -and ($active_create_date -le $days_new_key_is_active_for)) {
             Remove-IAMAccessKey -AccessKeyId $inactive_key -UserName $user -Force && 
-            write-host "It has been $days_to_remove_inactive days since ACTIVE accesskey has been created. Inactive accesskey for $user was removed."
+            Write-Host "It has been $days_to_remove_inactive days since ACTIVE accesskey has been created. Inactive accesskey for $user was removed."
         }
     }
     # invoke the accesskey rotation lambda to run checks and possibly create any needed new keys 
     # for targeted users after we have just removed the inactive key in which a current active key exists and is older than specified days
-    Invoke-LMFunction -FunctionName $accesskey_rotation_lambda_name -Region $region
+    Invoke-LMFunction -FunctionName $accesskey_rotation_lambda_name -region $region -sns_arn $sns_arn -days $days_warning_before_inactive -targeted_usernames $targeted_usernames
 } 
 
-check_remove_accesskeys -region $ENV:region -accesskey_rotation_lambda_name $ENV:accesskey_rotation_lambda_name -days_to_remove_inactive $ENV:days_to_remove_inactive -targeted_usernames $ENV:targeted_usernames
+check_remove_accesskeys -region $ENV:region -sns_arn $ENV:sns_arn -days_warning_before_inactive $ENV:days_warning_before_inactive -accesskey_rotation_lambda_name $ENV:accesskey_rotation_lambda_name -days_to_remove_inactive $ENV:days_to_remove_inactive -targeted_usernames $ENV:targeted_usernames
