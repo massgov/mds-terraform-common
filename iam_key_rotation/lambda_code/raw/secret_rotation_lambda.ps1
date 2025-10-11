@@ -14,12 +14,12 @@
 #Requires -Modules @{ModuleName='AWS.Tools.CloudWatch';ModuleVersion='4.1.318.0'}
 
 # Uncomment to send the input event to CloudWatch Logs
-Write-Host `## Environment variables
-Write-Host AWS_LAMBDA_LOG_GROUP_NAME=$Env:AWS_LAMBDA_LOG_GROUP_NAME
-Write-Host AWS_LAMBDA_LOG_STREAM_NAME=$Env:AWS_LAMBDA_LOG_STREAM_NAME
-Write-Host AWS_LAMBDA_FUNCTION_NAME=$Env:AWS_LAMBDA_FUNCTION_NAME
-Write-Host (ConvertTo-Json -InputObject $LambdaInput -Compress -Depth 5)
-Write-Host (ConvertTo-Json -InputObject $LambdaContext -Compress -Depth 5)
+# Write-Host `## Environment variables
+# Write-Host AWS_LAMBDA_LOG_GROUP_NAME=$Env:AWS_LAMBDA_LOG_GROUP_NAME
+# Write-Host AWS_LAMBDA_LOG_STREAM_NAME=$Env:AWS_LAMBDA_LOG_STREAM_NAME
+# Write-Host AWS_LAMBDA_FUNCTION_NAME=$Env:AWS_LAMBDA_FUNCTION_NAME
+# Write-Host (ConvertTo-Json -InputObject $LambdaInput -Compress -Depth 5)
+# Write-Host (ConvertTo-Json -InputObject $LambdaContext -Compress -Depth 5)
 
 function rotate-accesskeys { 
     param(
@@ -28,7 +28,9 @@ function rotate-accesskeys {
         [Parameter(Mandatory = $true)]
         [string]$days,
         [Parameter(Mandatory = $true)]
-        [string]$region
+        [string]$region,
+        [Parameter(Mandatory = $false)]
+        [string]$sns_arn
     )
 
     Set-DefaultAWSRegion -Region $region
@@ -194,5 +196,5 @@ $listBlock
 } 
 
 
-rotate-accesskeys -region $ENV:region -days $ENV:days -targeted_usernames $ENV:targeted_usernames &&
+rotate-accesskeys -region $ENV:region -days $ENV:days -targeted_usernames $ENV:targeted_usernames -sns_arn $ENV:sns_arn &&
 publish_snstopic -region $ENV:region -sns_arn $ENV:sns_arn

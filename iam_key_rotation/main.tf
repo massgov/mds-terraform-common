@@ -18,6 +18,8 @@ resource "aws_cloudwatch_event_rule" "key_rotate_event" {
   name                = "iamuser_accesskey_rotation"
   description         = "runs everyday"
   schedule_expression = var.event_frequency
+  depends_on          = [aws_lambda_function.remove_inactive_accesskeys]
+  force_destroy       = true
 }
 
 resource "aws_cloudwatch_event_target" "key_rotate_event" {
@@ -46,7 +48,7 @@ resource "aws_lambda_function" "remove_inactive_accesskeys" {
 
   environment {
     variables = {
-      region                         = data.aws_region.current.name
+      region                         = data.aws_region.current.id
       days_to_remove_inactive        = var.days_to_remove_inactive
       targeted_usernames             = local.targeted_usernames
       accesskey_rotation_lambda_name = var.lambda_name
@@ -54,6 +56,7 @@ resource "aws_lambda_function" "remove_inactive_accesskeys" {
       sns_arn                        = aws_sns_topic.iamuser_accesskey_rotation.arn
     }
   }
+  depends_on = [aws_sns_topic.iamuser_accesskey_rotation]
 }
 
 resource "aws_lambda_function" "iam_user_rotate_accesskeys" {
@@ -77,11 +80,13 @@ resource "aws_lambda_function" "iam_user_rotate_accesskeys" {
 
   environment {
     variables = {
-      region                       = data.aws_region.current.name
+      region                       = data.aws_region.current.id
       days                         = var.days_to_rotate
       targeted_usernames           = local.targeted_usernames
       sns_arn                      = aws_sns_topic.iamuser_accesskey_rotation.arn
       days_warning_before_inactive = var.days_warning_before_inactive
     }
   }
+  depends_on = [aws_sns_topic.iamuser_accesskey_rotation]
+
 }

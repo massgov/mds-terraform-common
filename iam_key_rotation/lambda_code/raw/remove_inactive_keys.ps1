@@ -44,7 +44,7 @@ function check_remove_accesskeys {
     $days_new_key_is_active_for = (Get-Date).AddDays( - [int]$days_to_remove_inactive)
 
     # calculate the warning date to be used in the accesskey rotation lambda to warn user before active key is made inactive
-    $days_warning_before_inactive = $days_new_key_is_active_for.AddDays( - [int]$days_warning_before_inactive)
+    $date_warning_before_inactive = $days_new_key_is_active_for.AddDays( - [int]$days_warning_before_inactive)
 
     #for each user in targeted list, get their keys
     foreach ($user in $users) { 
@@ -59,14 +59,23 @@ function check_remove_accesskeys {
         $inactive_create_date = ($list_keys | Where { $_.Status -eq "Inactive" }).CreateDate
         # get active key if any exist
         $active_create_date = ($list_keys | Where { $_.Status -eq "Active" }).CreateDate
+        # get all active keys if any exist
+        $active_key = ($list_keys | Where { $_.Status -eq "Active" }).AccessKeyId
 
-        if (($list_keys.count -ge 1) -and ($active_create_date -le $days_warning_before_inactive) -or ($inactive_create_date -le $days_warning_before_inactive)) {
-
+        if (($list_keys.count -ge 1) -and ($active_create_date -le $date_warning_before_inactive) -or ($inactive_create_date -le $date_warning_before_inactive)) {
+            if ($active_key.count -eq 2) { 
+                $oldest_active_key = ($list_keys | Where { $_.Status -eq "Active" } | Sort-Object CreateDate | Select-Object -First 1).AccessKeyId
+            }
             $warning_message = @"
------------------WARNING: this is an AWS IAM user key deletion notification, per rotation policy--------------------------- 
-the INACTIVE accesskey or OLDEST ACTIVE accesskey (if 2 active accesskeys exist) for this user will be removed in $days_warning_before_inactive days.
+-----------------WARNING: this is an AWS IAM user key deactivation/deletion notification, per rotation policy--------------------------- 
+the INACTIVE accesskey or OLDEST ACTIVE accesskey (if 2 active accesskeys exist) for this user will be removed on $date_warning_before_inactive.
+This leaves only the most recently created ACTIVE accesskey remaining for this user.
 --------------------------------------------------------------------------------------------
 IAM users that will soon have an accesskey deleted is: $user
+-----Inactive accesskey pending deletion: $inactive_key 
+-----------------------------------------------------------------------------------------------------------------------------------------
+(if 2 active keys exist)
+-----Oldest Active accesskey pending deletion: $oldest_active_key
 "@
             Publish-SNSMessage -Region $region -TopicArn $sns_arn -Subject "IAM user accesskey deletion warning" -Message $warning_message 
         } 
@@ -77,9 +86,18 @@ IAM users that will soon have an accesskey deleted is: $user
             Write-Host "It has been $days_to_remove_inactive days since ACTIVE accesskey has been created. Inactive accesskey for $user was removed."
         }
     }
+
+    $lambda_payload = [PSCustomObject]@{
+        region             = $region
+        sns_arn            = $sns_arn
+        days               = $days_warning_before_inactive
+        targeted_usernames = $targeted_usernames
+    }
+    $Payload = $lambda_payload | ConvertTo-Json
+    
     # invoke the accesskey rotation lambda to run checks and possibly create any needed new keys 
     # for targeted users after we have just removed the inactive key in which a current active key exists and is older than specified days
-    Invoke-LMFunction -FunctionName $accesskey_rotation_lambda_name -region $region -sns_arn $sns_arn -days $days_warning_before_inactive -targeted_usernames $targeted_usernames
-} 
+    Invoke-LMFunction -FunctionName $accesskey_rotation_lambda_name -region $region -Payload $Payload
+}
 
 check_remove_accesskeys -region $ENV:region -sns_arn $ENV:sns_arn -days_warning_before_inactive $ENV:days_warning_before_inactive -accesskey_rotation_lambda_name $ENV:accesskey_rotation_lambda_name -days_to_remove_inactive $ENV:days_to_remove_inactive -targeted_usernames $ENV:targeted_usernames

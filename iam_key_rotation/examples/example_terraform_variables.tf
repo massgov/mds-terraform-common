@@ -29,5 +29,5 @@ variable "sns_alert_emails" {
 variable "days_warning_before_inactive" {
   description = "number of days before an inactive key is removed to send a warning notification"
   type        = string
-  default     = 7
+  default     = "7"
 }
