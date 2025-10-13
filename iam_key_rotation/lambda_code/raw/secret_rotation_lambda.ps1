@@ -171,7 +171,7 @@ function publish_snstopic {
 
     $a_list = @()
     foreach ($secret in $secrets) { 
-        $changed_recently = $secret | where { $_.LastChangedDate -ge (Get-Date).Date }
+        $changed_recently = $secret | where { (($_.LastChangedDate).Date) -eq ((Get-Date).Date) -and ($_.Name -match '_credentials$') }
         $a_list += ($changed_recently).Name
     }
 
