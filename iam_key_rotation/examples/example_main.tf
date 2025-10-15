@@ -1,0 +1,9 @@
+module "rotate_iam_access_keys" {
+  source                       = "./iam_key_rotation" #put repo module location here
+  days_to_rotate               = var.days_to_rotate
+  targeted_usernames           = var.targeted_usernames
+  days_to_remove_inactive      = var.days_to_remove_inactive
+  event_frequency              = var.event_frequency
+  sns_alert_emails             = var.sns_alert_emails
+  days_warning_before_inactive = var.days_warning_before_inactive
+}
