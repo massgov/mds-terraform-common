@@ -39,6 +39,16 @@ variable "security_group_ids" {
   default     = null
 }
 
+variable "management_lambda_schedule_expression" {
+  type = string
+  description = <<EOF
+    Schedule expression to pass to EventBridge Scheduler for management Lambda invocation. If null, the
+    Lambda will not be scheduled to automatically run. See
+    https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html for more information
+  EOF
+  default = "rate(14 days)"
+}
+
 variable "ami_search_filters" {
   type = list(object({
     name   = string
@@ -103,7 +113,7 @@ variable "user_volume_iops" {
   default     = 1250
   validation {
     condition     = var.user_volume_iops <= 64000
-    error_message = "EBS does not support be more than 64000 IOPS"
+    error_message = "EBS does not support more than 64000 IOPS"
   }
 }
 
@@ -122,6 +132,9 @@ variable "additional_clountinit_config_parts" {
     content_type = string
     content      = string
   }))
-  description = "Cloudinit configuration files to include in user data. See https://cloudinit.readthedocs.io/en/latest/explanation/format.html"
+  description = <<EOF
+    Cloudinit configuration files to include in user data. See
+    https://cloudinit.readthedocs.io/en/latest/explanation/format.html"
+  EOF
   default     = []
 }

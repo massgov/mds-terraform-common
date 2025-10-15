@@ -2,6 +2,7 @@ import {
   AttachVolumeCommand,
   DescribeImagesCommand,
   DescribeInstancesCommand,
+  DescribeVolumesCommand,
   DetachVolumeCommand,
   EC2Client,
   InstanceStateName,
@@ -40,6 +41,7 @@ interface Env {
   PROTO_ID: string;
   VOLUME_ID: string;
   LAUNCH_TEMPLATE_ID: string;
+  DEVICE_NAME:string;
   PARTITION_NAME: string;
   AMI_QUERY_JSON: string;
 }
@@ -58,6 +60,10 @@ const getEnv = (env: Record<string, string | undefined>): Env => {
     "Required variable LAUNCH_TEMPLATE_ID missing from env"
   );
   assert(
+    typeof env["DEVICE_NAME"] === "string",
+    "Required variable DEVICE_NAME missing from env"
+  );
+  assert(
     typeof env["PARTITION_NAME"] === "string",
     "Required variable PARTITION_NAME missing from env"
   );
@@ -70,6 +76,7 @@ const getEnv = (env: Record<string, string | undefined>): Env => {
     PROTO_ID: env["PROTO_ID"],
     VOLUME_ID: env["VOLUME_ID"],
     LAUNCH_TEMPLATE_ID: env["LAUNCH_TEMPLATE_ID"],
+    DEVICE_NAME: env["DEVICE_NAME"],
     PARTITION_NAME: env["PARTITION_NAME"],
     AMI_QUERY_JSON: env["AMI_QUERY_JSON"],
   };
@@ -135,7 +142,10 @@ const unmountPartitionOnInstance = async (
       DocumentName: "AWS-RunShellScript",
       Comment: "Unmount user data partition",
       Parameters: {
-        commands: [`umount ${partitionName}`],
+        commands: [
+          "set -e",
+          `if mountpoint -q ${partitionName}; then unmount ${partitionName}; else echo 'Nothing to do - ${partitionName} not mounted'; fi`,
+        ],
       },
     })
   );
@@ -159,11 +169,8 @@ const unmountPartitionOnInstance = async (
   return { success: getCommandInvicationResult.Status === "Success" };
 };
 
-const getInstance = async (protoId: string): Promise<Instance> => {
-  logger.debug(
-    { protoId },
-    "Looking up AMI currently being used by instance"
-  );
+const getInstance = async (protoId: string): Promise<Instance | undefined> => {
+  logger.debug({ protoId }, "Looking up AMI currently being used by instance");
   const describeInstancesResult = await ec2.send(
     new DescribeInstancesCommand({
       Filters: [
@@ -188,27 +195,40 @@ const getInstance = async (protoId: string): Promise<Instance> => {
       ({ Instances }) => Instances
     ).filter(<T>(val: T | undefined): val is T => Boolean(val)) ?? [];
   const instance = allInstances.length === 1 ? allInstances[0] : undefined;
-  assert(
-    instance,
-    `Expected exactly 1 instance to match PROTO_ID, but got ${allInstances.length}`
-  );
   return instance;
 };
 
 const recreateInstance = async (
-  instanceId: string,
+  instanceId: string | null,
   volumeId: string,
+  deviceName: string,
   launchTemplateId: string,
   imageId: string,
-  deletedByTagValue: string
 ): Promise<{ newInstanceId: string }> => {
   logger.debug({ instanceId, volumeId }, "Detaching volume from instance");
-  const detachVolumeResult = await ec2.send(
-    new DetachVolumeCommand({
-      InstanceId: instanceId,
-      VolumeId: volumeId,
+  const describeVolumeResult = await ec2.send(
+    new DescribeVolumesCommand({
+      VolumeIds: [volumeId],
     })
   );
+  assert(
+    describeVolumeResult.Volumes?.length === 1
+      && describeVolumeResult.Volumes[0],
+    "Got unexpected response when checking volume status"
+  );
+  if (
+    instanceId &&
+    describeVolumeResult.Volumes[0].Attachments?.some(
+      ({ InstanceId }) => InstanceId === instanceId
+    )
+  ) {
+    await ec2.send(
+      new DetachVolumeCommand({
+        InstanceId: instanceId,
+        VolumeId: volumeId,
+      })
+    );
+  }
   await waitUntilVolumeAvailable(
     { client: ec2, maxWaitTime: 90 },
     { VolumeIds: [volumeId] }
@@ -242,14 +262,14 @@ const recreateInstance = async (
   logger.debug({ newInstanceId }, "New instance is now running");
 
   logger.debug(
-    { newInstanceId, volumeId, device: detachVolumeResult.Device },
+    { newInstanceId, volumeId, device: deviceName },
     "Attaching volume to new instance"
   );
   await ec2.send(
     new AttachVolumeCommand({
       VolumeId: volumeId,
       InstanceId: newInstanceId,
-      Device: detachVolumeResult.Device,
+      Device: deviceName
     })
   );
   await waitUntilVolumeInUse(
@@ -266,16 +286,18 @@ const recreateInstance = async (
     }
   );
   logger.debug(
-    { newInstanceId, volumeId, device: detachVolumeResult.Device },
+    { newInstanceId, volumeId, device: deviceName },
     "Volume is now attached to new intance"
   );
 
-  logger.debug({ instanceId }, "Terminating old instance");
-  await ec2.send(
-    new TerminateInstancesCommand({
-      InstanceIds: [instanceId],
-    })
-  );
+  if (instanceId) {
+    logger.debug({ instanceId }, "Terminating old instance");
+    await ec2.send(
+      new TerminateInstancesCommand({
+        InstanceIds: [instanceId],
+      })
+    );
+  }
 
   return {
     newInstanceId,
@@ -287,6 +309,7 @@ type Event = EventBridgeEvent<"Scheduled Event", {}> & { force?: boolean };
 export const handler: Handler<Event, void> = async (event, context) => {
   const force = event.force ?? false;
   logger.setBindings({
+    forceRecreate: force ? 'true' : 'false',
     invokedFunctionArn: context.invokedFunctionArn,
     awsRequestId: context.awsRequestId,
   });
@@ -307,29 +330,33 @@ export const handler: Handler<Event, void> = async (event, context) => {
 
   const instance = await getInstance(env.PROTO_ID);
   assert(
-    instance?.InstanceId,
-    "Instance doesn't have an ID. How is that even possible?"
+    force || instance,
+    `Could not find existing instance with proto-id ${env.PROTO_ID}`
   );
-  if (!force && latestAmi.ImageId && latestAmi.ImageId === instance.ImageId) {
-    logger.info(
-      { imageId: latestAmi.ImageId },
-      "Target instance already using latest AMI"
+  if (instance) {
+    assert(
+      instance.InstanceId,
+      "Instance doesn't have an ID - is that even possible?"
+    )
+    if (!force && latestAmi.ImageId && latestAmi.ImageId === instance.ImageId) {
+      logger.info(
+        { imageId: latestAmi.ImageId },
+        "Target instance already using latest AMI"
+      );
+      return;
+    }
+    const unmountResult = await unmountPartitionOnInstance(
+      instance.InstanceId,
+      env.PARTITION_NAME
     );
-    return;
+    assert(unmountResult.success, "Can't safely detach volume from instance");
   }
-
-  const unmountResult = await unmountPartitionOnInstance(
-    instance.InstanceId,
-    env.PARTITION_NAME
-  );
-  assert(unmountResult.success, "Can't safely detach volume from instance");
-
   const { newInstanceId } = await recreateInstance(
-    instance.InstanceId,
+    instance?.InstanceId ?? null,
     env.VOLUME_ID,
+    env.DEVICE_NAME,
     env.LAUNCH_TEMPLATE_ID,
-    latestAmi.ImageId,
-    context.invokedFunctionArn
+    latestAmi.ImageId
   );
   logger.info(
     { newInstanceId, imageId: latestAmi.ImageId, volumeId: env.VOLUME_ID },

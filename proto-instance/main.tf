@@ -4,6 +4,8 @@ locals {
   proto_id               = random_uuid.default.result
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
   user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
+  device_name            = "/dev/sdf"
+  block_device_name      = "/dev/xvdf"
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -12,6 +14,26 @@ data "aws_caller_identity" "default" {}
 data "aws_default_tags" "default" {}
 data "aws_subnet" "default" {
   id = var.subnet_id
+}
+data "aws_iam_role" "default" {
+  name = aws_iam_instance_profile.default.role
+}
+data "aws_ebs_volume" "default" {
+  most_recent = true
+  filter {
+    name   = "volume-id"
+    values = [local.user_volume_id]
+  }
+}
+data "aws_key_pair" "default" {
+  count = var.key_name == null ? 0 : 1
+
+  key_name = var.key_name
+}
+data "aws_security_group" "default" {
+  count = length(local.eni_security_group_ids)
+
+  id = local.eni_security_group_ids[count.index]
 }
 
 data "aws_ami" "default" {
@@ -80,7 +102,7 @@ data "cloudinit_config" "default" {
     content = templatefile(
       "${path.module}/templates/mount_user_volume.sh.tftpl",
       {
-        device_name = "/dev/xvdf"
+        device_name = local.block_device_name
       }
     )
   }
@@ -211,12 +233,19 @@ data "aws_iam_policy_document" "lambda" {
     actions = ["ssm:SendCommand"]
     effect  = "Allow"
     resources = [
-      "arn:aws:ssm:${local.region}:${local.account}:document/AWS-RunShellScript"
+      "arn:aws:ssm:${local.region}::document/AWS-RunShellScript",
+    ]
+  }
+  statement {
+    actions = ["ssm:SendCommand"]
+    effect  = "Allow"
+    resources = [
+      "arn:aws:ec2:${local.region}:${local.account}:instance/*"
     ]
     condition {
-      variable = "aws:ResourceTag/proto-id"
       test     = "StringEquals"
       values   = [local.proto_id]
+      variable = "ssm:resourceTag/proto-id"
     }
   }
   statement {
@@ -229,18 +258,45 @@ data "aws_iam_policy_document" "lambda" {
       "ec2:DetachVolume",
       "ec2:AttachVolume"
     ]
-    resources = ["arn:aws:ec2:${local.region}:${local.account}:instance/*"]
+    resources = [data.aws_ebs_volume.default.arn]
     effect    = "Allow"
+  }
+  statement {
+    actions = [
+      "ec2:DetachVolume",
+      "ec2:AttachVolume"
+    ]
+    resources = [
+      "arn:aws:ec2:${local.region}:${local.account}:instance/*"
+    ]
     condition {
       test     = "StringEquals"
       values   = [local.proto_id]
-      variable = "ec2:ResourceTag/proto-id"
+      variable = "aws:ResourceTag/proto-id"
     }
+    effect = "Allow"
   }
   statement {
-    actions   = ["ec2:DescribeVolumes"]
+    actions = [
+      "ec2:DescribeVolumes",
+      "ec2:DescribeVolumeStatus"
+    ]
     effect    = "Allow"
-    resources = ["arn:aws:ec2:${local.region}:${local.account}:volume/*"]
+    resources = ["*"]
+  }
+  statement {
+    actions = [
+      "iam:PassRole",
+    ]
+    effect = "Allow"
+    resources = [
+      data.aws_iam_role.default.arn
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ec2.amazonaws.com"]
+    }
   }
   statement {
     actions = ["ec2:RunInstances"]
@@ -248,33 +304,77 @@ data "aws_iam_policy_document" "lambda" {
     resources = concat(
       [
         "arn:aws:ec2:${local.region}::image/*",
-        "arn:aws:ec2:${local.region}:${local.account}:instance/*",
         "arn:aws:ec2:${local.region}:${local.account}:network-interface/*",
-        "arn:aws:ec2:${local.region}:${local.account}:volume/${local.user_volume_id}",
         data.aws_subnet.default.arn,
         aws_launch_template.default.arn,
       ],
-      formatlist("arn:aws:ec2:${local.region}:${local.account}:security-group/%s", local.eni_security_group_ids)
+      [for key in data.aws_key_pair.default : key.arn],
+      [for sg in data.aws_security_group.default : sg.arn]
     )
   }
   statement {
-    actions = ["ec2:TerminateInstances"]
-    effect  = "Allow"
+    actions = [
+      "ec2:AssociateIamInstanceProfile",
+      "ec2:DisassociateIamInstanceProfile",
+      "ec2:ReplaceIamInstanceProfileAssociation"
+    ]
     resources = [
       "arn:aws:ec2:${local.region}:${local.account}:instance/*",
     ]
     condition {
       test     = "StringEquals"
       values   = [local.proto_id]
-      variable = "ec2:ResourceTag/proto-id"
+      variable = "aws:ResourceTag/proto-id"
     }
   }
+  statement {
+    actions = [
+      "ec2:RunInstances",
+      "ec2:StartInstances",
+      "ec2:CreateTags"
+    ]
+    resources = [
+      "arn:aws:ec2:${local.region}:${local.account}:volume/*",
+      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
+    ]
+    effect = "Allow"
+  }
+  statement {
+    actions = [
+      "ec2:TerminateInstances",
+      "ec2:StopInstances"
+    ]
+    effect = "Allow"
+    resources = [
+      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
+    ]
+    condition {
+      test     = "StringEquals"
+      values   = [local.proto_id]
+      variable = "aws:ResourceTag/proto-id"
+    }
+  }
+}
+
+resource "aws_cloudwatch_event_rule" "lambda" {
+  count = var.management_lambda_schedule_expression == null ? 0 : 1
+
+  name                = "${var.name_prefix}-mgmt-lambda-trigger"
+  schedule_expression = var.management_lambda_schedule_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda" {
+  count = var.management_lambda_schedule_expression == null ? 0 : 1
+
+  rule = aws_cloudwatch_event_rule.lambda[count.index].name
+  arn  = module.lambda.lambda_function_arn
 }
 
 module "lambda" {
   source     = "terraform-aws-modules/lambda/aws"
   depends_on = [data.external.lambda]
 
+  timeout       = 15 * 60
   function_name = "${var.name_prefix}-management-lambda"
   description   = "Lambda that manages lifecycle of proto instance"
 
@@ -283,14 +383,23 @@ module "lambda" {
   local_existing_package = "${path.module}/lambda/.dist/handler/package.zip"
   create_package         = false
 
+  allowed_triggers = length(aws_cloudwatch_event_rule.lambda) < 1 ? {} : {
+    EventBridgeScheduler = {
+      principal  = "events.amazonaws.com"
+      source_arn = aws_cloudwatch_event_rule.lambda[0].arn
+    }
+  }
+
   environment_variables = {
     PROTO_ID           = local.proto_id
     VOLUME_ID          = local.user_volume_id
     LAUNCH_TEMPLATE_ID = aws_launch_template.default.id
-    PARTITION_NAME     = "/dev/sdf"
+    DEVICE_NAME        = local.device_name
+    PARTITION_NAME     = "${local.block_device_name}1"
     AMI_QUERY_JSON     = jsonencode(var.ami_search_filters)
   }
 
+  publish                       = true
   attach_policy_json            = true
   attach_cloudwatch_logs_policy = true
   policy_json                   = data.aws_iam_policy_document.lambda.json
@@ -352,7 +461,7 @@ resource "terraform_data" "volume_attachment" {
       aws ec2 attach-volume \
         --instance-id=${one(data.aws_instances.instance.ids)} \
         --volume-id=${local.user_volume_id} \
-        --device=/dev/sdf
+        --device=${local.device_name}
     EOF 
   }
 }
