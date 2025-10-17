@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.118] - 2025-10-17
+## [1.0.120] - 2025-10-17
   - [Proto Instance] Adds `proto-instance` module for creating managed dev instances
 
 ## [1.x] - 2025-10-03
