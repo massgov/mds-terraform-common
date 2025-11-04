@@ -173,6 +173,11 @@ variable "ecs_auto_scale_arn" {
   type        = string
   default     = ""
 }
+variable "ecs_create_auto_scale_arn" {
+  description = "Create an Auto scale role"
+  type        = bool
+  default     = false
+}
 variable "ecs_security_group_ids" {
   description = "List of Security Group IDs"
   type        = list(string)

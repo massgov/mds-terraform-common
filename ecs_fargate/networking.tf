@@ -9,30 +9,9 @@ data "aws_lb_listener" "selected" {
   port              = coalesce(var.lb_listener_port, 443)
 }
 
-resource "aws_lb_target_group" "alb" {
-  for_each = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
-
-  name                 = substr(join("-", [terraform.workspace, each.key, each.value["tls"] ? "HTTPS" : "HTTP"]), 0, 32)
-  port                 = lookup(each.value, "service_port", each.value["container_port"])
-  protocol             = each.value["tls"] ? "HTTPS" : "HTTP"
-  target_type          = "ip"
-  vpc_id               = var.vpc_id
-  deregistration_delay = "60"
-  health_check {
-    protocol            = each.value["tls"] ? "HTTPS" : "HTTP"
-    interval            = 10
-    path                = lookup(each.value, "health_check_path", "/")
-    timeout             = 5
-    unhealthy_threshold = 5
-    healthy_threshold   = 5
-    matcher             = lookup(each.value, "health_check_matcher", "200")
-  }
-  tags = {}
-}
-
 resource "aws_lb_listener_rule" "static" {
   depends_on = [aws_lb_target_group.alb]
-  for_each   = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
+  for_each   = var.ec2_alb_arn == null ? {} : length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
 
   listener_arn = data.aws_lb_listener.selected[0].arn
   tags         = {}
@@ -75,3 +54,23 @@ resource "aws_lb_listener_rule" "static" {
   lifecycle { ignore_changes = [action] }
 }
 
+resource "aws_lb_target_group" "alb" {
+  for_each = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
+
+  name                 = substr(join("-", [terraform.workspace, each.key, each.value["tls"] ? "HTTPS" : "HTTP"]), 0, 32)
+  port                 = lookup(each.value, "service_port", each.value["container_port"])
+  protocol             = each.value["tls"] ? "HTTPS" : "HTTP"
+  target_type          = "ip"
+  vpc_id               = var.vpc_id
+  deregistration_delay = "60"
+  health_check {
+    protocol            = each.value["tls"] ? "HTTPS" : "HTTP"
+    interval            = 10
+    path                = lookup(each.value, "health_check_path", "/")
+    timeout             = 5
+    unhealthy_threshold = 5
+    healthy_threshold   = 5
+    matcher             = lookup(each.value, "health_check_matcher", "200")
+  }
+  tags = {}
+}

@@ -6,7 +6,7 @@ terraform {
     aws = {
       source = "hashicorp/aws"
       # Needed for lambda module
-      version = ">= 4.8.0"
+      version = ">= 6.0.0"
     }
   }
 }
