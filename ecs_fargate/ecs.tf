@@ -187,7 +187,7 @@ resource "aws_ecs_service" "main" {
 
 // optional: scaling target for scaling policies
 resource "aws_appautoscaling_target" "main" {
-  count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : 1
+  count              = length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false ? 0 : 1
   max_capacity       = var.ecs_max_count
   min_capacity       = var.ecs_min_count
   resource_id        = "service/${data.aws_ecs_cluster.main.cluster_name}/${aws_ecs_service.main[count.index].name}"
@@ -199,7 +199,7 @@ resource "aws_appautoscaling_target" "main" {
 
 // optional: scale up when memory is over X %
 resource "aws_appautoscaling_policy" "memory" {
-  count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_memory == 0 ? 0 : 1
+  count = length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false ? 0 : var.ecs_auto_scale_memory == 0 ? 0 : 1
 
   name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-mem-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
@@ -217,7 +217,7 @@ resource "aws_appautoscaling_policy" "memory" {
 
 // optional: scale up when cpu is over X %
 resource "aws_appautoscaling_policy" "cpu" {
-  count = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
+  count =length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false  ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
 
   name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-cpu-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
@@ -236,7 +236,7 @@ resource "aws_appautoscaling_policy" "cpu" {
 
 // optional: spin service down on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_down" {
-  count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_down == "0" ? 0 : 1
+  count              = length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false ? 0 : var.ecs_auto_scale_schedule_down == "0" ? 0 : 1
   name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension
@@ -251,7 +251,7 @@ resource "aws_appautoscaling_scheduled_action" "schedule_down" {
 
 // optional: spin service up on a schedule
 resource "aws_appautoscaling_scheduled_action" "schedule_up" {
-  count              = length(var.ecs_auto_scale_arn) == 0 ? 0 : var.ecs_auto_scale_schedule_up == "0" ? 0 : 1
+  count              = length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false ? 0 : var.ecs_auto_scale_schedule_up == "0" ? 0 : 1
   name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-schedule-down"
   resource_id        = aws_appautoscaling_target.main[count.index].id
   scalable_dimension = aws_appautoscaling_target.main[count.index].scalable_dimension

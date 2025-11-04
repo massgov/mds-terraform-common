@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.121] - 2025-11-04
+- [Ecs Fargate] 
+  - Update AWS Version
+  - New: `var.ecs_create_auto_scale_arn` to create a new auto scaling role vs passing one in
+  - Update: `current.name` to `current.region` for deprecation
+  - Update: Allow `ec2_alb_arn` to be null, when skips creation of listener rule and target group attachment
+
+
 ## [1.0.120] - 2025-10-17
   - [Proto Instance] Adds `proto-instance` module for creating managed dev instances
 
