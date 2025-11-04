@@ -11,13 +11,13 @@ locals {
       environment : t.environment_vars
       secrets : [
         for s in t.secret_vars :
-        { name : s.name, valueFrom : "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${s.valueFrom}" }
+        { name : s.name, valueFrom : "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${s.valueFrom}" }
       ]
       logConfiguration : {
         logDriver : "awslogs",
         options : {
           awslogs-group : try(t.log_group_name, null) != null ? t.log_group_name : aws_cloudwatch_log_group.main[t.container_name].name
-          awslogs-region : data.aws_region.current.name,
+          awslogs-region : data.aws_region.current.region,
           awslogs-stream-prefix : "ecs"
         }
       }
@@ -321,7 +321,7 @@ module "teamsalerts" {
   source                      = "../teamsalerts"
   name                        = join("", [var.ecs_service_name, "Teams", "Alert"])
   human_name                  = "${var.ecs_cluster_name} ${var.ecs_service_name} Teams Alerts"
-  teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
+  teams_webhook_url_param_arn = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.teams_webhook_param_arn}"
   teams_webhook_url_param_key = var.teams_webhook_url_param_key
   topic_map = [
     {
