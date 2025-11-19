@@ -5,7 +5,7 @@ locals {
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
   user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
   device_name            = "/dev/sdf"
-  block_device_name      = "/dev/xvdf"
+  block_device_name      = "/dev/disk/by-id/nvme-Amazon_Elastic_Block_Store_${local.user_volume_id}"
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -395,7 +395,7 @@ module "lambda" {
     VOLUME_ID          = local.user_volume_id
     LAUNCH_TEMPLATE_ID = aws_launch_template.default.id
     DEVICE_NAME        = local.device_name
-    PARTITION_NAME     = "${local.block_device_name}1"
+    PARTITION_NAME     = "${local.block_device_name}-part1"
     AMI_QUERY_JSON     = jsonencode(var.ami_search_filters)
   }
 
