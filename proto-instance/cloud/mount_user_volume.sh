@@ -12,8 +12,10 @@ die() {
 }
 trap 'die $LINENO' ERR
 
-device_name="${device_name}"
-partition_name="$${device_name}-part1"
+# Select the device which has no boot partition
+device_name=$(
+  lsblk -o 'MOUNTPOINT,NAME,PATH' --json | jq -r '.blockdevices[] | select(isempty(.children // empty) or all(.children[].mountpoint // empty; startswith("/boot") | not)).path'
+)
 
 device_exists=1
 num_partitions=0
@@ -21,8 +23,8 @@ num_partitions=0
 sleep_time_sec=5
 for i in {1..10}
 do
-  echo "[+] Checking that block device $${device_name} is attached"
-  fdisk -l $device_name && break || echo "$${device_name} not found, sleeping for $${sleep_time_sec} sec"
+  echo "[+] Checking that block device ${device_name} is attached"
+  fdisk -l $device_name && break || echo "${device_name} not found, sleeping for ${sleep_time_sec} sec"
   sleep $sleep_time_sec
   sleep_time_sec=$(( 3 * sleep_time_sec / 2)) # exponential backoff by factor of 1.5
 done
@@ -33,29 +35,36 @@ num_partitions=$(
 )
 
 if (( $num_partitions < 1)); then
-  echo "[+] Partitioning $${device_name}"
+  echo "[+] Partitioning ${device_name}"
   parted -s $device_name -- mklabel gpt \
     mkpart main ext4 1MiB -1
 
-  echo "[+] Making a file system on $${partition_name}"
+  echo "[+] Making a file system on ${partition_name}"
   partprobe $device_name
+  partition_name=$(
+    lsblk $device_name -o NAME,PATH --json | jq -r '.blockdevices[0].children[0].path'
+  )
   mkfs.ext4 $partition_name
 else
-  echo "[+] Found $${num_partitions} partition(s) on $${device_name}"
+  echo "[+] Found ${num_partitions} partition(s) on ${device_name}"
   echo "[+] This is probably because this block device has already been partitioned and formatted"
+
+  partition_name=$(
+    lsblk $device_name -o NAME,PATH --json | jq -r '.blockdevices[0].children[0].path'
+  )
 fi
 
-echo "[+] Mounting $${partition_name} as /home"
+echo "[+] Mounting ${partition_name} as /home"
 home_mode=$(stat -c "%a" /home)
 mv /home $HOME_BACKUP
-mkdir -m="$${home_mode}" /home
+mkdir -m="${home_mode}" /home
 mount $partition_name /home
 
 echo "[+] Making entry in fstab"
-echo "$${partition_name} /home ext4 defaults 0 2" >> /etc/fstab
+echo "${partition_name} /home ext4 defaults 0 2" >> /etc/fstab
 
 echo "[+] Copying old home directory to new one"
-rsync -a "$${HOME_BACKUP}/" /home/
+rsync -a "${HOME_BACKUP}/" /home/
 
 echo "[+] Cleaning up"
 if [ -d "/home/$(whoami)" ]; then

@@ -144,8 +144,8 @@ const unmountPartitionOnInstance = async (
       Parameters: {
         commands: [
           "set -e",
-          `mountpoints=$(lsblk ${partitionName} -o MOUNTPOINTS --json | jq -r '.blockdevices[].mountpoints | length')`,
-          `if (( $mountpoints > 0 )); then unmount ${partitionName}; else echo 'Nothing to do - ${partitionName} not mounted'; fi`,
+          `mountpoint=$(lsblk -o MOUNTPOINT,PATH --json | jq -r '.blockdevices[] | select(.mountpoint == "/home").path')`,
+          'if [ -n "${mountpoint}" ]; then unmount $mountpoint; else echo "Nothing to do - ${mountpoint} not mounted"; fi',
         ],
       },
     })
