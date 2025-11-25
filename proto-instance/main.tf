@@ -412,7 +412,10 @@ module "lambda" {
 
 resource "terraform_data" "instance" {
   triggers_replace = []
-  depends_on       = [local.user_volume_id]
+  depends_on       = [
+    local.user_volume_id,
+    aws_launch_template.default
+  ]
 
   provisioner "local-exec" {
     command = <<EOF
@@ -427,7 +430,7 @@ resource "terraform_data" "instance" {
 resource "time_sleep" "wait" {
   depends_on = [terraform_data.instance]
 
-  create_duration = "10s"
+  create_duration = "30s"
 }
 
 data "aws_instances" "instance" {

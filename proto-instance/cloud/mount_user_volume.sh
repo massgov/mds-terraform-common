@@ -12,9 +12,15 @@ die() {
 }
 trap 'die $LINENO' ERR
 
-# Select the device which has no boot partition
-device_name=$(
-  lsblk -o 'MOUNTPOINT,NAME,PATH' --json | jq -r '.blockdevices[] | select(isempty(.children // empty) or all(.children[].mountpoint // empty; startswith("/boot") | not)).path'
+# Select the device that has no boot partition
+USER_BLOCK_DEVICE_QUERY=$(
+cat <<EOF
+.blockdevices[]
+  | select(isempty(.children // empty) or all(
+      .children[]?.mountpoint // empty; startswith("/boot") | not
+    )
+  ).path
+EOF
 )
 
 device_exists=1
@@ -23,15 +29,25 @@ num_partitions=0
 sleep_time_sec=5
 for i in {1..10}
 do
-  echo "[+] Checking that block device ${device_name} is attached"
-  fdisk -l $device_name && break || echo "${device_name} not found, sleeping for ${sleep_time_sec} sec"
+  device_name=$(
+    lsblk -o 'MOUNTPOINT,NAME,PATH' --json | jq -r "${USER_BLOCK_DEVICE_QUERY}"
+  )
+  if [ -n "${device_name}" ]; then
+    echo "[+] Checking that block device ${device_name} is attached"
+    fdisk -l $device_name && break || echo "${device_name} not found, sleeping for ${sleep_time_sec} sec"
+  fi
   sleep $sleep_time_sec
   sleep_time_sec=$(( 3 * sleep_time_sec / 2)) # exponential backoff by factor of 1.5
 done
 
+if [ -z "${device_name}" ]; then
+  echo "Couldn't find non-boot partition. Dying now."
+  exit 1
+fi
+
 echo "[+] Checking for existing partitions"
 num_partitions=$(
-  lsblk $device_name -J | jq -r '[.blockdevices[].children[] | select(.type == "part")] | length'
+  lsblk $device_name -J | jq -r '[.blockdevices[]?.children[]? | select(.type == "part")] | length'
 )
 
 if (( $num_partitions < 1)); then
