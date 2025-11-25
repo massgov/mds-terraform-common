@@ -35,14 +35,11 @@ const logger = pino({
 const ec2 = new EC2Client();
 const ssm = new SSMClient();
 
-const DELETED_BY_TAG = "deletedby";
-
 interface Env {
   PROTO_ID: string;
   VOLUME_ID: string;
   LAUNCH_TEMPLATE_ID: string;
   DEVICE_NAME:string;
-  PARTITION_NAME: string;
   AMI_QUERY_JSON: string;
 }
 
@@ -64,10 +61,6 @@ const getEnv = (env: Record<string, string | undefined>): Env => {
     "Required variable DEVICE_NAME missing from env"
   );
   assert(
-    typeof env["PARTITION_NAME"] === "string",
-    "Required variable PARTITION_NAME missing from env"
-  );
-  assert(
     typeof env["AMI_QUERY_JSON"] === "string",
     "Required variable AMI_QUERY_JSON missing from env"
   );
@@ -77,7 +70,6 @@ const getEnv = (env: Record<string, string | undefined>): Env => {
     VOLUME_ID: env["VOLUME_ID"],
     LAUNCH_TEMPLATE_ID: env["LAUNCH_TEMPLATE_ID"],
     DEVICE_NAME: env["DEVICE_NAME"],
-    PARTITION_NAME: env["PARTITION_NAME"],
     AMI_QUERY_JSON: env["AMI_QUERY_JSON"],
   };
 };
@@ -130,10 +122,9 @@ const getLatestAmi = async (amiQuery: AmiQuery): Promise<Image | undefined> => {
 
 const unmountPartitionOnInstance = async (
   instanceId: string,
-  partitionName: string
 ): Promise<{ success: boolean }> => {
   logger.debug(
-    { instanceId, partitionName },
+    { instanceId },
     "Unmounting partition from instance"
   );
   const sendCommandResult = await ssm.send(
@@ -144,7 +135,8 @@ const unmountPartitionOnInstance = async (
       Parameters: {
         commands: [
           "set -e",
-          `if mountpoint -q ${partitionName}; then unmount ${partitionName}; else echo 'Nothing to do - ${partitionName} not mounted'; fi`,
+          `mountpoint=$(lsblk -o MOUNTPOINT,PATH --json | jq -r '.blockdevices[] | select(.mountpoint == "/home").path')`,
+          'if [ -n "${mountpoint}" ]; then umount $mountpoint; else echo "Nothing to do - ${mountpoint} not mounted"; fi',
         ],
       },
     })
@@ -157,7 +149,7 @@ const unmountPartitionOnInstance = async (
     }
   );
   logger.debug(
-    { instanceId, partitionName },
+    { instanceId },
     "Unmount command has finished; checking invocation status"
   );
   const getCommandInvicationResult = await ssm.send(
@@ -347,7 +339,6 @@ export const handler: Handler<Event, void> = async (event, context) => {
     }
     const unmountResult = await unmountPartitionOnInstance(
       instance.InstanceId,
-      env.PARTITION_NAME
     );
     assert(unmountResult.success, "Can't safely detach volume from instance");
   }

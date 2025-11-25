@@ -14,7 +14,7 @@ provider "aws" {
   region = "us-east-1"
   default_tags {
     tags = {
-      foo = bar
+      foo = "bar"
     }
   }
 }
@@ -23,7 +23,7 @@ data "aws_subnet" "default" {
   id   = "subnet-0aaaaaaaaaaaaaaaa"
 }
 
-data "aws_prefix_list" "default" {
+data "aws_ec2_managed_prefix_list" "default" {
   name = "developer-home-ips"
 }
 

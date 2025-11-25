@@ -5,7 +5,6 @@ locals {
   instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
   user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
   device_name            = "/dev/sdf"
-  block_device_name      = "/dev/xvdf"
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -90,7 +89,7 @@ data "cloudinit_config" "default" {
     content_type = "text/x-shellscript"
 
     content = templatefile(
-      "${path.module}/templates/install_ssm_agent.sh.tftpl",
+      "${path.module}/cloud/templates/install_ssm_agent.sh.tftpl",
       {}
     )
   }
@@ -99,11 +98,8 @@ data "cloudinit_config" "default" {
     filename     = "mount_user_volume.sh"
     content_type = "text/x-shellscript"
 
-    content = templatefile(
-      "${path.module}/templates/mount_user_volume.sh.tftpl",
-      {
-        device_name = local.block_device_name
-      }
+    content = file(
+      "${path.module}/cloud/mount_user_volume.sh",
     )
   }
 
@@ -377,6 +373,7 @@ module "lambda" {
   timeout       = 15 * 60
   function_name = "${var.name_prefix}-management-lambda"
   description   = "Lambda that manages lifecycle of proto instance"
+  memory_size   = 1024
 
   handler                = "index.handler"
   runtime                = "nodejs22.x"
@@ -395,7 +392,6 @@ module "lambda" {
     VOLUME_ID          = local.user_volume_id
     LAUNCH_TEMPLATE_ID = aws_launch_template.default.id
     DEVICE_NAME        = local.device_name
-    PARTITION_NAME     = "${local.block_device_name}1"
     AMI_QUERY_JSON     = jsonencode(var.ami_search_filters)
   }
 
@@ -417,7 +413,10 @@ module "lambda" {
 
 resource "terraform_data" "instance" {
   triggers_replace = []
-  depends_on       = [local.user_volume_id]
+  depends_on       = [
+    local.user_volume_id,
+    aws_launch_template.default
+  ]
 
   provisioner "local-exec" {
     command = <<EOF
@@ -432,7 +431,7 @@ resource "terraform_data" "instance" {
 resource "time_sleep" "wait" {
   depends_on = [terraform_data.instance]
 
-  create_duration = "10s"
+  create_duration = "30s"
 }
 
 data "aws_instances" "instance" {
