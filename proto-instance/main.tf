@@ -373,6 +373,7 @@ module "lambda" {
   timeout       = 15 * 60
   function_name = "${var.name_prefix}-management-lambda"
   description   = "Lambda that manages lifecycle of proto instance"
+  memory_size   = 1024
 
   handler                = "index.handler"
   runtime                = "nodejs22.x"

@@ -136,7 +136,7 @@ const unmountPartitionOnInstance = async (
         commands: [
           "set -e",
           `mountpoint=$(lsblk -o MOUNTPOINT,PATH --json | jq -r '.blockdevices[] | select(.mountpoint == "/home").path')`,
-          'if [ -n "${mountpoint}" ]; then unmount $mountpoint; else echo "Nothing to do - ${mountpoint} not mounted"; fi',
+          'if [ -n "${mountpoint}" ]; then umount $mountpoint; else echo "Nothing to do - ${mountpoint} not mounted"; fi',
         ],
       },
     })
