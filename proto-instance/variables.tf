@@ -45,12 +45,12 @@ variable "security_group_ids" {
 }
 
 variable "management_lambda_schedule_expression" {
-  type = string
+  type        = string
   description = <<EOF
     Schedule expression to pass to EventBridge Scheduler for management Lambda invocation. If null, the Lambda will not be scheduled to automatically run.
     See https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html for more information
   EOF
-  default = "rate(14 days)"
+  default     = "rate(14 days)"
 }
 
 variable "ami_search_filters" {

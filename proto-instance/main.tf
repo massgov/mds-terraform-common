@@ -413,7 +413,7 @@ module "lambda" {
 
 resource "terraform_data" "instance" {
   triggers_replace = []
-  depends_on       = [
+  depends_on = [
     local.user_volume_id,
     aws_launch_template.default
   ]

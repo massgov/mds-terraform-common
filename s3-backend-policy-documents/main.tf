@@ -34,12 +34,12 @@ data "aws_iam_policy_document" "policy_info" {
   statement {
     sid       = "AccessStateFile"
     actions   = each.value.s3
-    resources = [ for path in var.state_file_paths : "arn:aws:s3:::${var.bucket_name}/${path}" ]
+    resources = [for path in var.state_file_paths : "arn:aws:s3:::${var.bucket_name}/${path}"]
   }
   statement {
     sid       = "AccessLock"
     actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-    resources = [ for path in var.state_file_paths : "arn:aws:s3:::${var.bucket_name}/${path}.lock" ]
+    resources = [for path in var.state_file_paths : "arn:aws:s3:::${var.bucket_name}/${path}.lock"]
   }
   statement {
     sid       = "BucketEncryption"

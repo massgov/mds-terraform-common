@@ -12,7 +12,7 @@ resource "aws_s3_object" "files" {
   bucket = data.aws_s3_bucket.docs.id
   key    = "documentation/${var.repo}/${replace(replace(each.value, "../", ""), "./", "")}"
   source = "${local.relative_path}${replace(replace(each.value, "../", ""), "./", "")}"
-  etag   = filemd5("${local.relative_path}${replace(replace(each.value, "../", ""), "./", "")}")  # Use MD5 hash to detect changes
+  etag   = filemd5("${local.relative_path}${replace(replace(each.value, "../", ""), "./", "")}") # Use MD5 hash to detect changes
 }
 
 resource "aws_s3_object" "category" {

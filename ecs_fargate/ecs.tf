@@ -217,7 +217,7 @@ resource "aws_appautoscaling_policy" "memory" {
 
 // optional: scale up when cpu is over X %
 resource "aws_appautoscaling_policy" "cpu" {
-  count =length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false  ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
+  count = length(var.ecs_auto_scale_arn) == 0 || var.ecs_create_auto_scale_arn == false ? 0 : var.ecs_auto_scale_cpu == 0 ? 0 : 1
 
   name               = "${data.aws_ecs_cluster.main.cluster_name}-${aws_ecs_service.main[0].name}-cpu-autoScalingPolicy"
   policy_type        = "TargetTrackingScaling"
