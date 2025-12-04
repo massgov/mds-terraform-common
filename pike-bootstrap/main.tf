@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 locals {
   account_id = data.aws_caller_identity.current.account_id
 
-  region = data.aws_region.current.region
+  region = data.aws_region.current.name
 
   policy_files = fileset(path.module, "${var.policy_file_prefix}*.json")
 
