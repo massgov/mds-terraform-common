@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 locals {
   account_id = data.aws_caller_identity.current.account_id
 
-  region = data.aws_region.current.name
+  region = data.aws_region.current.id
 
   policy_files = fileset(path.module, "${var.policy_file_prefix}*.json")
 
@@ -172,3 +172,4 @@ resource "aws_iam_role_policy_attachment" "pike_gha_attach" {
   role       = var.current_apply_role_name
   policy_arn = aws_iam_policy.pike_self_manage.arn
 }
+
