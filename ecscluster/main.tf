@@ -1,14 +1,23 @@
 locals {
-  default_devices = [{ device_name = "/dev/xvda",
-    delete_on_termination = true,
-    encrypted             = var.volume_encryption,
-    iops                  = null,
-    snapshot_id           = null,
-    throughput            = null,
-    volume_size           = var.volume_size,
-    volume_type           = null
+  default_devices = [
+    {
+      device_name           = "/dev/xvda",
+      delete_on_termination = true,
+      encrypted             = var.volume_encryption,
+      iops                  = null,
+      snapshot_id           = null,
+      throughput            = null,
+      volume_size           = var.volume_size,
+      volume_type           = null
     }
   ]
+  # Merge default block device configurations and block device configurations
+  # given by the AMI parameter. If there is a device name collision, prefer
+  # the AMI's block device
+  all_block_devices = merge(
+    { for d in local.default_devices: d.device_name => d },
+    { for d in module.ami_devices.block_devices: d.device_name => d }
+  )
 }
 
 # TODO: Now that we have this module, I think the `exclude_root_device` option
@@ -76,7 +85,7 @@ module "asg" {
   schedule_down        = var.schedule_down
   schedule_up          = var.schedule_up
 
-  block_devices = concat(local.default_devices, module.ami_devices.block_devices)
+  block_devices = values(local.all_block_devices)
 
   amazon_ecs_managed_tag = var.amazon_ecs_managed_tag
 

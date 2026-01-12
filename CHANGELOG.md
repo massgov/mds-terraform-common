@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.122] - 2026-01-12
+  - [ECS Cluster] Prevent block device collision in mapping provided to cluster autoscaling group
+
 ## [1.0.121] - 2025-11-04
 - [Ecs Fargate] 
   - Update AWS Version
