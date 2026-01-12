@@ -15,8 +15,8 @@ locals {
   # given by the AMI parameter. If there is a device name collision, prefer
   # the AMI's block device
   all_block_devices = merge(
-    { for d in local.default_devices: d.device_name => d },
-    { for d in module.ami_devices.block_devices: d.device_name => d }
+    { for d in local.default_devices : d.device_name => d },
+    { for d in module.ami_devices.block_devices : d.device_name => d }
   )
 }
 
