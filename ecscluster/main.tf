@@ -87,7 +87,8 @@ module "asg" {
 
   block_devices = values(local.all_block_devices)
 
-  amazon_ecs_managed_tag = var.amazon_ecs_managed_tag
+  amazon_ecs_managed_tag      = var.amazon_ecs_managed_tag
+  refresh_instances_on_update = true
 
   tags = merge(
     var.tags,

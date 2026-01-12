@@ -88,6 +88,13 @@ resource "aws_autoscaling_group" "default" {
     value               = var.name
   }
 
+  dynamic "instance_refresh" {
+    for_each = var.refresh_instances_on_update ? [1] : []
+    content {
+      strategy = "Rolling"
+    }
+  }
+
   dynamic "tag" {
     for_each = var.amazon_ecs_managed_tag ? [1] : []
 
