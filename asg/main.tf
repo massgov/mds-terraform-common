@@ -37,6 +37,12 @@ resource "aws_launch_template" "default" {
     arn = aws_iam_instance_profile.instance.arn
   }
 
+  metadata_options {
+    http_endpoint          = "enabled"
+    http_tokens            = "required"
+    instance_metadata_tags = "enabled"
+  }
+
   tag_specifications {
     resource_type = "instance"
 
