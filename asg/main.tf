@@ -49,9 +49,9 @@ resource "aws_launch_template" "default" {
     tags = merge(
       var.tags,
       {
-        "schedulev2"  = var.instance_schedule
-        "Patch Group" = var.instance_patch_group
-        "backup"      = var.instance_backup
+        "schedulev2" = var.instance_schedule
+        "PatchGroup" = var.instance_patch_group
+        "backup"     = var.instance_backup
       },
     )
   }
@@ -62,9 +62,9 @@ resource "aws_launch_template" "default" {
     tags = merge(
       var.tags,
       {
-        "schedulev2"  = var.instance_schedule
-        "Patch Group" = var.instance_patch_group
-        "backup"      = var.instance_backup
+        "schedulev2" = var.instance_schedule
+        "PatchGroup" = var.instance_patch_group
+        "backup"     = var.instance_backup
       },
     )
   }
