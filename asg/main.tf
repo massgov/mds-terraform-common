@@ -37,6 +37,12 @@ resource "aws_launch_template" "default" {
     arn = aws_iam_instance_profile.instance.arn
   }
 
+  metadata_options {
+    http_endpoint          = "enabled"
+    http_tokens            = "required"
+    instance_metadata_tags = "enabled"
+  }
+
   tag_specifications {
     resource_type = "instance"
 
@@ -86,6 +92,13 @@ resource "aws_autoscaling_group" "default" {
     key                 = "Name"
     propagate_at_launch = false
     value               = var.name
+  }
+
+  dynamic "instance_refresh" {
+    for_each = var.refresh_instances_on_update ? [1] : []
+    content {
+      strategy = "Rolling"
+    }
   }
 
   dynamic "tag" {

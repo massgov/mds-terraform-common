@@ -98,6 +98,12 @@ variable "instance_patch_group" {
   description = "Patch group to apply to EC2 instances."
 }
 
+variable "refresh_instances_on_update" {
+  type        = bool
+  default     = false
+  description = "When true, autoscaling group will perform an instance refresh when updates to its configuration are made"
+}
+
 variable "tags" {
   type        = map(string)
   description = "Additional tags to apply to all instances."
