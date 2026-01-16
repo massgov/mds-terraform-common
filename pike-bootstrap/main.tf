@@ -9,7 +9,7 @@ locals {
 
   policy_files = fileset(path.module, "${var.policy_file_prefix}*.json")
 
-  project_key = substr(md5(var.current_apply_role_name), 0, 6)
+  project_key = var.environment == "" ? substr(md5("${var.current_apply_role_name}"), 0, 6) : substr(md5("${var.environment}-${var.current_apply_role_name}"), 0, 6)
 
   current_role_name = element(split("/", data.aws_caller_identity.current.arn), length(split("/", data.aws_caller_identity.current.arn)) - 2)
 }
@@ -172,4 +172,3 @@ resource "aws_iam_role_policy_attachment" "pike_gha_attach" {
   role       = var.current_apply_role_name
   policy_arn = aws_iam_policy.pike_self_manage.arn
 }
-

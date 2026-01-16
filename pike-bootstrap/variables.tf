@@ -12,3 +12,9 @@ variable "current_apply_role_name" {
   description = "name of the role used to apply this terraform configuration"
   type        = string
 }
+
+variable "environment" {
+  description = "The environment used to create unique resource names"
+  type        = string
+  default     = ""
+}
