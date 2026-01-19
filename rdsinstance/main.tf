@@ -12,7 +12,7 @@ resource "aws_db_instance" "default" {
   identifier                            = var.name
   allocated_storage                     = var.allocated_storage
   max_allocated_storage                 = var.max_allocated_storage
-  storage_type                          = "gp2"
+  storage_type                          = "gp3"
   engine                                = var.engine
   engine_version                        = var.engine_version
   instance_class                        = var.instance_class
@@ -157,7 +157,7 @@ module "backup_lambda" {
   name    = "${aws_db_instance.default.identifier}-backup-lambda"
   package = "${path.module}/dist/backup_lambda.zip"
   handler = "index.handler"
-  runtime = "nodejs20.x"
+  runtime = "nodejs24.x"
   timeout = 300
   iam_policies = [
     data.aws_iam_policy_document.rds_snapshot_create[count.index].json
@@ -183,7 +183,7 @@ module "cleanup_lambda" {
   name    = "${aws_db_instance.default.identifier}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
   handler = "index.handler"
-  runtime = "nodejs20.x"
+  runtime = "nodejs24.x"
   timeout = 300
   iam_policies = [
     data.aws_iam_policy_document.rds_snapshot_delete[count.index].json
