@@ -14,7 +14,7 @@ const run = async (): Promise<void> => {
     entryPoints: ["index.ts"],
     bundle: true,
     platform: "node",
-    target: "node20",
+    target: "node24",
     outfile: path.join(tmp, "index.js"),
     external: ["@aws-sdk/client-rds"]
   });
