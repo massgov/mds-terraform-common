@@ -153,7 +153,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
 
 module "backup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
   name    = "${aws_db_instance.default.identifier}-backup-lambda"
   package = "${path.module}/dist/backup_lambda.zip"
   handler = "index.handler"
@@ -179,7 +179,7 @@ module "backup_lambda" {
 
 module "cleanup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
   name    = "${aws_db_instance.default.identifier}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
   handler = "index.handler"
