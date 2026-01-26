@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.123] - 2026-01-19
+- [RDS Instance] Update to GP3 from GP2, and updated lambdas to Node24
+
+
 ## [1.0.122] - 2026-01-12
   - [ECS Cluster] Prevent block device collision in mapping provided to cluster autoscaling group
 

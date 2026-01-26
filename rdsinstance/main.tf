@@ -12,7 +12,7 @@ resource "aws_db_instance" "default" {
   identifier                            = var.name
   allocated_storage                     = var.allocated_storage
   max_allocated_storage                 = var.max_allocated_storage
-  storage_type                          = "gp2"
+  storage_type                          = "gp3"
   engine                                = var.engine
   engine_version                        = var.engine_version
   instance_class                        = var.instance_class
@@ -121,7 +121,7 @@ data "aws_iam_policy_document" "rds_snapshot_create" {
   statement {
     effect = "Allow"
     resources = [
-      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:*",
+      "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:*",
       aws_db_instance.default.arn
     ]
     actions = ["rds:CreateDBSnapshot"]
@@ -133,7 +133,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
   statement {
     effect = "Allow"
     resources = [
-      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:*",
+      "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:*",
       aws_db_instance.default.arn
     ]
     actions = [
@@ -143,7 +143,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
   statement {
     effect = "Allow"
     resources = [
-      "arn:aws:rds:${data.aws_region.default.name}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.identifier}*"
+      "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.identifier}*"
     ]
     actions = [
       "rds:DeleteDBSnapshot"
@@ -153,11 +153,11 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
 
 module "backup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
   name    = "${aws_db_instance.default.identifier}-backup-lambda"
   package = "${path.module}/dist/backup_lambda.zip"
   handler = "index.handler"
-  runtime = "nodejs20.x"
+  runtime = "nodejs24.x"
   timeout = 300
   iam_policies = [
     data.aws_iam_policy_document.rds_snapshot_create[count.index].json
@@ -179,11 +179,11 @@ module "backup_lambda" {
 
 module "cleanup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
-  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
+  source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
   name    = "${aws_db_instance.default.identifier}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
   handler = "index.handler"
-  runtime = "nodejs20.x"
+  runtime = "nodejs24.x"
   timeout = 300
   iam_policies = [
     data.aws_iam_policy_document.rds_snapshot_delete[count.index].json
