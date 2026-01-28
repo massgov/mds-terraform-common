@@ -42,3 +42,10 @@ variable "oidc_subject_claims" {
   type    = list(string)
   default = ["*"]
 }
+
+# Custom IAM policy document in JSON format.
+variable "custom_policy_json" {
+  type        = string
+  description = "JSON IAM policy document to attach inline to the role"
+  default     = ""
+}

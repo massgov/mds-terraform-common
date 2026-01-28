@@ -1,3 +1,7 @@
+locals {
+  trust_policy = var.custom_policy_json != "" ? var.custom_policy_json : data.aws_iam_policy_document.assume_policy.json
+}
+
 data "aws_iam_policy_document" "assume_policy" {
   statement {
     effect  = "Allow"
@@ -22,11 +26,16 @@ data "aws_iam_policy_document" "assume_policy" {
 }
 
 resource "aws_iam_role" "role" {
-  name                = var.role_name
-  path                = var.role_path
-  assume_role_policy  = data.aws_iam_policy_document.assume_policy.json
-  managed_policy_arns = var.policy_arns
+  name               = var.role_name
+  path               = var.role_path
+  assume_role_policy = local.trust_policy
   tags = {
     "Name" = var.role_name
   }
+}
+
+resource "aws_iam_role_policy_attachment" "policy_attachments" {
+  for_each   = toset(var.policy_arns)
+  role       = aws_iam_role.role.name
+  policy_arn = each.value
 }
