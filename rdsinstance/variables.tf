@@ -204,3 +204,23 @@ variable "master_user_secret_kms_key_id" {
   default     = null
   description = "Specifies a custom KMS key used to encrypt/decrypt master password."
 }
+
+variable "rds_instance_cluster" {
+  type        = string
+  description = "Setup RDS as a standalone instance or part of a cluster"
+  default     = "instance"
+}
+variable "rds_instance_count" {
+  type        = number
+  description = "Number of instances to create in the RDS cluster"
+  default     = 1
+}
+
+// Variable validation checks
+
+check "rds_instance_cluster_valid" {
+  assert {
+    condition     = var.rds_instance_cluster == "instance" || var.rds_instance_cluster == "cluster"
+    error_message = "rds_instance_cluster must be either 'instance' or 'cluster'"
+  }
+}
