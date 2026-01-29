@@ -1,7 +1,11 @@
 # Changelog
 
 ## [1.0.123] - 2026-01-19
-- [RDS Instance] Update to GP3 from GP2, and updated lambdas to Node24
+- [RDS Instance] 
+    - Updated: to GP3 from GP2, 
+    - Updated: Lambdas Node19 to Node24
+    - New: `var.rds_instance_cluster` to allow RDS instance to be created in an RDS cluster
+    - New: `var.rds_instance_count` to allow creation of multiple RDS instances in cluster 
 
 
 ## [1.0.122] - 2026-01-12
