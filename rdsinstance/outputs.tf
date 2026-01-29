@@ -1,38 +1,38 @@
 // Root username for the database.
 output "username" {
-  value = aws_db_instance.default.username
+  value = try(aws_db_instance.default[0].username, null)
 }
 
 // Root password for the database.
 output "password" {
-  value = aws_db_instance.default.password
+  value = try(aws_db_instance.default[0].password, null)
 }
 
 // Hostname for external connection.
 output "host" {
-  value = aws_db_instance.default.address
+  value = try(aws_db_instance.default[0].address, null)
 }
 
 // Port for external connection.
 output "port" {
-  value = aws_db_instance.default.port
+  value = try(aws_db_instance.default[0].port, null)
 }
 
 // RDS Instance ID.
 output "rds_instance_id" {
   # NOTE: You probably want `rds_instance_identifier` instead, as this changed
   # in version 5 of the aws provider.
-  value = aws_db_instance.default.id
+  value = try(aws_db_instance.default[0].id, null)
 }
 
 // ARN of the RDS instance.
 output "rds_instance_arn" {
-  value = aws_db_instance.default.arn
+  value = try(aws_db_instance.default[0].arn, aws_rds_cluster_instance.cluster_instances[0].arn)
 }
 
 // RDS Resource ID
 output "rds_resource_id" {
-  value = aws_db_instance.default.resource_id
+  value = try(aws_db_instance.default[0].resource_id, null)
 }
 
 // Security group that is allowed to access the database.
@@ -41,11 +41,11 @@ output "accessor_security_group" {
 }
 
 output "rds_instance_identifier" {
-  value = aws_db_instance.default.identifier
+  value = try(aws_db_instance.default[0].identifier, null)
 }
 
 output "master_password_secret_arn" {
   value = var.manage_master_user_password ? try(
-    aws_db_instance.default.master_user_secret[0].secret_arn, null
+    aws_db_instance.default[0].master_user_secret[0].secret_arn, null
   ) : null
 }

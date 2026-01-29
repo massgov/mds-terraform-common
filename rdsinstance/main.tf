@@ -9,6 +9,7 @@ resource "aws_db_subnet_group" "default" {
 
 // db instance
 resource "aws_db_instance" "default" {
+  count                                 = var.rds_instance_cluster == "instance" ? 1 : 0
   identifier                            = var.name
   allocated_storage                     = var.allocated_storage
   max_allocated_storage                 = var.max_allocated_storage
@@ -19,10 +20,10 @@ resource "aws_db_instance" "default" {
   username                              = var.username
   password                              = var.password
   backup_retention_period               = var.backup_retention_period
-  backup_window                         = "05:10-06:00" # 12:10AM-1:00AM EST
+  backup_window                         = "05:10-06:00"
   copy_tags_to_snapshot                 = true
   deletion_protection                   = var.deletion_protection
-  maintenance_window                    = "wed:04:00-wed:05:00" # 11:00PM-12:00AM EST
+  maintenance_window                    = "wed:04:00-wed:05:00"
   storage_encrypted                     = var.storage_encrypted
   parameter_group_name                  = var.parameter_group_name
   db_subnet_group_name                  = aws_db_subnet_group.default.name
@@ -122,7 +123,7 @@ data "aws_iam_policy_document" "rds_snapshot_create" {
     effect = "Allow"
     resources = [
       "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:*",
-      aws_db_instance.default.arn
+      try(aws_db_instance.default[0].arn, aws_rds_cluster_instance.cluster_instances[0].arn)
     ]
     actions = ["rds:CreateDBSnapshot"]
   }
@@ -134,7 +135,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
     effect = "Allow"
     resources = [
       "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:*",
-      aws_db_instance.default.arn
+      try(aws_db_instance.default[0].arn, aws_rds_cluster_instance.cluster_instances[0].arn)
     ]
     actions = [
       "rds:DescribeDBSnapshots",
@@ -143,7 +144,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
   statement {
     effect = "Allow"
     resources = [
-      "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:${aws_db_instance.default.identifier}*"
+      "arn:aws:rds:${data.aws_region.default.region}:${data.aws_caller_identity.default.account_id}:snapshot:${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}*"
     ]
     actions = [
       "rds:DeleteDBSnapshot"
@@ -154,7 +155,7 @@ data "aws_iam_policy_document" "rds_snapshot_delete" {
 module "backup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
-  name    = "${aws_db_instance.default.identifier}-backup-lambda"
+  name    = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}-backup-lambda"
   package = "${path.module}/dist/backup_lambda.zip"
   handler = "index.handler"
   runtime = "nodejs24.x"
@@ -164,14 +165,14 @@ module "backup_lambda" {
   ]
   environment = {
     variables = {
-      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.identifier}"
+      "RDS_INSTANCE_IDENTIFIER" = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}"
     }
   }
   schedule = var.manual_snapshot_schedule
   tags = merge(
     var.tags,
     {
-      "Name" = "${aws_db_instance.default.identifier}-backup-lambda"
+      "Name" = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}-backup-lambda"
     }
   )
   error_topics = var.backup_error_topics
@@ -180,7 +181,7 @@ module "backup_lambda" {
 module "cleanup_lambda" {
   count   = var.enable_manual_snapshots ? 1 : 0
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.123"
-  name    = "${aws_db_instance.default.identifier}-cleanup-lambda"
+  name    = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}-cleanup-lambda"
   package = "${path.module}/dist/cleanup_lambda.zip"
   handler = "index.handler"
   runtime = "nodejs24.x"
@@ -190,7 +191,7 @@ module "cleanup_lambda" {
   ]
   environment = {
     variables = {
-      "RDS_INSTANCE_IDENTIFIER" = "${aws_db_instance.default.identifier}"
+      "RDS_INSTANCE_IDENTIFIER" = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}"
     }
   }
   schedule = {
@@ -199,8 +200,66 @@ module "cleanup_lambda" {
   tags = merge(
     var.tags,
     {
-      "Name" = "${aws_db_instance.default.identifier}-cleanup-lambda"
+      "Name" = "${try(aws_db_instance.default[0].identifier, aws_rds_cluster_instance.cluster_instances[0].identifier)}-cleanup-lambda"
     }
   )
   error_topics = var.backup_error_topics
+}
+
+
+
+resource "aws_rds_cluster" "default" {
+  count                               = var.rds_instance_cluster == "cluster" ? 1 : 0
+  cluster_identifier                  = "${var.name}-cluster"
+  engine                              = var.engine
+  master_username                     = var.username
+  master_password                     = var.password
+  manage_master_user_password         = var.manage_master_user_password
+  master_user_secret_kms_key_id       = var.master_user_secret_kms_key_id
+  backup_retention_period             = var.backup_retention_period
+  deletion_protection                 = var.deletion_protection
+  storage_type                        = "gp3"
+  allocated_storage                   = var.allocated_storage
+  preferred_maintenance_window        = "wed:04:00-wed:05:00" # 11:00PM-12:00AM EST
+  apply_immediately                   = var.apply_immediately
+  allow_major_version_upgrade         = var.allow_major_version_upgrade
+  iam_database_authentication_enabled = var.iam_database_authentication_enabled
+  storage_encrypted                   = var.storage_encrypted
+
+  preferred_backup_window = "05:10-06:00" # 12:10AM-1:00AM EST
+  db_subnet_group_name    = aws_db_subnet_group.default.name
+  vpc_security_group_ids = flatten([
+    var.security_groups,
+    aws_security_group.db.id,
+  ])
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "${var.name}-cluster"
+    },
+  )
+}
+resource "aws_rds_cluster_instance" "cluster_instances" {
+  count                                 = var.rds_instance_cluster == "cluster" ? var.rds_instance_count : 0
+  cluster_identifier                    = aws_rds_cluster.default[0].id
+  identifier                            = var.name
+  engine                                = var.engine
+  engine_version                        = var.engine_version
+  instance_class                        = var.instance_class
+  preferred_backup_window               = "05:10-06:00" # 12:10AM-1:00AM EST
+  copy_tags_to_snapshot                 = true
+  db_parameter_group_name               = var.parameter_group_name
+  db_subnet_group_name                  = aws_db_subnet_group.default.name
+  performance_insights_enabled          = var.performance_insights_enabled
+  performance_insights_retention_period = var.performance_insights_retention_period
+  monitoring_interval                   = var.monitoring_interval
+  auto_minor_version_upgrade            = var.auto_minor_version_upgrade
+  apply_immediately                     = var.apply_immediately
+  ca_cert_identifier                    = var.ca_cert_identifier
+  tags = merge(
+    var.tags,
+    {
+      "Name" = var.name
+    },
+  )
 }
