@@ -218,7 +218,7 @@ resource "aws_rds_cluster" "default" {
   master_user_secret_kms_key_id       = var.master_user_secret_kms_key_id
   backup_retention_period             = var.backup_retention_period
   deletion_protection                 = var.deletion_protection
-  storage_type                        = "gp3"
+  storage_type                        = "io1"
   allocated_storage                   = var.allocated_storage
   preferred_maintenance_window        = "wed:04:00-wed:05:00" # 11:00PM-12:00AM EST
   apply_immediately                   = var.apply_immediately
