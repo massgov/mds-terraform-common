@@ -213,6 +213,7 @@ resource "aws_rds_cluster" "default" {
   cluster_identifier                  = "${var.name}-cluster"
   engine                              = var.engine
   engine_version                      = var.engine_version
+  database_name                       = var.database_name
   master_username                     = var.username
   master_password                     = var.password
   manage_master_user_password         = var.manage_master_user_password

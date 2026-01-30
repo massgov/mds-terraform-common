@@ -6,6 +6,7 @@
     - Updated: Lambdas Node19 to Node24
     - New: `var.rds_instance_cluster` to allow RDS instance to be created in an RDS cluster
     - New: `var.rds_instance_count` to allow creation of multiple RDS instances in cluster 
+    - New: `var.database_name` to allow setting db name on cluster instances
 
 
 ## [1.0.122] - 2026-01-12
