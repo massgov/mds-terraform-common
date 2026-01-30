@@ -25,3 +25,10 @@ variable "oidc_subject_claims" {
   type    = list(string)
   default = ["*"]
 }
+
+# if templated (default) trust policy will not be used
+variable "custom_policy_json" {
+  type        = string
+  description = "IAM policy document to attach inline to the role, use jsonencode() to convert Terraform language expressions to JSON"
+  default     = ""
+}
