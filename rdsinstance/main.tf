@@ -13,7 +13,7 @@ resource "aws_db_instance" "default" {
   identifier                            = var.name
   allocated_storage                     = var.allocated_storage
   max_allocated_storage                 = var.max_allocated_storage
-  storage_type                          = "gp3"
+  storage_type                          = "gp2"
   engine                                = var.engine
   engine_version                        = var.engine_version
   instance_class                        = var.instance_class
@@ -212,14 +212,13 @@ resource "aws_rds_cluster" "default" {
   count                               = var.rds_instance_cluster == "cluster" ? 1 : 0
   cluster_identifier                  = "${var.name}-cluster"
   engine                              = var.engine
+  engine_version                      = var.engine_version
   master_username                     = var.username
   master_password                     = var.password
   manage_master_user_password         = var.manage_master_user_password
   master_user_secret_kms_key_id       = var.master_user_secret_kms_key_id
   backup_retention_period             = var.backup_retention_period
   deletion_protection                 = var.deletion_protection
-  storage_type                        = "gp3"
-  allocated_storage                   = var.allocated_storage
   preferred_maintenance_window        = "wed:04:00-wed:05:00" # 11:00PM-12:00AM EST
   apply_immediately                   = var.apply_immediately
   allow_major_version_upgrade         = var.allow_major_version_upgrade
@@ -246,7 +245,6 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   engine                                = var.engine
   engine_version                        = var.engine_version
   instance_class                        = var.instance_class
-  preferred_backup_window               = "05:10-06:00" # 12:10AM-1:00AM EST
   copy_tags_to_snapshot                 = true
   db_parameter_group_name               = var.parameter_group_name
   db_subnet_group_name                  = aws_db_subnet_group.default.name
