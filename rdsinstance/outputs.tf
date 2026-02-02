@@ -39,6 +39,9 @@ output "rds_resource_id" {
 output "accessor_security_group" {
   value = aws_security_group.db_accessor.id
 }
+output "db_security_group" {
+  value = aws_security_group.db.id
+}
 
 output "rds_instance_identifier" {
   value = try(aws_db_instance.default[0].identifier, null)

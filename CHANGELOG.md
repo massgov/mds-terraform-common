@@ -4,6 +4,7 @@
 - [RDS Instance] 
     - Updated: to GP3 from GP2, 
     - Updated: Lambdas Node19 to Node24
+    - Updated: Add db_security_group to output
     - New: `var.rds_instance_cluster` to allow RDS instance to be created in an RDS cluster
     - New: `var.rds_instance_count` to allow creation of multiple RDS instances in cluster 
     - New: `var.database_name` to allow setting db name on cluster instances

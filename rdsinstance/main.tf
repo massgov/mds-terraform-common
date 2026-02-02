@@ -261,4 +261,8 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
       "Name" = var.name
     },
   )
+  lifecycle {
+    prevent_destroy = var.deletion_protection
+  }
+
 }
