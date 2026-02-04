@@ -47,9 +47,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "maintenance_logs_lifecycle" {
   bucket = aws_s3_bucket.maintenance_logs.id
   rule {
     id = "log-expiration"
+
     expiration {
       days = 366
     }
+
+    filter {
+      prefix = var.s3_lifecycle_filter != null && var.s3_lifecycle_filter != "" ? var.s3_lifecycle_filter : ""
+    }
+
     status = "Enabled"
   }
 }
