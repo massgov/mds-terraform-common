@@ -1,3 +1,7 @@
+locals {
+  trust_policy = var.custom_policy_json != "" ? var.custom_policy_json : data.aws_iam_policy_document.assume_policy.json
+}
+
 
 data "aws_iam_policy_document" "assume_policy" {
   statement {
@@ -19,8 +23,9 @@ data "aws_iam_policy_document" "assume_policy" {
 
 resource "aws_iam_role" "role" {
   name               = var.role_name
-  assume_role_policy = data.aws_iam_policy_document.assume_policy.json
+  assume_role_policy = local.trust_policy
 }
+
 resource "aws_iam_role_policy_attachment" "policy_attachments" {
   count      = length(var.policy_arns)
   policy_arn = var.policy_arns[count.index]
