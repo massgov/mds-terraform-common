@@ -42,7 +42,7 @@ variable "image_scan_ignore_arn" {
   description = <<EOF
     ARN of an SSM parameter containing CVEs that can safely be ignored.
     This parameter must be created manually if it doesn't already exist.
-    
+
     Parameter format: `[{"name":"CVE-2024-1", "packageName":"cowsay", "packageVersion":["1.2.3", "1.2.4"]},{"name"...}]`
   EOF
 }
@@ -53,7 +53,7 @@ variable "image_scan_snooze_arn" {
   description = <<EOF
     ARN of an SSM parameter containing ECS cluster names and a date to snooze alerts.
     This parameter must be created manually if it doesn't already exist.
-    
+
     Parameter format: `[{"cluster":"ecs-cluster-1", "snoozeUntil":"2024-10-24"},{"cluster"...}]`
   EOF
 }
@@ -79,4 +79,10 @@ variable "create_github_inactive_user_reminder" {
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+variable "s3_lifecycle_filter" {
+  type        = string
+  description = "A single filter prefix or tag to apply to the only S3 lifecycle rule"
+  default     = null
 }
