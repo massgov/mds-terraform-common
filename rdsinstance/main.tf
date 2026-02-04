@@ -66,24 +66,28 @@ resource "aws_db_instance" "default" {
 resource "aws_security_group" "db" {
   name   = var.name
   vpc_id = var.vpc
-  ingress {
-    from_port       = 5432
-    protocol        = "tcp"
-    to_port         = 5432
-    security_groups = [aws_security_group.db_accessor.id]
-  }
-  ingress {
-    from_port       = 3600
-    protocol        = "tcp"
-    to_port         = 3600
-    security_groups = [aws_security_group.db_accessor.id]
-  }
   tags = merge(
     var.tags,
     {
       "Name" = var.name
     },
   )
+}
+// db ingress postgres
+resource "aws_vpc_security_group_ingress_rule" "db_ingress_accessor_to_db_postgres" {
+  ip_protocol                  = "tcp"
+  from_port                    = 5432
+  to_port                      = 5432
+  referenced_security_group_id = aws_security_group.db_accessor.id
+  security_group_id            = aws_security_group.db.id
+}
+// db ingress mysql
+resource "aws_vpc_security_group_ingress_rule" "db_ingress_accessor_to_db_mysql" {
+  ip_protocol                  = "tcp"
+  from_port                    = 3600
+  to_port                      = 3600
+  referenced_security_group_id = aws_security_group.db_accessor.id
+  security_group_id            = aws_security_group.db.id
 }
 
 // db accessor security group
@@ -213,6 +217,7 @@ resource "aws_rds_cluster" "default" {
   cluster_identifier                  = "${var.name}-cluster"
   engine                              = var.engine
   engine_version                      = var.engine_version
+  database_name                       = var.database_name
   master_username                     = var.username
   master_password                     = var.password
   manage_master_user_password         = var.manage_master_user_password

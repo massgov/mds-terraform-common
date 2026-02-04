@@ -215,6 +215,11 @@ variable "rds_instance_count" {
   description = "Number of instances to create in the RDS cluster"
   default     = 1
 }
+variable "database_name" {
+  type        = string
+  default     = null
+  description = "The name of the database to create when the DB instance is created."
+}
 
 // Variable validation checks
 
