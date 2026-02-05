@@ -54,10 +54,8 @@ output "master_password_secret_arn" {
 }
 
 output "writer_endpoint" {
-  value = var.rds_instance_cluster == "instance" ? try(aws_db_instance.default[0].endpoint, null) :
-    try([for instance in aws_rds_cluster_instance.cluster_instances : instance if instance.writer][0], null)
+  value = var.rds_instance_cluster == "instance" ? try(aws_db_instance.default[0].endpoint, null) : try([for instance in aws_rds_cluster_instance.cluster_instances : instance if instance.writer][0], null)
 }
 output "reader_endpoint" {
-  value = var.rds_instance_cluster == "instance" ? try(aws_db_instance.default[0].endpoint, null) :
-    try([for instance in aws_rds_cluster_instance.cluster_instances : instance if !instance.writer][0], null)
+  value = var.rds_instance_cluster == "instance" ? try(aws_db_instance.default[0].endpoint, null) : try([for instance in aws_rds_cluster_instance.cluster_instances : instance if !instance.writer][0], null)
 }
