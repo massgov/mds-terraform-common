@@ -59,3 +59,6 @@ output "writer_endpoint" {
 output "reader_endpoint" {
   value = var.rds_instance_cluster == "instance" ? try(aws_db_instance.default[0].endpoint, null) : try([for instance in aws_rds_cluster_instance.cluster_instances : instance if !instance.writer][0], null)
 }
+output "rds_cluster_endpoint" {
+  value = try(aws_rds_cluster.default.endpoint, null)
+}
