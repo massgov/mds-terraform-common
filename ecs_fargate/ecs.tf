@@ -11,7 +11,13 @@ locals {
       environment : t.environment_vars
       secrets : [
         for s in t.secret_vars :
-        { name : s.name, valueFrom : "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${s.valueFrom}" }
+        {
+          name : s.name,
+          valueFrom : s.valueFrom != null ? (
+            starts_with(s.valueFrom, "arn:aws:secretsmanager:") ? s.valueFrom :
+            "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter/${s.valueFrom}")
+            : null
+        }
       ]
       logConfiguration : {
         logDriver : "awslogs",
