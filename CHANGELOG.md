@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.123] - 2026-02-20
+- [Ecs Fargate]
+  - Add support to set `readonlyRootFilesystem` bool
+
 ## [1.0.123] - 2026-01-19
 - [RDS Instance] 
     - Updated: to GP3 from GP2, 
