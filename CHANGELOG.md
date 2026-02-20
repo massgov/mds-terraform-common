@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.123] - 2026-02-20
+## [1.0.124] - 2026-02-20
 - [Ecs Fargate]
   - Add support to set `readonlyRootFilesystem` bool
 
