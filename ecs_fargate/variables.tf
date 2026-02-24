@@ -78,9 +78,9 @@ variable "ecs_task_def" {
     task_role_arn      = string
     family             = string
     containers = list(object({
-      container_name = string
-
-      image_name = string
+      container_name         = string
+      readonlyRootFilesystem = optional(bool, false)
+      image_name             = string
       port_mappings = optional(list(object({
         containerPort = number
         protocol      = string
