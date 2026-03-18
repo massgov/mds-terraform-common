@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.125] - 2026-03-16
+## [1.0.126] - 2026-03-16
 - [New Relic]
   - Add support to add AWS account to NR account
 
