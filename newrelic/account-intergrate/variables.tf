@@ -40,7 +40,7 @@ variable "default_aws_regions" {
 
 variable "default_tag_key" {
   type    = string
-  default = null
+  default = "test"
 }
 
 variable "default_tag_value" {
