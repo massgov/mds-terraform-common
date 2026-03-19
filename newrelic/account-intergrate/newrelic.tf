@@ -7,10 +7,3 @@ resource "newrelic_cloud_aws_link_account" "main" {
   metric_collection_mode = "PULL"
   name                   = var.aws_account_name
 }
-
-resource "newrelic_cloud_aws_integrations" "integration" {
-  linked_account_id = newrelic_cloud_aws_link_account.main.id
-
-
-}
-
