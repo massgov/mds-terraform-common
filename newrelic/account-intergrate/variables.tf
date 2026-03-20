@@ -59,6 +59,62 @@ variable "default_fetch_extended_inventory" {
 }
 
 variable "enabled_integrations" {
+  description = <<EOT
+List of available services:
+    - billing
+    - health
+    - trusted_advisor
+    - cloudtrail
+    - vpc
+    - x_ray
+    - s3
+    - doc_db
+    - sqs
+    - ebs
+    - alb
+    - elasticache
+    - api_gateway
+    - auto_scaling
+    - aws_app_sync
+    - aws_athena
+    - aws_cognito
+    - aws_connect
+    - aws_direct_connect
+    - aws_fsx
+    - aws_glue
+    - aws_kinesis_analytics
+    - aws_media_convert
+    - aws_media_package_vod
+    - aws_mq
+    - aws_msk
+    - aws_neptune
+    - aws_qldb
+    - aws_route53resolver
+    - aws_states
+    - aws_transit_gateway
+    - aws_waf
+    - aws_wafv2
+    - cloudfront
+    - dynamodb
+    - ec2
+    - ecs
+    - efs
+    - elasticbeanstalk
+    - elasticsearch
+    - elb
+    - emr
+    - iam
+    - iot
+    - kinesis
+    - kinesis_firehose
+    - lambda
+    - rds
+    - redshift
+    - route53
+    - ses
+    - sns
+    - security_hub
+EOT
   type = map(object({
     metrics_polling_interval = optional(number)
     aws_regions              = optional(list(string))
