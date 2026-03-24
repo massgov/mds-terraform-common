@@ -33,12 +33,12 @@ provider "aws" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.87.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.37.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
@@ -49,16 +49,19 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_s3_object.category](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
+| [aws_s3_object.files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
+| [aws_s3_bucket.docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
 | [terraform_remote_state.tags](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
 
 ## Inputs
 
-| Name | Description                                                                       | Type | Default | Required |
-|------|-----------------------------------------------------------------------------------|------|---------|:--------:|
-| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Tags which will be merged into the managed tags provided by the module            | `map(string)` | `{}` |    no    |
-| <a name="input_org"></a> [org](#input\_org) | The name of the GitHub organization where calling code lives                      | `string` | `"massgov"` |    no    |
-| <a name="input_repo"></a> [repo](#input\_repo) | The name of the GitHub repository where calling code lives                        | `string` | n/a |   yes    |
-| <a name="input_manifest"></a> [manifest](#input\_manifest) | File path to docs.manifest file. See  [Manifest File](#manifest_file) for details | `string` | n/a |     no   |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_additional_tags"></a> [additional\_tags](#input\_additional\_tags) | Tags which will be merged into the managed tags provided by the module | `map(string)` | `{}` | no |
+| <a name="input_manifest"></a> [manifest](#input\_manifest) | n/a | `string` | `null` | no |
+| <a name="input_org"></a> [org](#input\_org) | The name of the GitHub organization where calling code lives | `string` | `"massgov"` | no |
+| <a name="input_repo"></a> [repo](#input\_repo) | The name of the GitHub repository where calling code lives | `string` | n/a | yes |
 
 ## Outputs
 
