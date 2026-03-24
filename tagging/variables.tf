@@ -24,5 +24,7 @@ locals {
   manifest_path    = var.manifest
   root_level_count = local.manifest_path != null ? length(local.manifest_path) - length(replace(local.manifest_path, "/", "")) : ""
   relative_path    = local.manifest_path != null ? join("", [for i in range(local.root_level_count) : "../"]) : ""
-  file_list        = local.manifest_path != null ? split("\n", file(var.manifest)) : []
+  # Strips out empty lines, which can happen when the file ends in a newline character (posix standard).
+  file_list = local.manifest_path != null ? [for f in split("\n", file(var.manifest)) : f if trimspace(f) != ""] : []
 }
+

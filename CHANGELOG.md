@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.126] - 2026-03-24
+- [Tagging]
+  - Fix parsing of docs.manifest file ending in a newline character
+
 ## [1.0.124] - 2026-02-20
 - [Ecs Fargate]
   - Add support to set `readonlyRootFilesystem` bool
