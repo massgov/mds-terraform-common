@@ -7,7 +7,7 @@ from pathlib import Path
 import boto3
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-REQUIRED_SG_ID = os.environ["REQUIRED_SG_ID"]
+VPC_SG_MAPPINGS = json.loads(os.environ["VPC_SG_MAPPINGS"])
 SCANNER_SECRET_PARAMETER_NAME = os.environ["SCANNER_SECRET_PARAMETER_NAME"]
 
 logging.basicConfig(level=LOG_LEVEL)
@@ -20,6 +20,8 @@ SCRIPT_PATH = Path(__file__).with_name("run-scanner-bootstrap.sh")
 SCRIPT_LINES = SCRIPT_PATH.read_text().splitlines()
 
 _scanner_secret_cache = None
+_sg_cache = {}
+_vpc_name_cache = {}
 
 
 def get_scanner_secret():
@@ -122,6 +124,88 @@ def describe_instance(instance_id):
     return reservations[0]["Instances"][0]
 
 
+def get_vpc_name(vpc_id):
+    """Get VPC name from tags, with caching."""
+    if vpc_id in _vpc_name_cache:
+        return _vpc_name_cache[vpc_id]
+
+    try:
+        resp = ec2.describe_vpcs(VpcIds=[vpc_id])
+        vpcs = resp.get("Vpcs", [])
+
+        if not vpcs:
+            logger.warning("VPC %s not found", vpc_id)
+            return None
+
+        vpc = vpcs[0]
+        tags = vpc.get("Tags", [])
+
+        # Look for Name tag
+        for tag in tags:
+            if tag.get("Key") == "Name":
+                vpc_name = tag.get("Value", "")
+                _vpc_name_cache[vpc_id] = vpc_name
+                logger.info("VPC %s has name: %s", vpc_id, vpc_name)
+                return vpc_name
+
+        logger.warning("VPC %s has no Name tag", vpc_id)
+        _vpc_name_cache[vpc_id] = None
+        return None
+    except Exception as e:
+        logger.error("Error looking up VPC %s: %s", vpc_id, e)
+        return None
+
+
+def get_security_group_id_by_name(sg_name):
+    """Look up security group ID by name, with caching."""
+    if sg_name in _sg_cache:
+        return _sg_cache[sg_name]
+
+    try:
+        resp = ec2.describe_security_groups(
+            Filters=[{"Name": "group-name", "Values": [sg_name]}]
+        )
+        security_groups = resp.get("SecurityGroups", [])
+
+        if not security_groups:
+            logger.error("Security group '%s' not found", sg_name)
+            return None
+
+        sg_id = security_groups[0]["GroupId"]
+        _sg_cache[sg_name] = sg_id
+        logger.info("Resolved security group '%s' to ID %s", sg_name, sg_id)
+        return sg_id
+    except Exception as e:
+        logger.error("Error looking up security group '%s': %s", sg_name, e)
+        return None
+
+
+def determine_required_sg_for_instance(instance):
+    """Determine which security group should be attached based on VPC name mapping."""
+    vpc_id = instance.get("VpcId")
+    if not vpc_id:
+        logger.error("Instance has no VPC ID")
+        return None
+
+    vpc_name = get_vpc_name(vpc_id)
+    if not vpc_name:
+        logger.error("Could not determine VPC name for VPC %s", vpc_id)
+        return None
+
+    # Look up security group name from the mapping
+    sg_name = VPC_SG_MAPPINGS.get(vpc_name)
+    if not sg_name:
+        logger.warning(
+            "No security group mapping found for VPC '%s'. Available mappings: %s",
+            vpc_name,
+            list(VPC_SG_MAPPINGS.keys())
+        )
+        return None
+
+    logger.info("VPC '%s' mapped to security group '%s'", vpc_name, sg_name)
+    return get_security_group_id_by_name(sg_name)
+
+
 def ensure_required_sg_on_all_enis(instance_id):
     instance = describe_instance(instance_id)
     if not instance:
@@ -133,17 +217,22 @@ def ensure_required_sg_on_all_enis(instance_id):
         logger.info("Instance %s is %s; skipping", instance_id, state)
         return False
 
+    required_sg_id = determine_required_sg_for_instance(instance)
+    if not required_sg_id:
+        logger.error("Could not determine required security group for instance %s", instance_id)
+        return False
+
     changed = False
 
     for eni in instance.get("NetworkInterfaces", []):
         eni_id = eni["NetworkInterfaceId"]
         current_group_ids = [g["GroupId"] for g in eni.get("Groups", [])]
 
-        if REQUIRED_SG_ID not in current_group_ids:
-            new_group_ids = sorted(set(current_group_ids + [REQUIRED_SG_ID]))
+        if required_sg_id not in current_group_ids:
+            new_group_ids = sorted(set(current_group_ids + [required_sg_id]))
             logger.info(
                 "Adding required SG %s to ENI %s on instance %s. Before=%s After=%s",
-                REQUIRED_SG_ID,
+                required_sg_id,
                 eni_id,
                 instance_id,
                 current_group_ids,
@@ -156,7 +245,7 @@ def ensure_required_sg_on_all_enis(instance_id):
             changed = True
 
     if not changed:
-        logger.info("Required SG %s already present on all ENIs for %s", REQUIRED_SG_ID, instance_id)
+        logger.info("Required SG %s already present on all ENIs for %s", required_sg_id, instance_id)
 
     return changed
 

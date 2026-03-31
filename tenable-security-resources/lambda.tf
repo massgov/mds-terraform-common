@@ -22,7 +22,7 @@ resource "aws_lambda_function" "remediator" {
 
   environment {
     variables = {
-      REQUIRED_SG_ID                = var.required_security_group_id
+      VPC_SG_MAPPINGS               = jsonencode(var.vpc_sg_mappings)
       SCANNER_SECRET_PARAMETER_NAME = var.scanner_secret_parameter_name
       LOG_LEVEL                     = "INFO"
     }

@@ -28,7 +28,7 @@ resource "aws_lambda_permission" "allow_runinstances" {
 
 resource "aws_cloudwatch_event_rule" "sg_change" {
   name        = "ec2-security-group-remediation"
-  description = "Catch SG changes and re-attach the required scanner SG if it is missing."
+  description = "Catch any SG changes and re-attach the required scanner SG if it is missing."
 
   event_pattern = jsonencode({
     source      = ["aws.ec2"]
