@@ -22,14 +22,18 @@ variable "lambda_function_name" {
 
 variable "scanner_secret_parameter_name" {
   type        = string
-  description = "Full SSM Parameter Store name for the SecureString secret, for example /scanner/prod/api-token."
-  #default     = "/apps/your-public-key-name"
+  description = "Full SSM Parameter Store name for the SecureString secret. Must start with '/'. Example: /scanner/prod/api-token"
+  #adding validation so no forgetting starting '/'
+  validation {
+    condition     = can(regex("^/", var.scanner_secret_parameter_name))
+    error_message = "The scanner_secret_parameter_name must start with a forward slash (/)."
+  }
 }
 
 variable "kms_key_arn" {
   type        = string
-  description = "ARN of the KMS key used to encrypt the scanner secret parameter. Use 'alias/aws/ssm' for the AWS managed key or specify a custom key ARN."
-  default     = "alias/aws/ssm"
+  description = "ARN of the KMS key used to encrypt the scanner secret parameter. Use '*' to allow any key, or provide a full KMS key ARN or alias ARN."
+  default     = "*"
 }
 
 variable "scanner_username" {

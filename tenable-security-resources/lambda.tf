@@ -26,6 +26,7 @@ resource "aws_lambda_function" "remediator" {
       SCANNER_SECRET_PARAMETER_NAME = var.scanner_secret_parameter_name
       SCANNER_USERNAME              = var.scanner_username
       SSM_DOCUMENT_NAME             = aws_ssm_document.scanner_bootstrap.name
+      SCANNER_POLICY_ARN            = aws_iam_policy.ec2_scanner_access.arn
       LOG_LEVEL                     = "INFO"
     }
   }
@@ -34,6 +35,7 @@ resource "aws_lambda_function" "remediator" {
     aws_iam_role_policy_attachment.lambda_basic,
     aws_iam_role_policy.lambda_custom,
     aws_cloudwatch_log_group.lambda,
-    aws_ssm_document.scanner_bootstrap
+    aws_ssm_document.scanner_bootstrap,
+    aws_iam_policy.ec2_scanner_access
   ]
 }
