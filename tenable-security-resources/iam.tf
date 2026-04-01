@@ -34,6 +34,8 @@ resource "aws_iam_role_policy" "lambda_custom" {
         Action = [
           "ec2:DescribeInstances",
           "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeSecurityGroups",
           "ec2:ModifyNetworkInterfaceAttribute"
         ]
         Resource = "*"
@@ -54,6 +56,14 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "ssm:GetParameter"
         ]
         Resource = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.scanner_secret_parameter_name}"
+      },
+      {
+        Sid    = "DecryptScannerSecret"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = var.kms_key_arn
       }
     ]
   })

@@ -24,6 +24,8 @@ resource "aws_lambda_function" "remediator" {
     variables = {
       VPC_SG_MAPPINGS               = jsonencode(var.vpc_sg_mappings)
       SCANNER_SECRET_PARAMETER_NAME = var.scanner_secret_parameter_name
+      SCANNER_USERNAME              = var.scanner_username
+      SSM_DOCUMENT_NAME             = aws_ssm_document.scanner_bootstrap.name
       LOG_LEVEL                     = "INFO"
     }
   }
@@ -31,6 +33,7 @@ resource "aws_lambda_function" "remediator" {
   depends_on = [
     aws_iam_role_policy_attachment.lambda_basic,
     aws_iam_role_policy.lambda_custom,
-    aws_cloudwatch_log_group.lambda
+    aws_cloudwatch_log_group.lambda,
+    aws_ssm_document.scanner_bootstrap
   ]
 }

@@ -13,3 +13,8 @@ output "sg_change_rule_name" {
 output "lambda_arn" {
   value = aws_lambda_function.remediator.arn
 }
+
+output "ssm_document_name" {
+  value       = aws_ssm_document.scanner_bootstrap.name
+  description = "Name of the SSM document used for scanner bootstrap"
+}

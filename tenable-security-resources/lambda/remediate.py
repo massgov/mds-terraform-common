@@ -2,22 +2,20 @@ import json
 import logging
 import os
 import time
-from pathlib import Path
 
 import boto3
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 VPC_SG_MAPPINGS = json.loads(os.environ["VPC_SG_MAPPINGS"])
 SCANNER_SECRET_PARAMETER_NAME = os.environ["SCANNER_SECRET_PARAMETER_NAME"]
+SCANNER_USERNAME = os.environ["SCANNER_USERNAME"]
+SSM_DOCUMENT_NAME = os.environ["SSM_DOCUMENT_NAME"]
 
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
 ec2 = boto3.client("ec2")
 ssm = boto3.client("ssm")
-
-SCRIPT_PATH = Path(__file__).with_name("run-scanner-bootstrap.sh")
-SCRIPT_LINES = SCRIPT_PATH.read_text().splitlines()
 
 _scanner_secret_cache = None
 _sg_cache = {}
@@ -271,13 +269,16 @@ def wait_for_ssm_online(instance_id, attempts=60, delay=10):
 
 
 def run_bootstrap_script(instance_id):
+    """Run the scanner bootstrap SSM document on the instance."""
+    public_key = get_scanner_secret()
+
     resp = ssm.send_command(
-        DocumentName="AWS-RunShellScript",
+        DocumentName=SSM_DOCUMENT_NAME,
         InstanceIds=[instance_id],
         Parameters={
-            "commands": SCRIPT_LINES,
-            "executionTimeout": ["3600"],
+            "PublicKey": [public_key],
+            "Username": [SCANNER_USERNAME],
         },
-        Comment="Bootstrap new instance after launch and SG remediation",
+        Comment="Bootstrap new instance for scanner access after launch and SG remediation",
     )
     return resp["Command"]["CommandId"]
