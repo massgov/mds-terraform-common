@@ -52,36 +52,36 @@ def handler(event, context):
                 policy_attached = ensure_scanner_policy_on_instance_role(instance_id)
                 results["iam_policy_attached"] = policy_attached
                 if policy_attached:
-                    logger.info("✓ SUCCESS: Scanner policy attached to instance role")
+                    logger.info("SUCCESS: Scanner policy attached to instance role")
                 else:
-                    logger.warning("⚠ SKIPPED: Scanner policy not attached (instance may not have IAM role)")
+                    logger.warning("SKIPPED: Scanner policy not attached (instance may not have IAM role)")
 
                 # Ensure security groups are attached (CRITICAL)
                 logger.info("Attempting to attach required security group...")
                 sg_result = ensure_required_sg_on_all_enis(instance_id)
                 results["security_group_attached"] = sg_result
                 if sg_result is False:
-                    error_msg = f"✗ FAILURE: Failed to ensure required security group on instance {instance_id}"
+                    error_msg = f"FAILURE: Failed to ensure required security group on instance {instance_id}"
                     logger.error(error_msg)
                     logger.error("=" * 80)
                     logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
                     logger.error("=" * 80)
                     raise RuntimeError(error_msg)
-                logger.info("✓ SUCCESS: Required security group attached")
+                logger.info("SUCCESS: Required security group attached")
 
                 # Wait for SSM and bootstrap (non-critical - instance may not have SSM agent)
                 logger.info("Waiting for SSM agent to come online...")
                 if wait_for_ssm_online(instance_id):
-                    logger.info("✓ SUCCESS: SSM agent is online")
+                    logger.info("SUCCESS: SSM agent is online")
                     logger.info("Sending bootstrap script via SSM...")
                     command_id = run_bootstrap_script(instance_id)
                     results["ssm_bootstrap_sent"] = True
-                    logger.info("✓ SUCCESS: Bootstrap script sent (Command ID: %s)", command_id)
+                    logger.info("SUCCESS: Bootstrap script sent (Command ID: %s)", command_id)
                 else:
-                    logger.warning("⚠ TIMEOUT: Instance %s never became SSM-online; skipped bootstrap script", instance_id)
+                    logger.warning("TIMEOUT: Instance %s never became SSM-online; skipped bootstrap script", instance_id)
 
                 logger.info("=" * 80)
-                logger.info("✓ LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
                 logger.info("Summary: %s", json.dumps(results, indent=2))
                 logger.info("=" * 80)
             else:
@@ -102,13 +102,13 @@ def handler(event, context):
                     sg_result = ensure_required_sg_on_all_enis(instance_id)
                     if sg_result is False:
                         failed_instances.append(instance_id)
-                        logger.error("✗ FAILURE: Security group remediation failed for instance %s", instance_id)
+                        logger.error("FAILURE: Security group remediation failed for instance %s", instance_id)
                     else:
                         successful_instances.append(instance_id)
-                        logger.info("✓ SUCCESS: Security group remediation completed for instance %s", instance_id)
+                        logger.info("SUCCESS: Security group remediation completed for instance %s", instance_id)
 
                 if failed_instances:
-                    error_msg = f"✗ FAILURE: Failed to remediate security groups on {len(failed_instances)} instance(s): {', '.join(failed_instances)}"
+                    error_msg = f"FAILURE: Failed to remediate security groups on {len(failed_instances)} instance(s): {', '.join(failed_instances)}"
                     logger.error("=" * 80)
                     logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
                     logger.error("Successful: %s", successful_instances)
@@ -117,7 +117,7 @@ def handler(event, context):
                     raise RuntimeError(error_msg)
 
                 logger.info("=" * 80)
-                logger.info("✓ LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
                 logger.info("Successfully remediated %d instance(s): %s", len(successful_instances), successful_instances)
                 logger.info("=" * 80)
             else:
@@ -130,7 +130,7 @@ def handler(event, context):
 
     except Exception as e:
         logger.error("=" * 80)
-        logger.error("✗ LAMBDA EXECUTION FAILED WITH EXCEPTION - Request ID: %s", context.request_id)
+        logger.error("LAMBDA EXECUTION FAILED WITH EXCEPTION - Request ID: %s", context.request_id)
         logger.error("Error: %s", str(e))
         logger.error("=" * 80)
         raise
@@ -252,7 +252,7 @@ def ensure_required_sg_on_all_enis(instance_id):
         logger.debug("Checking instance %s for required security groups", instance_id)
         instance = describe_instance(instance_id)
         if not instance:
-            logger.error("✗ FAILURE: Instance %s not found", instance_id)
+            logger.error("FAILURE: Instance %s not found", instance_id)
             return False
 
         state = instance.get("State", {}).get("Name")
@@ -262,12 +262,12 @@ def ensure_required_sg_on_all_enis(instance_id):
 
         required_sg_id = determine_required_sg_for_instance(instance)
         if not required_sg_id:
-            logger.error("✗ FAILURE: Could not determine required security group for instance %s", instance_id)
+            logger.error("FAILURE: Could not determine required security group for instance %s", instance_id)
             return False
 
         eni_count = len(instance.get("NetworkInterfaces", []))
         logger.debug("Instance %s has %d network interface(s)", instance_id, eni_count)
-        
+
         changed = False
         enis_modified = []
 
@@ -291,19 +291,19 @@ def ensure_required_sg_on_all_enis(instance_id):
                 )
                 changed = True
                 enis_modified.append(eni_id)
-                logger.info("✓ SUCCESS: Added security group to ENI %s", eni_id)
+                logger.info("SUCCESS: Added security group to ENI %s", eni_id)
 
         if changed:
-            logger.info("✓ SUCCESS: Security group %s added to %d ENI(s): %s", 
+            logger.info("SUCCESS: Security group %s added to %d ENI(s): %s",
                        required_sg_id, len(enis_modified), enis_modified)
         else:
-            logger.info("✓ SUCCESS: Required SG %s already present on all %d ENI(s) for instance %s", 
+            logger.info("SUCCESS: Required SG %s already present on all %d ENI(s) for instance %s",
                        required_sg_id, eni_count, instance_id)
 
         return True
 
     except Exception as e:
-        logger.error("✗ FAILURE: Error ensuring security group on instance %s: %s", instance_id, e, exc_info=True)
+        logger.error("FAILURE: Error ensuring security group on instance %s: %s", instance_id, e, exc_info=True)
         return False
 
 
@@ -333,10 +333,10 @@ def run_bootstrap_script(instance_id):
             Comment="Bootstrap new instance for scanner access after launch and SG remediation",
         )
         command_id = resp["Command"]["CommandId"]
-        logger.info("✓ SUCCESS: SSM command sent successfully (Command ID: %s)", command_id)
+        logger.info("SUCCESS: SSM command sent successfully (Command ID: %s)", command_id)
         return command_id
     except Exception as e:
-        logger.error("✗ FAILURE: Failed to send SSM command to instance %s: %s", instance_id, e, exc_info=True)
+        logger.error("FAILURE: Failed to send SSM command to instance %s: %s", instance_id, e, exc_info=True)
         raise
 
 
@@ -346,7 +346,7 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         logger.debug("Checking IAM role for instance %s", instance_id)
         instance = describe_instance(instance_id)
         if not instance:
-            logger.warning("⚠ WARNING: Cannot attach policy - instance %s not found", instance_id)
+            logger.warning("WARNING: Cannot attach policy - instance %s not found", instance_id)
             return False
 
         # Get the instance profile ARN
@@ -361,7 +361,7 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         profile_name = profile_arn.split("/")[-1] if profile_arn else None
 
         if not profile_name:
-            logger.error("✗ FAILURE: Could not extract instance profile name from ARN: %s", profile_arn)
+            logger.error("FAILURE: Could not extract instance profile name from ARN: %s", profile_arn)
             return False
 
         # Get the IAM role from the instance profile
@@ -370,7 +370,7 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         roles = profile_response.get("InstanceProfile", {}).get("Roles", [])
 
         if not roles:
-            logger.warning("⚠ WARNING: Instance profile %s has no roles attached", profile_name)
+            logger.warning("WARNING: Instance profile %s has no roles attached", profile_name)
             return False
 
         role_name = roles[0]["RoleName"]
@@ -387,9 +387,9 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         # Attach the policy
         logger.info("Attaching scanner policy %s to role %s", SCANNER_POLICY_ARN, role_name)
         iam.attach_role_policy(RoleName=role_name, PolicyArn=SCANNER_POLICY_ARN)
-        logger.info("✓ SUCCESS: Attached scanner policy to role %s for instance %s", role_name, instance_id)
+        logger.info("SUCCESS: Attached scanner policy to role %s for instance %s", role_name, instance_id)
         return True
 
     except Exception as e:
-        logger.error("✗ FAILURE: Error attaching scanner policy to instance %s role: %s", instance_id, e, exc_info=True)
+        logger.error("FAILURE: Error attaching scanner policy to instance %s role: %s", instance_id, e, exc_info=True)
         return False
