@@ -32,7 +32,6 @@ resource "aws_lambda_function" "remediator" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.lambda_basic,
     aws_iam_role_policy.lambda_custom,
     aws_cloudwatch_log_group.lambda,
     aws_ssm_document.scanner_bootstrap,

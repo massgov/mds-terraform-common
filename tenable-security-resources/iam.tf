@@ -11,13 +11,16 @@ data "aws_iam_policy_document" "ec2_scanner_access" {
     ]
   }
 
-  statement {
-    sid    = "DecryptScannerSecret"
-    effect = "Allow"
-    actions = [
-      "kms:Decrypt"
-    ]
-    resources = [var.kms_key_arn]
+  dynamic "statement" {
+    for_each = var.kms_key_arn != null ? [1] : []
+    content {
+      sid    = "DecryptScannerSecret"
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt"
+      ]
+      resources = [var.kms_key_arn]
+    }
   }
 }
 
@@ -56,11 +59,6 @@ resource "aws_iam_role" "lambda" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_basic" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
 resource "aws_iam_role_policy" "lambda_custom" {
   name = "${var.lambda_function_name}-policy"
   role = aws_iam_role.lambda.id
@@ -69,25 +67,56 @@ resource "aws_iam_role_policy" "lambda_custom" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "EC2ReadAndRemediate"
+        Sid    = "CloudWatchLogging"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = [
+          "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.lambda_function_name}:*"
+        ]
+      },
+      {
+        Sid    = "EC2Describe"
         Effect = "Allow"
         Action = [
           "ec2:DescribeInstances",
           "ec2:DescribeNetworkInterfaces",
           "ec2:DescribeVpcs",
-          "ec2:DescribeSecurityGroups",
-          "ec2:ModifyNetworkInterfaceAttribute"
+          "ec2:DescribeSecurityGroups"
         ]
         Resource = "*"
       },
       {
-        Sid    = "RunSSMCommands"
+        Sid    = "EC2ModifyNetworkInterfaces"
         Effect = "Allow"
         Action = [
-          "ssm:SendCommand",
+          "ec2:ModifyNetworkInterfaceAttribute"
+        ]
+        Resource = [
+          "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:network-interface/*",
+          "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:security-group/*"
+        ]
+      },
+      {
+        Sid    = "SSMDescribe"
+        Effect = "Allow"
+        Action = [
           "ssm:DescribeInstanceInformation"
         ]
         Resource = "*"
+      },
+      {
+        Sid    = "SSMSendCommand"
+        Effect = "Allow"
+        Action = [
+          "ssm:SendCommand"
+        ]
+        Resource = [
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:document/${var.ssm_document_name}",
+          "arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*"
+        ]
       },
       {
         Sid    = "ManageIAMPolicies"
@@ -97,7 +126,10 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "iam:ListAttachedRolePolicies",
           "iam:AttachRolePolicy"
         ]
-        Resource = "*"
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/*"
+        ]
       }
     ]
   })

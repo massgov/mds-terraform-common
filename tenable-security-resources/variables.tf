@@ -32,8 +32,13 @@ variable "scanner_secret_parameter_name" {
 
 variable "kms_key_arn" {
   type        = string
-  description = "ARN of the KMS key used to encrypt the scanner secret parameter. Use '*' to allow any key, or provide a full KMS key ARN or alias ARN."
-  default     = "*"
+  description = "ARN of the KMS key used to encrypt the scanner secret parameter. Must be a full KMS key ARN or alias ARN - wildcards are not allowed. Set to null if the parameter is not encrypted with a customer-managed key."
+  default     = null
+  # validation not allowing wildcards obviously.
+  validation {
+    condition     = var.kms_key_arn == null || (var.kms_key_arn != "*" && can(regex("^arn:aws:kms:", var.kms_key_arn)))
+    error_message = "oopsies!, the kms_key_arn must be a valid KMS key ARN (starting with 'arn:aws:kms:'). Wildcards ('*') are not allowed for security reasons. Set to null if not using"
+  }
 }
 
 variable "scanner_username" {
