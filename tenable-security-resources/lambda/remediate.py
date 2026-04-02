@@ -24,49 +24,116 @@ _vpc_name_cache = {}
 
 
 def handler(event, context):
+    logger.info("=" * 80)
+    logger.info("LAMBDA EXECUTION STARTED - Request ID: %s", context.request_id)
     logger.info("Received event: %s", json.dumps(event))
+    logger.info("=" * 80)
 
     detail_type = event.get("detail-type")
     detail = event.get("detail", {})
 
-    if detail_type == "EC2 Instance State-change Notification":
-        instance_id = detail.get("instance-id")
-        state = detail.get("state")
+    try:
+        if detail_type == "EC2 Instance State-change Notification":
+            instance_id = detail.get("instance-id")
+            state = detail.get("state")
 
-        if state == "running" and instance_id:
-            logger.info("Handling new instance in running state: %s", instance_id)
+            if state == "running" and instance_id:
+                logger.info("▶ PROCESSING: New instance in running state: %s", instance_id)
 
-            # Attach scanner policy to instance role
-            ensure_scanner_policy_on_instance_role(instance_id)
+                results = {
+                    "instance_id": instance_id,
+                    "iam_policy_attached": False,
+                    "security_group_attached": False,
+                    "ssm_bootstrap_sent": False,
+                }
 
-            # Ensure security groups are attached (instance is already running)
-            ensure_required_sg_on_all_enis(instance_id)
+                # Attach scanner policy to instance role (non-critical - instance may not have a role)
+                logger.info("Attempting to attach scanner policy to instance role...")
+                policy_attached = ensure_scanner_policy_on_instance_role(instance_id)
+                results["iam_policy_attached"] = policy_attached
+                if policy_attached:
+                    logger.info("✓ SUCCESS: Scanner policy attached to instance role")
+                else:
+                    logger.warning("⚠ SKIPPED: Scanner policy not attached (instance may not have IAM role)")
 
-            # Wait for SSM and bootstrap
-            if wait_for_ssm_online(instance_id):
-                command_id = run_bootstrap_script(instance_id)
-                logger.info("Sent bootstrap script to %s with command id %s", instance_id, command_id)
+                # Ensure security groups are attached (CRITICAL)
+                logger.info("Attempting to attach required security group...")
+                sg_result = ensure_required_sg_on_all_enis(instance_id)
+                results["security_group_attached"] = sg_result
+                if sg_result is False:
+                    error_msg = f"✗ FAILURE: Failed to ensure required security group on instance {instance_id}"
+                    logger.error(error_msg)
+                    logger.error("=" * 80)
+                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
+                    logger.error("=" * 80)
+                    raise RuntimeError(error_msg)
+                logger.info("✓ SUCCESS: Required security group attached")
+
+                # Wait for SSM and bootstrap (non-critical - instance may not have SSM agent)
+                logger.info("Waiting for SSM agent to come online...")
+                if wait_for_ssm_online(instance_id):
+                    logger.info("✓ SUCCESS: SSM agent is online")
+                    logger.info("Sending bootstrap script via SSM...")
+                    command_id = run_bootstrap_script(instance_id)
+                    results["ssm_bootstrap_sent"] = True
+                    logger.info("✓ SUCCESS: Bootstrap script sent (Command ID: %s)", command_id)
+                else:
+                    logger.warning("⚠ TIMEOUT: Instance %s never became SSM-online; skipped bootstrap script", instance_id)
+
+                logger.info("=" * 80)
+                logger.info("✓ LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("Summary: %s", json.dumps(results, indent=2))
+                logger.info("=" * 80)
             else:
-                logger.warning("Instance %s never became SSM-online; skipped bootstrap script", instance_id)
+                logger.info("Ignoring state change to '%s' for instance %s", state, instance_id)
+
+        elif detail_type == "AWS API Call via CloudTrail":
+            event_name = detail.get("eventName")
+
+            if event_name in ("ModifyInstanceAttribute", "ModifyNetworkInterfaceAttribute"):
+                instance_ids = extract_modified_instance_ids(detail)
+                logger.info("▶ PROCESSING: Security group remediation for %d instance(s)", len(instance_ids))
+
+                successful_instances = []
+                failed_instances = []
+
+                for instance_id in instance_ids:
+                    logger.info("Remediating security group for instance: %s", instance_id)
+                    sg_result = ensure_required_sg_on_all_enis(instance_id)
+                    if sg_result is False:
+                        failed_instances.append(instance_id)
+                        logger.error("✗ FAILURE: Security group remediation failed for instance %s", instance_id)
+                    else:
+                        successful_instances.append(instance_id)
+                        logger.info("✓ SUCCESS: Security group remediation completed for instance %s", instance_id)
+
+                if failed_instances:
+                    error_msg = f"✗ FAILURE: Failed to remediate security groups on {len(failed_instances)} instance(s): {', '.join(failed_instances)}"
+                    logger.error("=" * 80)
+                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
+                    logger.error("Successful: %s", successful_instances)
+                    logger.error("Failed: %s", failed_instances)
+                    logger.error("=" * 80)
+                    raise RuntimeError(error_msg)
+
+                logger.info("=" * 80)
+                logger.info("✓ LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("Successfully remediated %d instance(s): %s", len(successful_instances), successful_instances)
+                logger.info("=" * 80)
+            else:
+                logger.info("Ignoring CloudTrail event: %s", event_name)
+
         else:
-            logger.info("Ignoring state change to %s for instance %s", state, instance_id)
+            logger.info("Ignoring event type: %s", detail_type)
 
-    elif detail_type == "AWS API Call via CloudTrail":
-        event_name = detail.get("eventName")
+        return {"ok": True}
 
-        if event_name in ("ModifyInstanceAttribute", "ModifyNetworkInterfaceAttribute"):
-            instance_ids = extract_modified_instance_ids(detail)
-
-            for instance_id in instance_ids:
-                logger.info("Handling SG remediation for instance: %s", instance_id)
-                ensure_required_sg_on_all_enis(instance_id)
-        else:
-            logger.info("Ignoring CloudTrail event: %s", event_name)
-
-    else:
-        logger.info("Ignoring event type: %s", detail_type)
-
-    return {"ok": True}
+    except Exception as e:
+        logger.error("=" * 80)
+        logger.error("✗ LAMBDA EXECUTION FAILED WITH EXCEPTION - Request ID: %s", context.request_id)
+        logger.error("Error: %s", str(e))
+        logger.error("=" * 80)
+        raise
 
 
 def extract_modified_instance_ids(detail):
@@ -181,47 +248,63 @@ def determine_required_sg_for_instance(instance):
 
 
 def ensure_required_sg_on_all_enis(instance_id):
-    instance = describe_instance(instance_id)
-    if not instance:
-        logger.warning("Instance %s not found", instance_id)
+    try:
+        logger.debug("Checking instance %s for required security groups", instance_id)
+        instance = describe_instance(instance_id)
+        if not instance:
+            logger.error("✗ FAILURE: Instance %s not found", instance_id)
+            return False
+
+        state = instance.get("State", {}).get("Name")
+        if state in ("shutting-down", "terminated"):
+            logger.info("Instance %s is %s; skipping security group attachment", instance_id, state)
+            return False
+
+        required_sg_id = determine_required_sg_for_instance(instance)
+        if not required_sg_id:
+            logger.error("✗ FAILURE: Could not determine required security group for instance %s", instance_id)
+            return False
+
+        eni_count = len(instance.get("NetworkInterfaces", []))
+        logger.debug("Instance %s has %d network interface(s)", instance_id, eni_count)
+        
+        changed = False
+        enis_modified = []
+
+        for eni in instance.get("NetworkInterfaces", []):
+            eni_id = eni["NetworkInterfaceId"]
+            current_group_ids = [g["GroupId"] for g in eni.get("Groups", [])]
+
+            if required_sg_id not in current_group_ids:
+                new_group_ids = sorted(set(current_group_ids + [required_sg_id]))
+                logger.info(
+                    "Adding required SG %s to ENI %s on instance %s. Before=%s After=%s",
+                    required_sg_id,
+                    eni_id,
+                    instance_id,
+                    current_group_ids,
+                    new_group_ids,
+                )
+                ec2.modify_network_interface_attribute(
+                    NetworkInterfaceId=eni_id,
+                    Groups=new_group_ids,
+                )
+                changed = True
+                enis_modified.append(eni_id)
+                logger.info("✓ SUCCESS: Added security group to ENI %s", eni_id)
+
+        if changed:
+            logger.info("✓ SUCCESS: Security group %s added to %d ENI(s): %s", 
+                       required_sg_id, len(enis_modified), enis_modified)
+        else:
+            logger.info("✓ SUCCESS: Required SG %s already present on all %d ENI(s) for instance %s", 
+                       required_sg_id, eni_count, instance_id)
+
+        return True
+
+    except Exception as e:
+        logger.error("✗ FAILURE: Error ensuring security group on instance %s: %s", instance_id, e, exc_info=True)
         return False
-
-    state = instance.get("State", {}).get("Name")
-    if state in ("shutting-down", "terminated"):
-        logger.info("Instance %s is %s; skipping", instance_id, state)
-        return False
-
-    required_sg_id = determine_required_sg_for_instance(instance)
-    if not required_sg_id:
-        logger.error("Could not determine required security group for instance %s", instance_id)
-        return False
-
-    changed = False
-
-    for eni in instance.get("NetworkInterfaces", []):
-        eni_id = eni["NetworkInterfaceId"]
-        current_group_ids = [g["GroupId"] for g in eni.get("Groups", [])]
-
-        if required_sg_id not in current_group_ids:
-            new_group_ids = sorted(set(current_group_ids + [required_sg_id]))
-            logger.info(
-                "Adding required SG %s to ENI %s on instance %s. Before=%s After=%s",
-                required_sg_id,
-                eni_id,
-                instance_id,
-                current_group_ids,
-                new_group_ids,
-            )
-            ec2.modify_network_interface_attribute(
-                NetworkInterfaceId=eni_id,
-                Groups=new_group_ids,
-            )
-            changed = True
-
-    if not changed:
-        logger.info("Required SG %s already present on all ENIs for %s", required_sg_id, instance_id)
-
-    return changed
 
 
 def wait_for_ssm_online(instance_id, attempts=60, delay=10):
@@ -238,24 +321,32 @@ def wait_for_ssm_online(instance_id, attempts=60, delay=10):
 
 def run_bootstrap_script(instance_id):
     """Run the scanner bootstrap SSM document on the instance."""
-    resp = ssm.send_command(
-        DocumentName=SSM_DOCUMENT_NAME,
-        InstanceIds=[instance_id],
-        Parameters={
-            "ParameterName": [SCANNER_SECRET_PARAMETER_NAME],
-            "Username": [SCANNER_USERNAME],
-        },
-        Comment="Bootstrap new instance for scanner access after launch and SG remediation",
-    )
-    return resp["Command"]["CommandId"]
+    try:
+        logger.info("Sending SSM command to instance %s (Document: %s)", instance_id, SSM_DOCUMENT_NAME)
+        resp = ssm.send_command(
+            DocumentName=SSM_DOCUMENT_NAME,
+            InstanceIds=[instance_id],
+            Parameters={
+                "ParameterName": [SCANNER_SECRET_PARAMETER_NAME],
+                "Username": [SCANNER_USERNAME],
+            },
+            Comment="Bootstrap new instance for scanner access after launch and SG remediation",
+        )
+        command_id = resp["Command"]["CommandId"]
+        logger.info("✓ SUCCESS: SSM command sent successfully (Command ID: %s)", command_id)
+        return command_id
+    except Exception as e:
+        logger.error("✗ FAILURE: Failed to send SSM command to instance %s: %s", instance_id, e, exc_info=True)
+        raise
 
 
 def ensure_scanner_policy_on_instance_role(instance_id):
     """Attach the scanner access policy to the instance's IAM role if not already attached."""
     try:
+        logger.debug("Checking IAM role for instance %s", instance_id)
         instance = describe_instance(instance_id)
         if not instance:
-            logger.warning("Cannot attach policy - instance %s not found", instance_id)
+            logger.warning("⚠ WARNING: Cannot attach policy - instance %s not found", instance_id)
             return False
 
         # Get the instance profile ARN
@@ -270,15 +361,16 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         profile_name = profile_arn.split("/")[-1] if profile_arn else None
 
         if not profile_name:
-            logger.error("Could not extract instance profile name from ARN: %s", profile_arn)
+            logger.error("✗ FAILURE: Could not extract instance profile name from ARN: %s", profile_arn)
             return False
 
         # Get the IAM role from the instance profile
+        logger.debug("Getting IAM role from instance profile: %s", profile_name)
         profile_response = iam.get_instance_profile(InstanceProfileName=profile_name)
         roles = profile_response.get("InstanceProfile", {}).get("Roles", [])
 
         if not roles:
-            logger.warning("Instance profile %s has no roles attached", profile_name)
+            logger.warning("⚠ WARNING: Instance profile %s has no roles attached", profile_name)
             return False
 
         role_name = roles[0]["RoleName"]
@@ -289,14 +381,15 @@ def ensure_scanner_policy_on_instance_role(instance_id):
         policy_arns = [p["PolicyArn"] for p in attached_policies.get("AttachedPolicies", [])]
 
         if SCANNER_POLICY_ARN in policy_arns:
-            logger.info("Scanner policy already attached to role %s", role_name)
+            logger.info("Scanner policy already attached to role %s (no action needed)", role_name)
             return False
 
         # Attach the policy
+        logger.info("Attaching scanner policy %s to role %s", SCANNER_POLICY_ARN, role_name)
         iam.attach_role_policy(RoleName=role_name, PolicyArn=SCANNER_POLICY_ARN)
-        logger.info("Successfully attached scanner policy to role %s for instance %s", role_name, instance_id)
+        logger.info("✓ SUCCESS: Attached scanner policy to role %s for instance %s", role_name, instance_id)
         return True
 
     except Exception as e:
-        logger.error("Error attaching scanner policy to instance %s role: %s", instance_id, e)
+        logger.error("✗ FAILURE: Error attaching scanner policy to instance %s role: %s", instance_id, e, exc_info=True)
         return False
