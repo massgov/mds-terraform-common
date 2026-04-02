@@ -28,56 +28,45 @@ def handler(event, context):
 
     detail_type = event.get("detail-type")
     detail = event.get("detail", {})
-    event_name = detail.get("eventName")
 
-    if detail_type == "AWS API Call via CloudTrail" and event_name == "RunInstances":
-        instance_ids = extract_runinstances_instance_ids(detail)
+    if detail_type == "EC2 Instance State-change Notification":
+        instance_id = detail.get("instance-id")
+        state = detail.get("state")
 
-        for instance_id in instance_ids:
-            logger.info("Handling new instance: %s", instance_id)
+        if state == "running" and instance_id:
+            logger.info("Handling new instance in running state: %s", instance_id)
 
             # Attach scanner policy to instance role
             ensure_scanner_policy_on_instance_role(instance_id)
 
-            ensure_required_sg_on_all_enis(instance_id)
-            wait_for_instance_running(instance_id)
+            # Ensure security groups are attached (instance is already running)
             ensure_required_sg_on_all_enis(instance_id)
 
+            # Wait for SSM and bootstrap
             if wait_for_ssm_online(instance_id):
                 command_id = run_bootstrap_script(instance_id)
                 logger.info("Sent bootstrap script to %s with command id %s", instance_id, command_id)
             else:
                 logger.warning("Instance %s never became SSM-online; skipped bootstrap script", instance_id)
+        else:
+            logger.info("Ignoring state change to %s for instance %s", state, instance_id)
 
-    elif detail_type == "AWS API Call via CloudTrail" and event_name in (
-        "ModifyInstanceAttribute",
-        "ModifyNetworkInterfaceAttribute",
-    ):
-        instance_ids = extract_modified_instance_ids(detail)
+    elif detail_type == "AWS API Call via CloudTrail":
+        event_name = detail.get("eventName")
 
-        for instance_id in instance_ids:
-            logger.info("Handling SG remediation for instance: %s", instance_id)
-            ensure_required_sg_on_all_enis(instance_id)
+        if event_name in ("ModifyInstanceAttribute", "ModifyNetworkInterfaceAttribute"):
+            instance_ids = extract_modified_instance_ids(detail)
+
+            for instance_id in instance_ids:
+                logger.info("Handling SG remediation for instance: %s", instance_id)
+                ensure_required_sg_on_all_enis(instance_id)
+        else:
+            logger.info("Ignoring CloudTrail event: %s", event_name)
 
     else:
-        logger.info("Ignoring event type=%s eventName=%s", detail_type, event_name)
+        logger.info("Ignoring event type: %s", detail_type)
 
     return {"ok": True}
-
-
-def extract_runinstances_instance_ids(detail):
-    ids = []
-    response = detail.get("responseElements") or {}
-    instances_set = response.get("instancesSet") or {}
-    items = instances_set.get("items") or []
-
-    for item in items:
-        if isinstance(item, dict):
-            instance_id = item.get("instanceId")
-            if instance_id:
-                ids.append(instance_id)
-
-    return ids
 
 
 def extract_modified_instance_ids(detail):
@@ -233,14 +222,6 @@ def ensure_required_sg_on_all_enis(instance_id):
         logger.info("Required SG %s already present on all ENIs for %s", required_sg_id, instance_id)
 
     return changed
-
-
-def wait_for_instance_running(instance_id):
-    waiter = ec2.get_waiter("instance_running")
-    waiter.wait(
-        InstanceIds=[instance_id],
-        WaiterConfig={"Delay": 5, "MaxAttempts": 60},
-    )
 
 
 def wait_for_ssm_online(instance_id, attempts=60, delay=10):
