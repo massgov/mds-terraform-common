@@ -38,6 +38,15 @@ resource "aws_cloudwatch_event_rule" "sg_change" {
         "ModifyInstanceAttribute",
         "ModifyNetworkInterfaceAttribute"
       ]
+      userIdentity = {
+        sessionContext = {
+          sessionIssuer = {
+            arn = [{
+              "anything-but" = aws_iam_role.lambda.arn
+            }]
+          }
+        }
+      }
     }
   })
 }

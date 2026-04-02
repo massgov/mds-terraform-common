@@ -307,7 +307,8 @@ def ensure_required_sg_on_all_enis(instance_id):
         return False
 
 
-def wait_for_ssm_online(instance_id, attempts=60, delay=10):
+def wait_for_ssm_online(instance_id, attempts=30, delay=10):
+    """Wait for SSM agent to pop online (5 min max)."""
     for _ in range(attempts):
         resp = ssm.describe_instance_information(
             Filters=[{"Key": "InstanceIds", "Values": [instance_id]}]
