@@ -2,8 +2,8 @@ output "lambda_name" {
   value = aws_lambda_function.remediator.function_name
 }
 
-output "runinstances_rule_name" {
-  value = aws_cloudwatch_event_rule.runinstances.name
+output "instance_running_rule_name" {
+  value = aws_cloudwatch_event_rule.instance_running.name
 }
 
 output "sg_change_rule_name" {
