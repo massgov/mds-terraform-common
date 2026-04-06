@@ -25,7 +25,7 @@ _vpc_name_cache = {}
 
 def handler(event, context):
     logger.info("=" * 80)
-    logger.info("LAMBDA EXECUTION STARTED - Request ID: %s", context.request_id)
+    logger.info("LAMBDA EXECUTION STARTED - Request ID: %s", context.aws_request_id)
     logger.info("Received event: %s", json.dumps(event))
     logger.info("=" * 80)
 
@@ -38,7 +38,7 @@ def handler(event, context):
             state = detail.get("state")
 
             if state == "running" and instance_id:
-                logger.info("▶ PROCESSING: New instance in running state: %s", instance_id)
+                logger.info("PROCESSING: New instance in running state: %s", instance_id)
 
                 results = {
                     "instance_id": instance_id,
@@ -64,7 +64,7 @@ def handler(event, context):
                     error_msg = f"FAILURE: Failed to ensure required security group on instance {instance_id}"
                     logger.error(error_msg)
                     logger.error("=" * 80)
-                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
+                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.aws_request_id)
                     logger.error("=" * 80)
                     raise RuntimeError(error_msg)
                 logger.info("SUCCESS: Required security group attached")
@@ -81,7 +81,7 @@ def handler(event, context):
                     logger.warning("TIMEOUT: Instance %s never became SSM-online; skipped bootstrap script", instance_id)
 
                 logger.info("=" * 80)
-                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.aws_request_id)
                 logger.info("Summary: %s", json.dumps(results, indent=2))
                 logger.info("=" * 80)
             else:
@@ -92,7 +92,7 @@ def handler(event, context):
 
             if event_name in ("ModifyInstanceAttribute", "ModifyNetworkInterfaceAttribute"):
                 instance_ids = extract_modified_instance_ids(detail)
-                logger.info("▶ PROCESSING: Security group remediation for %d instance(s)", len(instance_ids))
+                logger.info("PROCESSING: Security group remediation for %d instance(s)", len(instance_ids))
 
                 successful_instances = []
                 failed_instances = []
@@ -110,14 +110,14 @@ def handler(event, context):
                 if failed_instances:
                     error_msg = f"FAILURE: Failed to remediate security groups on {len(failed_instances)} instance(s): {', '.join(failed_instances)}"
                     logger.error("=" * 80)
-                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.request_id)
+                    logger.error("LAMBDA EXECUTION FAILED - Request ID: %s", context.aws_request_id)
                     logger.error("Successful: %s", successful_instances)
                     logger.error("Failed: %s", failed_instances)
                     logger.error("=" * 80)
                     raise RuntimeError(error_msg)
 
                 logger.info("=" * 80)
-                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.request_id)
+                logger.info("LAMBDA EXECUTION COMPLETED SUCCESSFULLY - Request ID: %s", context.aws_request_id)
                 logger.info("Successfully remediated %d instance(s): %s", len(successful_instances), successful_instances)
                 logger.info("=" * 80)
             else:
@@ -130,7 +130,7 @@ def handler(event, context):
 
     except Exception as e:
         logger.error("=" * 80)
-        logger.error("LAMBDA EXECUTION FAILED WITH EXCEPTION - Request ID: %s", context.request_id)
+        logger.error("LAMBDA EXECUTION FAILED WITH EXCEPTION - Request ID: %s", context.aws_request_id)
         logger.error("Error: %s", str(e))
         logger.error("=" * 80)
         raise
