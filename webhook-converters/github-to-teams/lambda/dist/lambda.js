@@ -48124,12 +48124,14 @@ var z = /* @__PURE__ */ Object.freeze({
 var logLevels = ["debug", "log", "error"];
 
 // src/types/Config.ts
+var severities = ["low", "medium", "high", "critical"];
 var ConfigSchema = z.object({
   region: z.string().min(1),
   paramPrefix: z.string().min(1),
   sendToTeams: z.boolean(),
   minLogLevel: z.enum(logLevels),
-  token: z.string().min(50)
+  token: z.string().min(50),
+  minSeverities: z.array(z.enum(severities)).optional()
 });
 
 // src/lib/config/EnvConfigBuilder.ts
@@ -48138,12 +48140,15 @@ var EnvConfigBuilder = class {
     return process.env[name];
   }
   build() {
+    const minSeveritiesEnv = this.getEnvVar("MIN_SEVERITIES");
+    const minSeverities = minSeveritiesEnv && minSeveritiesEnv.trim() !== "" ? minSeveritiesEnv.split(",").map((s) => s.trim()).filter((s) => s !== "").map((s) => s) : void 0;
     const result = {
       region: this.getEnvVar("AWS_REGION"),
       paramPrefix: this.getEnvVar("CONFIGURABLE_PARAM_PREFIX"),
       sendToTeams: this.getEnvVar("SEND_TO_TEAMS") === "yes",
       minLogLevel: this.getEnvVar("MIN_LOG_LEVEL"),
-      token: this.getEnvVar("PATH_TOKEN")
+      token: this.getEnvVar("PATH_TOKEN"),
+      minSeverities
     };
     return ConfigSchema.parse(result);
   }
@@ -48358,6 +48363,13 @@ var createWebhookHandler = ({
     "dependabot_alert.created",
     "dependabot_alert.reopened"
   ], async ({ payload }) => {
+    const severity = payload.alert.security_vulnerability.severity;
+    if (config.minSeverities && config.minSeverities.length > 0) {
+      if (!config.minSeverities.includes(severity)) {
+        logger.debug(`skipping alert with severity '${severity}' (not in configured severities: ${config.minSeverities.join(", ")})`);
+        return;
+      }
+    }
     let teamsPayload = {};
     try {
       teamsPayload = convertDependabotAlert(payload);

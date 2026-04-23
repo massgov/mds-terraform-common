@@ -74,3 +74,9 @@ variable "send_to_teams" {
   description = "Whether to actually send the message to the Teams channel or just log the payload that could be sent to Teams."
   default     = false
 }
+
+variable "min_severities" {
+  type        = list(string)
+  description = "Optional list of minimal severities to send to Teams. alerts matching these severities will only be sent."
+  default     = null
+}

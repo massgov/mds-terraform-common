@@ -29,7 +29,17 @@ const createWebhookHandler = ({
     'dependabot_alert.reintroduced',
     'dependabot_alert.created',
     'dependabot_alert.reopened',
-  ], async ({payload}) => {
+  ], async ({ payload }) => {
+    const severity = payload.alert.security_vulnerability.severity;
+
+    // filtering by severity only if configured, otherwise send all alerts
+    if (config.minSeverities && config.minSeverities.length > 0) {
+      if (!config.minSeverities.includes(severity)) {
+        logger.debug(`skipping alert with severity '${severity}' (not in configured severities: ${config.minSeverities.join(', ')})`);
+        return;
+      }
+    }
+
     let teamsPayload: TeamsWebhookPayload = {}
     try {
       teamsPayload = convertDependabotAlert(payload)
