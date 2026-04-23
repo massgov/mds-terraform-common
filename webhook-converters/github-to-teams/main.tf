@@ -35,6 +35,7 @@ module "lambda" {
       MIN_LOG_LEVEL             = var.min_log_level
       SEND_TO_TEAMS             = var.send_to_teams ? "yes" : "no"
       PATH_TOKEN                = random_password.path_token.result
+      MIN_SEVERITIES            = var.min_severities != null ? join(",", var.min_severities) : ""
     }, var.environment_vars)
   }
   iam_policies = concat(
