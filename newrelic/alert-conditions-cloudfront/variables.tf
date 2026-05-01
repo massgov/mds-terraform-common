@@ -72,3 +72,9 @@ variable "tags" {
   description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
   default     = {}
 }
+
+variable "include_4xx_errors" {
+  type        = bool
+  description = "Whether to include 4xx errors in the alert conditions."
+  default     = true
+}

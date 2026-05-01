@@ -10,7 +10,11 @@ locals {
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 
   error_rate_nql_query = var.custom_error_rate_nql_query != "" ? var.custom_error_rate_nql_query : <<-NRQL
-   SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+    SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+  NRQL
+
+  important_error_rate_nql_query = <<-NRQL
+   SELECT average(aws.cloudfront.TotalErrorRate - aws.cloudfront.4xxErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
   NRQL
 
   throughput_nql_query = var.custom_throughput_nql_query != "" ? var.custom_throughput_nql_query : <<-NRQL
@@ -29,8 +33,8 @@ module "error_rate" {
     replace(format("%f", var.error_rate_threshold), "/\\.0+$/", ""),
     var.critical_threshold_duration
   )
-
-  nrql_query                  = local.error_rate_nql_query
+  # if var.include_4xx_errors is false (default is true), we exclude 4xx errors in the error rate calculation
+  nrql_query                  = var.include_4xx_errors ? local.error_rate_nql_query : local.important_error_rate_nql_query
   critical_threshold          = var.error_rate_threshold
   critical_threshold_duration = var.critical_threshold_duration
   aggregation_window          = var.aggregation_window
