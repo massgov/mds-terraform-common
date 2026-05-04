@@ -13,7 +13,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - run: terraform fmt -recursive -check || echo "Terraform fmt check failed. Run 'terraform fmt -recursive' to fix the formatting issues."
       - name: Check Terraform docs
-        uses: terraform-docs/gh-actions@v1.1.0
+        uses: terraform-docs/gh-actions@v1.4.1
         with:
           working-dir: ssm-session-monitor/,jump-box/,assume-role-alerts/,gha-environment/,gha-role/,terraform-bootstrap/,s3-backend-policy-documents/
           git-push: false
