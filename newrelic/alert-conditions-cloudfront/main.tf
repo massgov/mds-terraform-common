@@ -10,15 +10,15 @@ locals {
   filter_subquery = length(local.filter_subqueries_and) == 0 ? "" : "WHERE (${local.filter_subqueries_and})"
 
   error_rate_nql_query = var.custom_error_rate_nql_query != "" ? var.custom_error_rate_nql_query : <<-NRQL
-    SELECT average(aws.cloudfront.TotalErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+    SELECT average(`aws.cloudfront.TotalErrorRate`) FROM Metric ${local.filter_subquery} FACET entity.name
   NRQL
 
   important_error_rate_nql_query = <<-NRQL
-   SELECT average(aws.cloudfront.TotalErrorRate) - average(aws.cloudfront.4xxErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+    SELECT average(`aws.cloudfront.TotalErrorRate`) - average(`aws.cloudfront.4xxErrorRate`) FROM Metric ${local.filter_subquery} FACET entity.name
   NRQL
 
   throughput_nql_query = var.custom_throughput_nql_query != "" ? var.custom_throughput_nql_query : <<-NRQL
-   SELECT average(aws.cloudfront.Requests) FROM Metric ${local.filter_subquery} FACET entity.name
+   SELECT average(`aws.cloudfront.Requests`) FROM Metric ${local.filter_subquery} FACET entity.name
   NRQL
 }
 
