@@ -1,6 +1,10 @@
 # Changelog
 
-## [1.0.127] - 2026-03-16
+## [1.0.129] - 2026-05-04
+- [New Relic]
+  - Update Provider versions 
+
+## [1.0.126] - 2026-03-16
 - [New Relic]
   - Add support to add AWS account to NR account
 
@@ -20,7 +24,6 @@
     - New: `var.rds_instance_cluster` to allow RDS instance to be created in an RDS cluster
     - New: `var.rds_instance_count` to allow creation of multiple RDS instances in cluster 
     - New: `var.database_name` to allow setting db name on cluster instances
-
 
 ## [1.0.122] - 2026-01-12
   - [ECS Cluster] Prevent block device collision in mapping provided to cluster autoscaling group

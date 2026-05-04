@@ -14,7 +14,7 @@ locals {
   NRQL
 
   important_error_rate_nql_query = <<-NRQL
-   SELECT average(aws.cloudfront.TotalErrorRate - aws.cloudfront.4xxErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
+   SELECT average(aws.cloudfront.TotalErrorRate) - average(aws.cloudfront.4xxErrorRate) FROM Metric ${local.filter_subquery} FACET entity.name
   NRQL
 
   throughput_nql_query = var.custom_throughput_nql_query != "" ? var.custom_throughput_nql_query : <<-NRQL
