@@ -7,7 +7,7 @@
 ## [1.0.126] - 2026-03-16
 - [New Relic]
   - Add support to add AWS account to NR account
-  
+
 ## [1.0.126] - 2026-03-24
 - [Tagging]
   - Fix parsing of docs.manifest file ending in a newline character
