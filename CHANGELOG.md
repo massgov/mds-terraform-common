@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.127] - 2026-05-04
+## [1.0.128] - 2026-05-04
 - [New Relic]
   - Update Provider versions 
 
