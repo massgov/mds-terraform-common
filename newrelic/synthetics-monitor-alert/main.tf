@@ -60,5 +60,6 @@ module "alert_condition" {
   aggregation_window          = var.aggregation_window
   aggregation_method          = "event_flow"
   aggregation_delay           = var.aggregation_delay
+  critical_operator           = var.critical_operator
   tags                        = var.tags
 }
