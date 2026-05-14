@@ -78,3 +78,10 @@ variable "tags" {
   description = "Tags to apply to the alert conditions. Tag values can either be a single string or a list of strings."
   default     = {}
 }
+
+
+variable "critical_operator" {
+  type        = string
+  description = "See newrelic_nrql_alert_condition.critical.operator."
+  default     = "above"
+}

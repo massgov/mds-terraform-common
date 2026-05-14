@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.130] - 2026-05-13
+- [New Relic]
+  - Add alert-workflow
+  - add var.critical_operator to synthetic alerts
+
 ## [1.0.129] - 2026-05-04
 - [New Relic]
   - Update Provider versions 
