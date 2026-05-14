@@ -96,3 +96,26 @@ variable "error_topics" {
   default     = []
 }
 
+variable "alarm_comparison_operator" {
+  type        = string
+  description = "The comparison operator used for the Lambda error alarm"
+  default     = "GreaterThanOrEqualToThreshold"
+}
+
+variable "alarm_period" {
+  type        = number
+  description = "The period in seconds over which the specified statistic is applied"
+  default     = 60
+}
+
+variable "alarm_threshold" {
+  type        = number
+  description = "The value against which the specified statistic is compared"
+  default     = 1
+}
+
+variable "alarm_statistic" {
+  type        = string
+  description = "The statistic to apply to the alarm's associated metric"
+  default     = "Sum"
+}

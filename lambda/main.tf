@@ -124,13 +124,13 @@ resource "aws_cloudwatch_metric_alarm" "alarm" {
   count               = length(var.error_topics)
   alarm_name          = "${coalesce(var.human_name, var.name)} error"
   alarm_description   = "The Lambda function ${coalesce(var.human_name, var.name)} has errored"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
+  comparison_operator = var.alarm_comparison_operator
   evaluation_periods  = 1
   metric_name         = "Errors"
   namespace           = "AWS/Lambda"
-  period              = 60
-  threshold           = 1
-  statistic           = "Sum"
+  period              = var.alarm_period
+  threshold           = var.alarm_threshold
+  statistic           = var.alarm_statistic
   dimensions = {
     FunctionName = aws_lambda_function.default.function_name
   }
