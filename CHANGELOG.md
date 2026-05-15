@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.131] - 2026-05-15
+- [Proto Instance]
+  - Fix management Lambda failing to unmount /home when users are logged in
+
 ## [1.0.130] - 2026-05-13
 - [New Relic]
   - Add alert-workflow
