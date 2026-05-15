@@ -134,15 +134,19 @@ const unmountPartitionOnInstance = async (
       Comment: "Unmount user data partition",
       Parameters: {
         commands: [
-          "set -e",
           `mountpoint=$(lsblk -o MOUNTPOINT,PATH --json | jq -r '.blockdevices[] | select(.mountpoint == "/home").path')`,
-          'if [ -n "${mountpoint}" ]; then umount $mountpoint; else echo "Nothing to do - ${mountpoint} not mounted"; fi',
+          'if [ -z "${mountpoint}" ]; then echo "Nothing to do - not mounted"; exit 0; fi',
+          'wall "System maintenance: this instance will be rebuilt in 60 seconds. Save your work and disconnect." 2>/dev/null || true',
+          'sleep 60',
+          'fuser -km /home 2>/dev/null || true',
+          'sleep 2',
+          'umount $mountpoint || umount -l $mountpoint',
         ],
       },
     })
   );
   await waitUntilCommandExecuted(
-    { client: ssm, maxWaitTime: 90 },
+    { client: ssm, maxWaitTime: 120 },
     {
       CommandId: sendCommandResult.Command?.CommandId,
       InstanceId: instanceId,
