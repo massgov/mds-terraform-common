@@ -76,7 +76,7 @@ resource "aws_iam_policy" "lambda" {
 # Lambda function module
 # ---------------------------------------------------------------------------
 module "lambda" {
-  source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.131"
+  source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.132"
   name            = local.module_name
   human_name     = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
   handler         = "index.handler"
