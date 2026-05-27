@@ -79,3 +79,24 @@ resource "aws_iam_policy" "maintenance_publish_alerts" {
   name   = "SSR-Maintenance-Publish-Alerts-Policy"
   policy = data.aws_iam_policy_document.maintenance_publish_alerts.json
 }
+
+# ---------------------------------------------------------------------------
+# User Access Key Age Check
+# ---------------------------------------------------------------------------
+
+module "iam_user_access_key_age" {
+  count  = var.create_user_access_key_age_check ? 1 : 0
+  source = "./modules/iam_user_access_key_age"
+
+  name_prefix             = var.user_access_name_prefix
+  sns_topic_arn           = var.user_access_sns_topic_arn
+  sns_email_subscriptions = var.user_access_sns_email_subscriptions
+  name_pattern            = var.user_access_name_pattern
+  tag_key                 = var.user_access_tag_key
+  tag_value               = var.user_access_tag_value
+  warning_days            = var.user_access_warning_days
+  alert_days              = var.user_access_alert_days
+  schedule_expression     = var.user_access_schedule_expression
+  tags                    = var.tags
+
+}
