@@ -25,7 +25,7 @@ ALERT_DAYS    = int(os.environ.get("ALERT_DAYS",   "90"))
 DISABLE_DAYS  = int(os.environ.get("DISABLE_DAYS", "180"))  # Days before disabling keys
 PRE_WARN_DAYS = int(os.environ.get("PRE_WARN_DAYS", "7"))   # Days before disable to warn
 AUTO_DISABLE  = os.environ.get("AUTO_DISABLE", "false").lower() == "true"  # Enable auto-disable
-DRY_RUN       = os.environ.get("DRY_RUN", "true").lower() == "true"  # Enable dry-run mode (no SNS publish, no disable)
+DRY_RUN       = os.environ.get("DRY_RUN", "false").lower() == "true"  # Enable dry-run mode (no SNS publish, no disable)
 NAME_PATTERN  = os.environ.get("NAME_PATTERN", "") # Default to no user to avoid accidental
 TAG_KEY       = os.environ.get("TAG_KEY", "")
 TAG_VALUE     = os.environ.get("TAG_VALUE", "")
