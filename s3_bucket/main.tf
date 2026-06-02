@@ -5,11 +5,27 @@ resource "random_id" "bucket_id" {
 
 locals {
   bucket_root_name = var.guarantee_uniqueness ? "${var.bucket_name}-${random_id.bucket_id.dec}" : var.bucket_name
+  account_id = data.aws_caller_identity.default.account_id
 }
+
+data "aws_caller_identity" "default" {}
 
 #############################################################################
 # KMS Key for server-side encryption of bucket objects
 #############################################################################
+
+data "aws_iam_policy_document" "default_key_policy" {
+  statement {
+    sid = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type = "AWS" 
+      identifiers = ["arn:aws:iam::${local.account_id}:root"]
+    }
+    actions = ["kms:*"]
+    resources = ["*"]
+  }
+}
 
 # Only create if var.kms_encrypted = true
 resource "aws_kms_key" "s3_key" {
@@ -17,15 +33,7 @@ resource "aws_kms_key" "s3_key" {
   description             = "This key is used to encrypt bucket objects in ${local.bucket_root_name} and ${local.bucket_root_name}-logs"
   deletion_window_in_days = var.deletion_window_in_days # Length of time the key will be retained when a deletion is scheduled.
   enable_key_rotation     = true
-
-  dynamic "policy" {
-    for_each = var.kms_policy != "" ? [1] : []
-    content {
-      # Use the provided policy if one is provided
-      # otherwise the default policy created by AWS will be used
-      policy = var.kms_policy
-    }
-  }
+  policy = coalesce(var.kms_policy, data.aws_iam_policy_document.default_key_policy.json)
 }
 
 resource "aws_kms_alias" "s3_key_alias" {
@@ -52,12 +60,12 @@ resource "aws_s3_bucket" "log_bucket" {
 resource "aws_s3_bucket_logging" "default_bucket_logging" {
   count         = var.enable_logging ? 1 : 0
   bucket        = aws_s3_bucket.default_bucket.id
-  target_bucket = aws_s3_bucket.log_bucket.id
+  target_bucket = aws_s3_bucket.log_bucket[0].id
   target_prefix = var.log_prefix
 }
 
 resource "aws_s3_bucket_acl" "log_bucket_acl" {
-  bucket = aws_s3_bucket.log_bucket.id
+  bucket = aws_s3_bucket.log_bucket[0].id
   acl    = "log-delivery-write"
 }
 
@@ -84,7 +92,7 @@ resource "aws_s3_bucket_acl" "default_bucket_acl" {
 resource "aws_s3_bucket_policy" "default_bucket_policy" {
   count  = var.permit_non_ssl_requests ? 0 : 1
   bucket = aws_s3_bucket.default_bucket.id
-  policy = data.aws_iam_policy_document.default_bucket_policy.json
+  policy = data.aws_iam_policy_document.default_bucket_policy[0].json
 }
 
 # Only used if var.permit_non_ssl_requests = true and there is a custom policy passed in var.custom_policy
