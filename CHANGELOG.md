@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.132] - 2026-05-26
+- [Maintenance Calendar]
+  - New Module [Iam User Access Key Age]
+
+## [1.0.131] - 2026-05-15
+- [Proto Instance]
+  - Fix management Lambda failing to unmount /home when users are logged in
+
+## [1.0.130] - 2026-05-13
+- [New Relic]
+  - Add alert-workflow
+  - add var.critical_operator to synthetic alerts
+
 ## [1.0.129] - 2026-05-04
 - [New Relic]
   - Update Provider versions 
