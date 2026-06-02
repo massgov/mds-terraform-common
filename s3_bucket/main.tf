@@ -42,11 +42,6 @@ resource "aws_kms_alias" "s3_key_alias" {
   target_key_id = aws_kms_key.s3_key[0].arn
 }
 
-data "aws_kms_key" "s3_key_arn" {
-  count  = var.kms_encrypted && var.kms_key_arn != "" ? 1 : 0
-  key_id = var.kms_key_arn
-}
-
 #############################################################################
 # Logging bucket (if enabled)
 #############################################################################
@@ -108,7 +103,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_sse_config" {
   bucket = aws_s3_bucket.default_bucket.bucket
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = (var.kms_key_arn == "" && var.kms_encrypted) ? aws_kms_key.s3_key[0].arn : data.aws_kms_key.s3_key_arn.id[0]
+      kms_master_key_id = coalesce(var.kms_key_arn, aws_kms_key.s3_key[0].arn)
       sse_algorithm     = "aws:kms"
     }
   }

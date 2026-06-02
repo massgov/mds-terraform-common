@@ -7,11 +7,11 @@ output "full_bucket_arn" {
 }
 
 output "log_bucket_name" {
-  value = aws_s3_bucket.log_bucket.id
+  value = length(aws_s3_bucket.log_bucket) > 0 ? aws_s3_bucket.log_bucket[0].id : null
 }
 
 output "log_bucket_arn" {
-  value = aws_s3_bucket.log_bucket.arn
+  value = length(aws_s3_bucket.log_bucket) > 0 ? aws_s3_bucket.log_bucket[0].arn : null
 }
 
 output "kms_key_arn" {
