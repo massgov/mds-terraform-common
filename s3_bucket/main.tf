@@ -60,6 +60,7 @@ resource "aws_s3_bucket_logging" "default_bucket_logging" {
 }
 
 resource "aws_s3_bucket_acl" "log_bucket_acl" {
+  count  = var.enable_logging ? 1 : 0
   bucket = aws_s3_bucket.log_bucket[0].id
   acl    = "log-delivery-write"
 }
