@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------
 
 data "archive_file" "lambda_zip" {
-  type        = "zip"
+  type = "zip"
 
   source_file = "${path.module}/lambda/src/handler.py"
   output_path = "${path.module}/lambda/src/handler.zip"
@@ -81,7 +81,7 @@ module "lambda" {
 
   source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.132"
   name            = local.module_name
-  human_name     = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
+  human_name      = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
   handler         = "index.handler"
   runtime         = "python3.12"
   iam_policy_arns = [aws_iam_policy.lambda.arn]
