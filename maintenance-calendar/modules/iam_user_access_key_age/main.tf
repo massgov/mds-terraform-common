@@ -79,13 +79,14 @@ resource "aws_iam_policy" "lambda" {
 module "lambda" {
   depends_on = [data.archive_file.lambda_zip]
 
-  source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.132"
-  name            = local.module_name
-  human_name      = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
-  handler         = "index.handler"
-  runtime         = "python3.12"
-  iam_policy_arns = [aws_iam_policy.lambda.arn]
-  package         = data.archive_file.lambda_zip.output_path
+  source           = "../../../lambda"
+  name             = local.module_name
+  human_name       = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
+  handler          = "index.handler"
+  runtime          = "python3.12"
+  iam_policy_arns  = [aws_iam_policy.lambda.arn]
+  package          = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   environment = {
     variables = {
       SNS_TOPIC_ARN = local.effective_sns_topic_arn

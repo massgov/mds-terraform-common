@@ -4,7 +4,7 @@ resource "aws_lambda_function" "default" {
   filename         = var.package
   handler          = var.handler
   role             = aws_iam_role.default.arn
-  source_code_hash = filebase64sha256(var.package)
+  source_code_hash = var.source_code_hash != null ? var.source_code_hash : filebase64sha256(var.package)
   runtime          = var.runtime
   timeout          = var.timeout
   publish          = var.publish

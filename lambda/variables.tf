@@ -12,6 +12,12 @@ variable "package" {
   type = string
 }
 
+variable "source_code_hash" {
+  type        = string
+  default     = null
+  description = "Optional precomputed base64-encoded SHA256 hash of the deployment package."
+}
+
 variable "handler" {
   type    = string
   default = "index.handler"
