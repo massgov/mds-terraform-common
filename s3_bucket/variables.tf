@@ -42,7 +42,13 @@ variable "important" {
 
 variable "public" {
   type        = bool
-  description = "Should this bucket be publicly accessible? Default is false. CAUTION: Only things like CSS/JS assets for a public web site should ever be publicly accessible! Use locked-down/private S3 buckets by default!"
+  description = <<EOF
+    Should this bucket be publicly accessible? Default is false. Note that configuring
+    a bucket as public with NOT affect bucket policy, but merely allow callers to grant
+    public access using the custom_policy variable. CAUTION: Only things like CSS/JS
+    assets for a public web site should ever be publicly accessible! Use locked-down/private
+    S3 buckets by default!
+  EOF
   default     = false
 }
 

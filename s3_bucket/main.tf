@@ -77,11 +77,19 @@ resource "aws_s3_bucket" "default_bucket" {
   force_destroy = var.important ? false : true
 }
 
-# Only create if var.public = false (the default)
-resource "aws_s3_bucket_acl" "default_bucket_acl" {
-  count  = var.public ? 0 : 1
+# Only create if var.public = true
+resource "aws_s3_bucket_public_access_block" "public_access_block" {
+  count  = var.public ? 1 : 0
   bucket = aws_s3_bucket.default_bucket.id
-  acl    = "private"
+
+  # No sense in enabling public ACLs, since we aren't touching
+  # bucket ownership settings
+  block_public_acls = true
+  ignore_public_acls = true
+
+  # Allow callers to enable public access thru the custom_policy variable
+  block_public_policy = false
+  restrict_public_buckets = false
 }
 
 # Only create if var.permit_non_ssl_requests = false (the default)
