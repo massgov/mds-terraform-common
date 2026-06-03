@@ -6,7 +6,7 @@ data "archive_file" "lambda_zip" {
   type = "zip"
 
   source_file = "${path.module}/lambda/src/handler.py"
-  output_path = "${path.module}/lambda/src/handler.zip"
+  output_path = abspath("${path.module}/lambda/src/handler.zip")
 }
 
 # ---------------------------------------------------------------------------
