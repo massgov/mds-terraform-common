@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.133] - 2026-06-03
+- [S3 Bucket]
+  - Fix invalid resource references, invalid `dynamic` block uses, and erroenous use of public bucket ACL
+  - Add terraform-docs configuration file and update README
+
 ## [1.0.132] - 2026-05-26
 - [Maintenance Calendar]
   - New Module [Iam User Access Key Age]
