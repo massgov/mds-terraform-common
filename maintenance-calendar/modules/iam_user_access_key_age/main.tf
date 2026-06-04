@@ -1,13 +1,3 @@
-# ---------------------------------------------------------------------------
-# Lambda deployment package
-# ---------------------------------------------------------------------------
-
-data "archive_file" "lambda_zip" {
-  type = "zip"
-
-  source_file = "${path.module}/lambda/src/handler.py"
-  output_path = abspath("${path.module}/lambda/src/handler.zip")
-}
 
 # ---------------------------------------------------------------------------
 # SNS topic — created only when no external ARN is supplied
@@ -85,7 +75,7 @@ module "lambda" {
   handler         = "index.handler"
   runtime         = "python3.12"
   iam_policy_arns = [aws_iam_policy.lambda.arn]
-  package         = data.archive_file.lambda_zip.output_path
+  package         = "${path.module}/lambda/src/handler.zip"
   environment = {
     variables = {
       SNS_TOPIC_ARN = local.effective_sns_topic_arn
