@@ -43,6 +43,7 @@ data "aws_iam_policy_document" "lambda_permissions" {
       "iam:ListUsers",
       "iam:ListAccessKeys",
       "iam:ListUserTags",
+      "iam:UpdateAccessKey"
     ]
     resources = ["*"]
   }
@@ -70,7 +71,7 @@ module "lambda" {
   source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.132"
   name            = local.module_name
   human_name      = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
-  handler         = "index.handler"
+  handler         = "handler.lambda_handler"
   runtime         = "python3.12"
   iam_policy_arns = [aws_iam_policy.lambda.arn]
   package         = "${path.module}/lambda/src/handler.zip"
@@ -79,6 +80,7 @@ module "lambda" {
       SNS_TOPIC_ARN = local.effective_sns_topic_arn
       WARNING_DAYS  = tostring(var.warning_days)
       ALERT_DAYS    = tostring(var.alert_days)
+      AUTO_DISABLE  = var.auto_disable ? "true" : "false"
       NAME_PATTERN  = var.name_pattern
       TAG_KEY       = var.tag_key
       TAG_VALUE     = var.tag_value
