@@ -70,7 +70,7 @@ module "lambda" {
   source          = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.132"
   name            = local.module_name
   human_name      = "Checks IAM access key ages and sends SNS WARNING/ALERT notifications"
-  handler         = "index.handler"
+  handler         = "handler,lambda_handler"
   runtime         = "python3.12"
   iam_policy_arns = [aws_iam_policy.lambda.arn]
   package         = "${path.module}/lambda/src/handler.zip"
