@@ -101,3 +101,13 @@ variable "tags" {
   default     = {}
   description = "Additional tags applied to every resource."
 }
+
+# ---------------------------------------------------------------------------
+# auto_disable
+# ---------------------------------------------------------------------------
+
+variable "auto_disable" {
+  type        = bool
+  default     = false
+  description = "Whether to automatically disable keys that have reached the alert threshold. Defaults to false."
+}
