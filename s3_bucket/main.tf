@@ -50,6 +50,9 @@ resource "aws_kms_alias" "s3_key_alias" {
 resource "aws_s3_bucket" "log_bucket" {
   count  = var.enable_logging ? 1 : 0
   bucket = "${local.bucket_root_name}-logs"
+  tags          = {
+    Name = "${local.bucket_root_name}-logs"
+  }
 }
 
 resource "aws_s3_bucket_logging" "default_bucket_logging" {
@@ -73,7 +76,12 @@ resource "aws_s3_bucket_acl" "log_bucket_acl" {
 # If bucket is NOT important, force_destroy = true; force-destroyed bucket contents are not recoverable!
 resource "aws_s3_bucket" "default_bucket" {
   bucket        = local.bucket_root_name
-  tags          = var.bucket_tags
+  tags          = merge(
+    var.bucket_tags,
+    {
+      Name = local.bucket_root_name
+    }
+  )
   force_destroy = var.important ? false : true
 }
 
