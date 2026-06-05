@@ -97,7 +97,9 @@ data "aws_iam_policy_document" "ecs_scans" {
       "ssm:StartAutomationExecution"
     ]
     resources = [
-      "arn:aws:ssm:${var.region}:${var.account_id}:automation-definition/${aws_ssm_document.ssr_scan_ecr_image.name}:$LATEST"
+      "arn:aws:ssm:${var.region}:${var.account_id}:automation-definition/${aws_ssm_document.ssr_scan_ecr_image.name}:$LATEST",
+      "arn:aws:ssm:${var.region}::automation-definition/AWS-PublishSNSNotification:$DEFAULT",
+      "arn:aws:ssm:${var.region}:${var.account_id}:automation-execution/*"
     ]
   }
   statement {
