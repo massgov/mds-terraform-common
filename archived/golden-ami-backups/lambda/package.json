@@ -12,9 +12,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@aws-sdk/client-ec2": "^3.461.0",
-    "@aws-sdk/client-sns": "^3.461.0",
-    "@aws-sdk/client-ssm": "^3.461.0",
+    "@aws-sdk/client-ec2": "^3.1064.0",
+    "@aws-sdk/client-sns": "^3.1064.0",
+    "@aws-sdk/client-ssm": "^3.1064.0",
     "@tsconfig/node18": "^18.2.2",
     "@types/archiver": "^5.3.2",
     "@types/assert": "^1.5.8",

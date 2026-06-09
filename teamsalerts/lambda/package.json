@@ -2,7 +2,7 @@
   "name": "massgov-aws-sns-to-teams",
   "version": "1.0.0",
   "devDependencies": {
-    "@aws-sdk/client-ssm": "^3.629.0",
+    "@aws-sdk/client-ssm": "^3.1064.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/archiver": "^5.3.1",
     "@types/aws-lambda": "^8.10.110",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "assert": "^2.0.0",
-    "ms-teams-webhook": "^2.0.2",
+    "ms-teams-webhook": "^2.2.2",
     "streaming-iterables": "^7.1.0"
   },
   "scripts": {
