@@ -122,7 +122,7 @@ module "golden_ami_backups" {
   name       = "${var.name_prefix}-backup-lambda"
   human_name = var.human_name
   handler    = "index.handler"
-  runtime    = "nodejs18.x"
+  runtime    = "nodejs22.x"
   iam_policy_arns = [
     aws_iam_policy.publish_errors.arn,
     aws_iam_policy.read_parameter.arn,

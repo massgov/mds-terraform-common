@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "monitor_inline_policy" {
 module "monitor_lambda" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
   package = "${path.module}/package/lambda.zip"
-  runtime = "nodejs20.x"
+  runtime = "nodejs22.x"
   handler = "lambda.default"
   environment = {
     variables = merge({

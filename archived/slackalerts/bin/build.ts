@@ -14,7 +14,7 @@ const run = async (): Promise<void> => {
     entryPoints: [path.join(__dirname, "..", "src", "index.ts")],
     bundle: true,
     platform: "node",
-    target: "node16",
+    target: "node22",
     outfile: path.join(tmp, "index.js")
   });
   const archivePath = path.join(__dirname, "..", "dist", "slackalerts.zip");
