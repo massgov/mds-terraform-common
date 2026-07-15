@@ -7,7 +7,7 @@ resource "aws_lambda_function" "sns_to_slack" {
   function_name    = var.name
   handler          = "index.handler"
   role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs16.x"
+  runtime          = "nodejs22.x"
   environment {
     variables = {
       SLACK_TOKEN     = var.SLACK_TOKEN
@@ -74,4 +74,3 @@ resource "aws_iam_role_policy" "lambda" {
   policy = data.aws_iam_policy_document.lambda_policy.json
   role   = aws_iam_role.lambda.id
 }
-

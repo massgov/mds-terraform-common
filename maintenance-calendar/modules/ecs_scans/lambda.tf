@@ -8,7 +8,7 @@ module "ecs_cluster_image_scan" {
   name       = local.lambda_name
   human_name = "SSR ECS Cluster Image Scan"
   handler    = "index.handler"
-  runtime    = "nodejs20.x"
+  runtime    = "nodejs22.x"
   iam_policy_arns = [
     var.publish_alerts_policy,
     aws_iam_policy.maintenance_ecs_scan_lambda.arn,
