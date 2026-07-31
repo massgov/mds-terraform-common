@@ -1,11 +1,9 @@
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.5.0"
   required_providers {
     aws = {
-      source = "hashicorp/aws"
-      # 4.67 is the first version that allows `metric_names` for
-      # the include_filters
-      version = ">= 4.67"
+      source  = "hashicorp/aws"
+      version = ">= 5.26.0"
     }
 
   }
