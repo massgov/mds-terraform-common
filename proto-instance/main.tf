@@ -376,7 +376,7 @@ module "lambda" {
   memory_size   = 1024
 
   handler                = "index.handler"
-  runtime                = "nodejs22.x"
+  runtime                = "nodejs24.x"
   local_existing_package = "${path.module}/lambda/.dist/handler/package.zip"
   create_package         = false
 
@@ -424,7 +424,7 @@ resource "terraform_data" "instance" {
         --image-id=${data.aws_ami.default.id} \
         --launch-template="LaunchTemplateId=${aws_launch_template.default.id},Version=$Latest" \
         --query="Instances[0].InstanceId"
-    EOF 
+    EOF
   }
 }
 
@@ -461,6 +461,6 @@ resource "terraform_data" "volume_attachment" {
         --instance-id=${one(data.aws_instances.instance.ids)} \
         --volume-id=${local.user_volume_id} \
         --device=${local.device_name}
-    EOF 
+    EOF
   }
 }

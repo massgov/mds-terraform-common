@@ -13,7 +13,7 @@ prepare:
 	npx esbuild index.ts \
 		--bundle \
 		--platform=node \
-		--target=node22 \
+		--target=node24 \
 		--outfile=.dist/handler/index.js \
 		"--external:@aws-sdk/*"
 
