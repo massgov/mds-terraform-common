@@ -20,8 +20,8 @@
     "@types/assert": "^1.5.8",
     "@types/aws-lambda": "^8.10.126",
     "@types/node": "^22.0.0",
-    "archiver": "^5.3.1",
-    "esbuild": "^0.17.14",
+    "archiver": "^7.0.1",
+    "esbuild": "^0.28.1",
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
