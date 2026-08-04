@@ -9,7 +9,7 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_db_subnet_group" "subnet_group" {
   count      = var.create_subnet_group ? 1 : 0
   name       = "${var.name}-subnet-${count.index}"
-  subnet_ids = var.subnets
+  subnet_ids = var.additional_subnets
 }
 
 // db instance

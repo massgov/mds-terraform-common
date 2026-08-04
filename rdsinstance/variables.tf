@@ -13,6 +13,12 @@ variable "subnets" {
   default     = []
 }
 
+variable "additional_subnets" {
+  type        = list(string)
+  description = "Additional subnets to include in the new DB subnet group if created."
+  default     = []
+}
+
 variable "security_groups" {
   type        = list(string)
   description = "Security groups to apply to the instances."
