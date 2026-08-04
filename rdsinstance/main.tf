@@ -6,6 +6,11 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.subnets
 }
 
+resource "aws_db_subnet_group" "subnet_group" {
+  count      = var.create_subnet_group ? 1 : 0
+  name       = "${var.name}-subnet-${count.index}"
+  subnet_ids = var.subnets
+}
 
 // db instance
 resource "aws_db_instance" "default" {
@@ -26,7 +31,7 @@ resource "aws_db_instance" "default" {
   maintenance_window                    = "wed:04:00-wed:05:00"
   storage_encrypted                     = var.storage_encrypted
   parameter_group_name                  = var.parameter_group_name
-  db_subnet_group_name                  = aws_db_subnet_group.default.name
+  db_subnet_group_name                  = var.create_subnet_group ? aws_db_subnet_group.subnet_group[0].name : aws_db_subnet_group.default.name
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_retention_period
   monitoring_interval                   = var.monitoring_interval
@@ -231,7 +236,7 @@ resource "aws_rds_cluster" "default" {
   storage_encrypted                   = var.storage_encrypted
 
   preferred_backup_window = "05:10-06:00" # 12:10AM-1:00AM EST
-  db_subnet_group_name    = aws_db_subnet_group.default.name
+  db_subnet_group_name    = var.create_subnet_group ? aws_db_subnet_group.subnet_group[0].name : aws_db_subnet_group.default.name
   vpc_security_group_ids = flatten([
     var.security_groups,
     aws_security_group.db.id,
@@ -252,7 +257,7 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   instance_class                        = var.instance_class
   copy_tags_to_snapshot                 = true
   db_parameter_group_name               = var.parameter_group_name
-  db_subnet_group_name                  = aws_db_subnet_group.default.name
+  db_subnet_group_name                  = var.create_subnet_group ? aws_db_subnet_group.subnet_group[0].name : aws_db_subnet_group.default.name
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_retention_period
   monitoring_interval                   = var.monitoring_interval

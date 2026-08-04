@@ -58,6 +58,12 @@ variable "instance_class" {
   default     = "db.t2.micro"
 }
 
+variable "create_subnet_group" {
+  type        = bool
+  description = "Whether to create an additional DB subnet group."
+  default     = false
+}
+
 variable "allocated_storage" {
   type        = string
   description = "The allocated storage in GB"

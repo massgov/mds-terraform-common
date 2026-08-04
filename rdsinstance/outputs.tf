@@ -3,6 +3,11 @@ output "username" {
   value = try(aws_db_instance.default[0].username, null)
 }
 
+// DB Subnet Group Name
+output "db_subnet_group_name" {
+  value = try(aws_db_subnet_group.subnet_group[0].name, aws_db_subnet_group.default.name)
+}
+
 // Root password for the database.
 output "password" {
   value = try(aws_db_instance.default[0].password, null)
