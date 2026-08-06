@@ -1,8 +1,8 @@
 locals {
-  region                 = data.aws_region.default.region
-  account                = data.aws_caller_identity.default.account_id
+  region  = data.aws_region.default.region
+  account = data.aws_caller_identity.default.account_id
 
-  proto_id               = random_uuid.default.result
+  proto_id = random_uuid.default.result
   eni_security_group_ids = setunion(
     [aws_security_group.default.id],
     coalesce(var.security_group_ids, [])
@@ -224,14 +224,12 @@ resource "aws_security_group" "s3fs" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "s3fs" {
-  description       = "Allow inbound s3files traffic from ${var.name_prefix}-instance"
-  security_group_id = aws_security_group.s3fs.id
-  referenced_security_group_id = [
-    aws_security_group.default.id
-  ]
-  ip_protocol = "tcp"
-  from_port   = "2049"
-  to_port     = "2049"
+  description                  = "Allow inbound s3files traffic from ${var.name_prefix}-instance"
+  security_group_id            = aws_security_group.s3fs.id
+  referenced_security_group_id = aws_security_group.default.id
+  ip_protocol                  = "tcp"
+  from_port                    = "2049"
+  to_port                      = "2049"
 }
 
 resource "aws_s3files_file_system" "s3fs" {
