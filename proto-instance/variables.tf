@@ -44,15 +44,6 @@ variable "security_group_ids" {
   default     = null
 }
 
-variable "management_lambda_schedule_expression" {
-  type        = string
-  description = <<EOF
-    Schedule expression to pass to EventBridge Scheduler for management Lambda invocation. If null, the Lambda will not be scheduled to automatically run.
-    See https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html for more information
-  EOF
-  default     = "rate(14 days)"
-}
-
 variable "ami_search_filters" {
   type = list(object({
     name   = string
@@ -101,22 +92,6 @@ variable "volume_attachments" {
   type        = map(string)
   description = "Mapping of EBS volume IDs to device names"
   default     = {}
-}
-
-variable "user_volume_size" {
-  type        = number
-  description = "Size, in GiB, of the user volume"
-  default     = 100
-}
-
-variable "user_volume_iops" {
-  type        = number
-  description = "Number input/output operations per second (IOPS) provisioned to user volume"
-  default     = 1250
-  validation {
-    condition     = var.user_volume_iops <= 64000
-    error_message = "EBS does not support more than 64000 IOPS"
-  }
 }
 
 variable "additional_instance_profile_policy_arns" {
