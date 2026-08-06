@@ -3,7 +3,10 @@ locals {
   account                = data.aws_caller_identity.default.account_id
 
   proto_id               = random_uuid.default.result
-  eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
+  eni_security_group_ids = setunion(
+    [aws_security_group.default.id],
+    coalesce(var.security_group_ids, [])
+  )
 }
 
 data "aws_region" "default" {}
@@ -19,11 +22,6 @@ data "aws_key_pair" "default" {
   count = var.key_name == null ? 0 : 1
 
   key_name = var.key_name
-}
-data "aws_security_group" "default" {
-  count = length(local.eni_security_group_ids)
-
-  id = local.eni_security_group_ids[count.index]
 }
 
 data "aws_ami" "default" {
@@ -353,8 +351,6 @@ data "cloudinit_config" "default" {
 }
 
 resource "aws_security_group" "default" {
-  count = var.security_group_ids == null ? 1 : 0
-
   vpc_id = data.aws_subnet.default.vpc_id
 }
 
@@ -365,7 +361,7 @@ resource "aws_security_group_rule" "default" {
   to_port           = 0
   from_port         = 0
   protocol          = "-1"
-  security_group_id = aws_security_group.default[count.index].id
+  security_group_id = aws_security_group.default.id
   cidr_blocks       = ["0.0.0.0/0"]
 }
 
