@@ -97,10 +97,10 @@ variable "key_name" {
   default     = null
 }
 
-variable "user_volume_id" {
-  type        = string
-  description = "ID of EBS volume to attach to instance. By default, a new EBS volume will be created"
-  default     = null
+variable "attach_volume_ids" {
+  type        = list(string)
+  description = "List of IDs of EBS volumes to attach to instance."
+  default     = []
 }
 
 variable "user_volume_size" {
@@ -119,12 +119,10 @@ variable "user_volume_iops" {
   }
 }
 
-variable "instance_role_name" {
-  type        = string
-  description = <<EOF
-    Friendly name of IAM role to attach to instance profile. Defaults to creating bespoke role with AmazonSSMManagedInstanceCore managed policy attached.
-  EOF
-  default     = null
+variable "additional_instance_profile_policy_arns" {
+  type        = list(string)
+  description = "ARNs of IAM policies to attach to instance profile"
+  default     = []
 }
 
 variable "additional_clountinit_config_parts" {

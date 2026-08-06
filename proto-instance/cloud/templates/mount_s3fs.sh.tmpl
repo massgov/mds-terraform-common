@@ -1,0 +1,41 @@
+#!/usr/env/bin bash
+
+set -eE
+
+FS_ID=${file_system_id}
+
+sudo dnf upgrade -y --color=never \
+  && sudo dnf install -y --color=never curl pip3 python3
+
+echo "[+] Installing EFS utils"
+install_dir=$(mktemp)
+curl -fsSL -o $install_dir/efs-utils-installer.sh https://amazon-efs-utils.aws.com/efs-utils-installer.sh
+sudo sh install_dir/efs-utils-installer.sh --install
+
+echo "[+] Installing AWS CLI"
+curl -fsSL -o $install_dir/aws-install.sh https://awscli.amazonaws.com/v2/install.sh
+sudo sh $install_dir/aws-install.sh --system
+
+echo "[+] Installing botocore"
+sudo pip3 install botocore
+
+echo "[+] Mounting s3 filesystem to /mnt/s3files"
+sudo mount -t s3files -o iam,tls $FS_ID:/ /mnt/s3files
+sudo chmod a+w /mnt/s3files
+
+echo "[+] Adding entry to fstab"
+sudo echo "$FS_ID:/ /mnt/s3files s3files _netdev,nofail 0 0" >> /etc/fstab
+sudo mount -a
+
+echo "[+] Updating /etc/profile.d"
+cat <<EOF > /etc/profile.d/s3fs.sh
+  if [[ ! -f $HOME/persist/README ]]; then
+   mkdir -p /mnt/s3files/$USER/persist
+   chown $USER:$USER /mnt/s3files/$USER/persist
+   chmod "u=wrx,g=wrx,o=" /mnt/s3files/$USER/persist
+   ln -s /mnt/s3files/$USER/persist $HOME/persist
+   echo "Files in this directory are automatically synced to S3. Please do not store information such as passwords, private keys, or API tokens here." > $HOME/persist/README
+  fi
+EOF
+
+echo "[+] Done"

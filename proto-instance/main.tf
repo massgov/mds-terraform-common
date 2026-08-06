@@ -2,9 +2,7 @@ locals {
   region                 = data.aws_region.default.region
   account                = data.aws_caller_identity.default.account_id
   proto_id               = random_uuid.default.result
-  instance_role_name     = var.instance_role_name != null ? var.instance_role_name : aws_iam_role.default[0].name
-  user_volume_id         = var.user_volume_id != null ? var.user_volume_id : aws_ebs_volume.default[0].id
-  device_name            = "/dev/sdf"
+  letters                = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -16,13 +14,6 @@ data "aws_subnet" "default" {
 }
 data "aws_iam_role" "default" {
   name = aws_iam_instance_profile.default.role
-}
-data "aws_ebs_volume" "default" {
-  most_recent = true
-  filter {
-    name   = "volume-id"
-    values = [local.user_volume_id]
-  }
 }
 data "aws_key_pair" "default" {
   count = var.key_name == null ? 0 : 1
@@ -50,14 +41,225 @@ data "aws_ami" "default" {
 
 resource "random_uuid" "default" {}
 
+################################################################################
+# S3 file system resources
+################################################################################
+
+resource "aws_kms_key" "s3fs" {
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "EnableIAMManagement"
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${local.account}:root"
+        },
+        Action   = "kms:*",
+        Resource = "*"
+      }
+    ]
+  })
+}
+resource "aws_kms_alias" "s3fs" {
+  name          = "${var.name_prefix}-s3fs-kms"
+  target_key_id = aws_kms_key.s3fs.key_id
+}
+
+resource "aws_s3_bucket" "s3fs" {
+  bucket = "${var.name_prefix}-s3fs-${local.proto_id}"
+  tags = {
+    Name = "${var.name_prefix}-s3fs-${local.proto_id}"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3fs" {
+  bucket = aws_s3_bucket.s3fs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.s3fs.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "s3fs" {
+  bucket = aws_s3_bucket.s3fs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_iam_role" "s3fs" {
+  name_prefix = "${var.name_prefix}-s3fs"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowS3FilesAssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "elasticfilesystem.amazonaws.com"
+        },
+        Action = ["sts:AssumeRole"]
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = local.account
+          },
+          ArnLike = {
+            "aws:SourceArn" = "arn:aws:s3files:us-east-1:${local.account}:file-system/*"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "access_s3fs" {
+  name_prefix = "${var.name_prefix}-access-s3fs"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "S3BucketPermissions",
+        Effect = "Allow",
+        Action = [
+          "s3:ListBucket*"
+        ],
+        Resource = [
+          aws_s3_bucket.s3fs.arn
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:ResourceAccount" = local.account
+          }
+        }
+      },
+      {
+        Sid    = "S3ObjectPermissions",
+        Effect = "Allow",
+        Action = [
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject*",
+          "s3:GetObject*",
+          "s3:List*",
+          "s3:PutObject*"
+        ],
+        Resource = [
+          "${aws_s3_bucket.s3fs.arn}/*"
+        ]
+        Condition = {
+          StringEquals = {
+            "aws:ResourceAccount" = local.account
+          }
+        }
+      },
+      {
+        Sid    = "UseKmsKeyWithS3Files",
+        Effect = "Allow",
+        Action = [
+          "kms:GenerateDataKey",
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncryptFrom",
+          "kms:ReEncryptTo"
+        ],
+        Condition = {
+          StringLike = {
+            "kms:ViaService" = "s3.${local.region}.amazonaws.com",
+            "kms:EncryptionContext:aws:s3:arn" : [
+              aws_s3_bucket.s3fs.arn,
+              "${aws_s3_bucket.s3fs.arn}/*"
+            ]
+          }
+        },
+        Resource = [aws_kms_key.s3fs.arn]
+      },
+      {
+        Sid    = "EventBridgeManage",
+        Effect = "Allow",
+        Action = [
+          "events:DeleteRule",
+          "events:DisableRule",
+          "events:EnableRule",
+          "events:PutRule",
+          "events:PutTargets",
+          "events:RemoveTargets"
+        ],
+        Condition = {
+          StringEquals = {
+            "events:ManagedBy" = "elasticfilesystem.amazonaws.com"
+          }
+        },
+        Resource = [
+          "arn:aws:events:*:*:rule/DO-NOT-DELETE-S3-Files*"
+        ]
+      },
+      {
+        Sid    = "EventBridgeRead",
+        Effect = "Allow",
+        Action = [
+          "events:DescribeRule",
+          "events:ListRuleNamesByTarget",
+          "events:ListRules",
+          "events:ListTargetsByRule"
+        ],
+        Resource = [
+          "arn:aws:events:*:*:rule/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3fs" {
+  role       = aws_iam_role.s3fs.id
+  policy_arn = aws_iam_policy.access_s3fs.arn
+}
+
+resource "aws_security_group" "s3fs" {
+  name        = "${var.name_prefix}-s3fs-ingress"
+  description = "Allow inbound s3files traffic from ${var.name_prefix}-instance"
+  vpc_id      = data.aws_subnet.default.vpc_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "s3fs" {
+  description       = "Allow inbound s3files traffic from ${var.name_prefix}-instance"
+  security_group_id = aws_security_group.s3fs.id
+  referenced_security_group_id = [
+    aws_security_group.default.id
+  ]
+  ip_protocol = "tcp"
+  from_port   = "2049"
+  to_port     = "2049"
+}
+
+resource "aws_s3files_file_system" "s3fs" {
+  bucket     = aws_s3_bucket.s3fs.id
+  role_arn   = aws_iam_role.s3fs.arn
+  kms_key_id = aws_kms_key.s3fs.arn
+}
+
+resource "aws_s3files_mount_target" "s3fs" {
+  file_system_id = aws_s3files_file_system.s3fs.id
+  subnet_id      = var.subnet_id
+  security_groups = [
+    aws_security_group.s3fs.id
+  ]
+}
+
+################################################################################
+# EC2 instance profile resources
+################################################################################
+
 resource "aws_iam_instance_profile" "default" {
   name = "${var.name_prefix}-instance-profile"
-  role = local.instance_role_name
+  role = aws_iam_role.default.name
 }
 
 resource "aws_iam_role" "default" {
-  count = var.instance_role_name == null ? 1 : 0
-
   name = "${var.name_prefix}-instance-profile-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -73,12 +275,47 @@ resource "aws_iam_role" "default" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "default" {
-  count = var.instance_role_name == null ? 1 : 0
+resource "aws_iam_policy" "mount_s3fs" {
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "MountS3FileSystem"
+        Effect = "Allow"
+        Action = [
+          "s3files:ClientMount",
+          "s3files:ClientWrite",
+          "s3files:ClientRootAccess"
+        ]
+        Resource = [
+          aws_s3files_file_system.s3fs.arn
+        ]
+      },
+    ]
+  })
+}
 
-  role       = aws_iam_role.default[count.index].id
+resource "aws_iam_role_policy_attachment" "default" {
+  role       = aws_iam_role.default.id
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
+
+resource "aws_iam_role_policy_attachment" "additional_policies" {
+  for_each = setunion(
+    [
+      aws_iam_policy.mount_s3fs.arn,
+      aws_iam_policy.access_s3fs.arn
+    ],
+    var.additional_instance_profile_policy_arns
+  )
+
+  role       = aws_iam_role.default.id
+  policy_arn = each.value
+}
+
+################################################################################
+# EC2 launch template and instance resources
+################################################################################
 
 data "cloudinit_config" "default" {
   gzip          = false
@@ -88,18 +325,20 @@ data "cloudinit_config" "default" {
     filename     = "install_ssm_agent.sh"
     content_type = "text/x-shellscript"
 
-    content = templatefile(
-      "${path.module}/cloud/templates/install_ssm_agent.sh.tftpl",
-      {}
+    content = file(
+      "${path.module}/cloud/install_ssm_agent.sh",
     )
   }
 
   part {
-    filename     = "mount_user_volume.sh"
+    filename     = "mount_s3fs.sh"
     content_type = "text/x-shellscript"
 
-    content = file(
-      "${path.module}/cloud/mount_user_volume.sh",
+    content = templatefile(
+      "${path.module}/cloud/templates/mount_s3fs.sh.tmpl",
+      {
+        file_system_id = aws_s3files_file_system.s3fs.id
+      }
     )
   }
 
@@ -197,270 +436,19 @@ resource "aws_launch_template" "default" {
   }
 }
 
-resource "aws_ebs_volume" "default" {
-  count = var.user_volume_id == null ? 1 : 0
-
-  availability_zone = data.aws_subnet.default.availability_zone
-  size              = var.user_volume_size
-
-  type = "io1"
-  iops = var.user_volume_iops
-
-  final_snapshot = true
-}
-
-data "external" "lambda" {
-  program     = ["bash", "build-lambda.sh"]
-  working_dir = path.module
-}
-
-data "aws_iam_policy_document" "lambda" {
-  statement {
-    actions   = ["ec2:DescribeImages"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-  statement {
-    actions   = ["ec2:DescribeInstances"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-  statement {
-    actions = ["ssm:SendCommand"]
-    effect  = "Allow"
-    resources = [
-      "arn:aws:ssm:${local.region}::document/AWS-RunShellScript",
-    ]
-  }
-  statement {
-    actions = ["ssm:SendCommand"]
-    effect  = "Allow"
-    resources = [
-      "arn:aws:ec2:${local.region}:${local.account}:instance/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      values   = [local.proto_id]
-      variable = "ssm:resourceTag/proto-id"
-    }
-  }
-  statement {
-    actions   = ["ssm:GetCommandInvocation"]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-  statement {
-    actions = [
-      "ec2:DetachVolume",
-      "ec2:AttachVolume"
-    ]
-    resources = [data.aws_ebs_volume.default.arn]
-    effect    = "Allow"
-  }
-  statement {
-    actions = [
-      "ec2:DetachVolume",
-      "ec2:AttachVolume"
-    ]
-    resources = [
-      "arn:aws:ec2:${local.region}:${local.account}:instance/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      values   = [local.proto_id]
-      variable = "aws:ResourceTag/proto-id"
-    }
-    effect = "Allow"
-  }
-  statement {
-    actions = [
-      "ec2:DescribeVolumes",
-      "ec2:DescribeVolumeStatus"
-    ]
-    effect    = "Allow"
-    resources = ["*"]
-  }
-  statement {
-    actions = [
-      "iam:PassRole",
-    ]
-    effect = "Allow"
-    resources = [
-      data.aws_iam_role.default.arn
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "iam:PassedToService"
-      values   = ["ec2.amazonaws.com"]
-    }
-  }
-  statement {
-    actions = ["ec2:RunInstances"]
-    effect  = "Allow"
-    resources = concat(
-      [
-        "arn:aws:ec2:${local.region}::image/*",
-        "arn:aws:ec2:${local.region}:${local.account}:network-interface/*",
-        data.aws_subnet.default.arn,
-        aws_launch_template.default.arn,
-      ],
-      [for key in data.aws_key_pair.default : key.arn],
-      [for sg in data.aws_security_group.default : sg.arn]
-    )
-  }
-  statement {
-    actions = [
-      "ec2:AssociateIamInstanceProfile",
-      "ec2:DisassociateIamInstanceProfile",
-      "ec2:ReplaceIamInstanceProfileAssociation"
-    ]
-    resources = [
-      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
-    ]
-    condition {
-      test     = "StringEquals"
-      values   = [local.proto_id]
-      variable = "aws:ResourceTag/proto-id"
-    }
-  }
-  statement {
-    actions = [
-      "ec2:RunInstances",
-      "ec2:StartInstances",
-      "ec2:CreateTags"
-    ]
-    resources = [
-      "arn:aws:ec2:${local.region}:${local.account}:volume/*",
-      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
-    ]
-    effect = "Allow"
-  }
-  statement {
-    actions = [
-      "ec2:TerminateInstances",
-      "ec2:StopInstances"
-    ]
-    effect = "Allow"
-    resources = [
-      "arn:aws:ec2:${local.region}:${local.account}:instance/*",
-    ]
-    condition {
-      test     = "StringEquals"
-      values   = [local.proto_id]
-      variable = "aws:ResourceTag/proto-id"
-    }
+resource "aws_instance" "default" {
+  launch_template {
+    id = aws_launch_template.default.id
   }
 }
 
-resource "aws_cloudwatch_event_rule" "lambda" {
-  count = var.management_lambda_schedule_expression == null ? 0 : 1
+resource "aws_volume_attachment" "default" {
+  for_each = [for i, vid in var.attach_volume_ids : {
+    volume_id   = vid
+    device_name = "/dev/sd${local.letters[i]}"
+  }]
 
-  name                = "${var.name_prefix}-mgmt-lambda-trigger"
-  schedule_expression = var.management_lambda_schedule_expression
-}
-
-resource "aws_cloudwatch_event_target" "lambda" {
-  count = var.management_lambda_schedule_expression == null ? 0 : 1
-
-  rule = aws_cloudwatch_event_rule.lambda[count.index].name
-  arn  = module.lambda.lambda_function_arn
-}
-
-module "lambda" {
-  source     = "terraform-aws-modules/lambda/aws"
-  depends_on = [data.external.lambda]
-
-  timeout       = 15 * 60
-  function_name = "${var.name_prefix}-management-lambda"
-  description   = "Lambda that manages lifecycle of proto instance"
-  memory_size   = 1024
-
-  handler                = "index.handler"
-  runtime                = "nodejs22.x"
-  local_existing_package = "${path.module}/lambda/.dist/handler/package.zip"
-  create_package         = false
-
-  allowed_triggers = length(aws_cloudwatch_event_rule.lambda) < 1 ? {} : {
-    EventBridgeScheduler = {
-      principal  = "events.amazonaws.com"
-      source_arn = aws_cloudwatch_event_rule.lambda[0].arn
-    }
-  }
-
-  environment_variables = {
-    PROTO_ID           = local.proto_id
-    VOLUME_ID          = local.user_volume_id
-    LAUNCH_TEMPLATE_ID = aws_launch_template.default.id
-    DEVICE_NAME        = local.device_name
-    AMI_QUERY_JSON     = jsonencode(var.ami_search_filters)
-  }
-
-  publish                       = true
-  attach_policy_json            = true
-  attach_cloudwatch_logs_policy = true
-  policy_json                   = data.aws_iam_policy_document.lambda.json
-  create_role                   = true
-}
-
-/**
-  Resources for creating the proto instance just once. We do this because the Lambda function
-  becomes responsible for (re)creating the instance once the terraform has been applied the
-  first time
-
-  In order to accomplish this, we create the instance outside of the AWS provider with
-  terraform_data blocks which never recreate themselves
-**/
-
-resource "terraform_data" "instance" {
-  triggers_replace = []
-  depends_on = [
-    local.user_volume_id,
-    aws_launch_template.default
-  ]
-
-  provisioner "local-exec" {
-    command = <<EOF
-      aws ec2 run-instances \
-        --image-id=${data.aws_ami.default.id} \
-        --launch-template="LaunchTemplateId=${aws_launch_template.default.id},Version=$Latest" \
-        --query="Instances[0].InstanceId"
-    EOF 
-  }
-}
-
-resource "time_sleep" "wait" {
-  depends_on = [terraform_data.instance]
-
-  create_duration = "30s"
-}
-
-data "aws_instances" "instance" {
-  depends_on = [terraform_data.instance]
-
-  instance_tags = {
-    proto-id = local.proto_id
-  }
-  instance_state_names = ["running", "pending"]
-}
-
-resource "terraform_data" "instance_ok" {
-  triggers_replace = []
-
-  provisioner "local-exec" {
-    command = "aws ec2 wait instance-running --instance-ids=${one(data.aws_instances.instance.ids)}"
-  }
-}
-
-resource "terraform_data" "volume_attachment" {
-  triggers_replace = []
-  depends_on       = [terraform_data.instance_ok]
-
-  provisioner "local-exec" {
-    command = <<EOF
-      aws ec2 attach-volume \
-        --instance-id=${one(data.aws_instances.instance.ids)} \
-        --volume-id=${local.user_volume_id} \
-        --device=${local.device_name}
-    EOF 
-  }
+  device_name = each.value["device_name"]
+  volume_id   = each.value["volume_id"]
+  instance_id = aws_instance.default.id
 }
