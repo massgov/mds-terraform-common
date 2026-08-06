@@ -1,8 +1,8 @@
 locals {
   region                 = data.aws_region.default.region
   account                = data.aws_caller_identity.default.account_id
+
   proto_id               = random_uuid.default.result
-  letters                = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
   eni_security_group_ids = var.security_group_ids != null ? var.security_group_ids : [aws_security_group.default[0].id]
 }
 
@@ -443,12 +443,9 @@ resource "aws_instance" "default" {
 }
 
 resource "aws_volume_attachment" "default" {
-  for_each = [for i, vid in var.attach_volume_ids : {
-    volume_id   = vid
-    device_name = "/dev/sd${local.letters[i]}"
-  }]
+  for_each = var.volume_attachments
 
-  device_name = each.value["device_name"]
-  volume_id   = each.value["volume_id"]
+  volume_id   = each.key
+  device_name = each.value
   instance_id = aws_instance.default.id
 }

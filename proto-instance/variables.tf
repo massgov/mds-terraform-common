@@ -97,10 +97,10 @@ variable "key_name" {
   default     = null
 }
 
-variable "attach_volume_ids" {
-  type        = list(string)
-  description = "List of IDs of EBS volumes to attach to instance."
-  default     = []
+variable "volume_attachments" {
+  type        = map(string)
+  description = "Mapping of EBS volume IDs to device names"
+  default     = {}
 }
 
 variable "user_volume_size" {
