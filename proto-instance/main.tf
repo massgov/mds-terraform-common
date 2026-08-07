@@ -69,6 +69,10 @@ resource "aws_s3_bucket" "s3fs" {
   tags = {
     Name = "${var.name_prefix}-s3fs-${local.proto_id}"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "s3fs" {
