@@ -60,7 +60,7 @@ resource "aws_kms_key" "s3fs" {
   })
 }
 resource "aws_kms_alias" "s3fs" {
-  name          = "${var.name_prefix}-s3fs-kms"
+  name          = "alias/${var.name_prefix}-s3fs-kms"
   target_key_id = aws_kms_key.s3fs.key_id
 }
 
