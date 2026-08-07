@@ -95,9 +95,12 @@ variable "volume_attachments" {
 }
 
 variable "additional_instance_profile_policy_arns" {
-  type        = list(string)
-  description = "ARNs of IAM policies to attach to instance profile"
-  default     = []
+  type        = map(string)
+  description = <<EOF
+    Mapping of short names to IAM policy ARNs. Policies will be attached to instance profile. Short
+    names do not affect behavior, but are merely used by terraform to track changes.
+  EOF
+  default     = {}
 }
 
 variable "additional_clountinit_config_parts" {

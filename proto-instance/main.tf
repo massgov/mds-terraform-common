@@ -297,13 +297,10 @@ resource "aws_iam_role_policy_attachment" "default" {
 }
 
 resource "aws_iam_role_policy_attachment" "additional_policies" {
-  for_each = setunion(
-    [
-      aws_iam_policy.mount_s3fs.arn,
-      aws_iam_policy.access_s3fs.arn
-    ],
-    var.additional_instance_profile_policy_arns
-  )
+  for_each = merge(var.additional_instance_profile_policy_arns, {
+    mount_s3fs  = aws_iam_policy.mount_s3fs.arn,
+    access_s3fs = aws_iam_policy.access_s3fs.arn
+  })
 
   role       = aws_iam_role.default.id
   policy_arn = each.value
