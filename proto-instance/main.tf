@@ -430,7 +430,8 @@ resource "aws_launch_template" "default" {
 
 resource "aws_instance" "default" {
   launch_template {
-    id = aws_launch_template.default.id
+    id      = aws_launch_template.default.id
+    version = aws_launch_template.default.latest_version
   }
 }
 
