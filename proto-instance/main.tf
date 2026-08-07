@@ -2,7 +2,6 @@ locals {
   region  = data.aws_region.default.region
   account = data.aws_caller_identity.default.account_id
 
-  proto_id = random_uuid.default.result
   eni_security_group_ids = setunion(
     [aws_security_group.default.id],
     coalesce(var.security_group_ids, [])
@@ -37,8 +36,6 @@ data "aws_ami" "default" {
   }
 }
 
-resource "random_uuid" "default" {}
-
 ################################################################################
 # S3 file system resources
 ################################################################################
@@ -65,9 +62,9 @@ resource "aws_kms_alias" "s3fs" {
 }
 
 resource "aws_s3_bucket" "s3fs" {
-  bucket = "${var.name_prefix}-s3fs-${local.proto_id}"
+  bucket = "${var.name_prefix}-s3fs"
   tags = {
-    Name = "${var.name_prefix}-s3fs-${local.proto_id}"
+    Name = "${var.name_prefix}-s3fs"
   }
 
   lifecycle {
@@ -228,7 +225,7 @@ resource "aws_security_group" "s3fs" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "s3fs" {
-  description                  = "Allow inbound s3files traffic from ${var.name_prefix}-instance"
+  description                  = "Allow inbound NFS traffic from ${var.name_prefix}-instance"
   security_group_id            = aws_security_group.s3fs.id
   referenced_security_group_id = aws_security_group.default.id
   ip_protocol                  = "tcp"
@@ -410,7 +407,6 @@ resource "aws_launch_template" "default" {
     tags = merge(
       {
         "Name"   = "${var.name_prefix}-instance",
-        proto-id = local.proto_id
       },
       data.aws_default_tags.default.tags,
       coalesce(var.tag_specifications["instance"], {})
