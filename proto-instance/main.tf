@@ -363,6 +363,7 @@ resource "aws_security_group_rule" "default" {
 
 resource "aws_launch_template" "default" {
   name          = "${var.name_prefix}-launch-template"
+  image_id      = data.aws_ami.default.image_id
   instance_type = var.instance_type
   user_data     = data.cloudinit_config.default.rendered
 
@@ -406,7 +407,7 @@ resource "aws_launch_template" "default" {
     resource_type = "instance"
     tags = merge(
       {
-        "Name"   = "${var.name_prefix}-instance",
+        "Name" = "${var.name_prefix}-instance",
       },
       data.aws_default_tags.default.tags,
       coalesce(var.tag_specifications["instance"], {})
