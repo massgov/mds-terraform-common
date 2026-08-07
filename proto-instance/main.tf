@@ -234,7 +234,7 @@ resource "aws_vpc_security_group_ingress_rule" "s3fs" {
 }
 
 resource "aws_s3files_file_system" "s3fs" {
-  bucket     = aws_s3_bucket.s3fs.id
+  bucket     = aws_s3_bucket.s3fs.arn
   role_arn   = aws_iam_role.s3fs.arn
   kms_key_id = aws_kms_key.s3fs.arn
 }
