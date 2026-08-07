@@ -1,12 +1,12 @@
 
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.5.0"
 
   required_providers {
     aws = {
       source = "hashicorp/aws"
       # Needed for lambda module
-      version = ">= 6.0.0"
+      version = ">= 5.26.0"
     }
   }
 }

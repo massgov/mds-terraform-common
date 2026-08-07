@@ -1,12 +1,10 @@
 
 terraform {
-  required_version = ">= 0.13"
+  required_version = ">= 1.5.0"
   required_providers {
     aws = {
-      source = "hashicorp/aws"
-      # Can probably be used with lower versions, I think down to aws v2?
-      # I have only tested it with v4 though
-      version = ">= 4.53"
+      source  = "hashicorp/aws"
+      version = ">= 5.26.0"
     }
   }
 }

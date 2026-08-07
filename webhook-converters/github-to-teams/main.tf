@@ -27,7 +27,7 @@ resource "random_password" "path_token" {
 module "lambda" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
   package = "${path.module}/package/lambda.zip"
-  runtime = "nodejs22.x"
+  runtime = "nodejs24.x"
   handler = "lambda.default"
   environment = {
     variables = merge({
