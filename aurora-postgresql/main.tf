@@ -1,4 +1,4 @@
-resource "aws_db_subnet_group" "default" {
+resource "aws_db_subnet_group" "this" {
   name       = var.name
   subnet_ids = var.subnet_ids
 
@@ -7,7 +7,7 @@ resource "aws_db_subnet_group" "default" {
   })
 }
 
-resource "aws_rds_cluster" "default" {
+resource "aws_rds_cluster" "this" {
   cluster_identifier = var.name
   engine             = "aurora-postgresql"
   engine_version     = var.engine_version
@@ -18,7 +18,7 @@ resource "aws_rds_cluster" "default" {
   master_username             = var.master_username
   manage_master_user_password = true
 
-  db_subnet_group_name = aws_db_subnet_group.default.name
+  db_subnet_group_name = aws_db_subnet_group.this.name
   vpc_security_group_ids = concat(
     [aws_security_group.cluster.id],
     var.security_group_ids,

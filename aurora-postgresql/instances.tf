@@ -13,16 +13,16 @@ locals {
   custom_endpoint_groups = toset([for name, group in var.instance_groups : name if group.custom_endpoint])
 }
 
-resource "aws_rds_cluster_instance" "default" {
+resource "aws_rds_cluster_instance" "this" {
   for_each = local.instances
 
   identifier         = "${var.name}-${each.key}"
-  cluster_identifier = aws_rds_cluster.default.id
-  engine             = aws_rds_cluster.default.engine
-  engine_version     = aws_rds_cluster.default.engine_version
+  cluster_identifier = aws_rds_cluster.this.id
+  engine             = aws_rds_cluster.this.engine
+  engine_version     = aws_rds_cluster.this.engine_version
   instance_class     = each.value.instance_class
 
-  db_subnet_group_name         = aws_db_subnet_group.default.name
+  db_subnet_group_name         = aws_db_subnet_group.this.name
   promotion_tier               = each.value.promotion_tier
   publicly_accessible          = false
   preferred_maintenance_window = var.preferred_maintenance_window
@@ -36,16 +36,16 @@ resource "aws_rds_cluster_instance" "default" {
   })
 }
 
-resource "aws_rds_cluster_endpoint" "default" {
+resource "aws_rds_cluster_endpoint" "this" {
   for_each = local.custom_endpoint_groups
 
-  cluster_identifier          = aws_rds_cluster.default.id
+  cluster_identifier          = aws_rds_cluster.this.id
   cluster_endpoint_identifier = "${var.name}-${each.value}"
   custom_endpoint_type        = "READER"
 
   static_members = [
     for key, instance in local.instances :
-    aws_rds_cluster_instance.default[key].identifier if instance.group == each.value
+    aws_rds_cluster_instance.this[key].identifier if instance.group == each.value
   ]
 
   tags = merge(var.tags, {
