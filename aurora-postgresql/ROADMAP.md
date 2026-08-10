@@ -297,10 +297,16 @@ Not every cluster needs these, but they shape what the module has to support.
 4. Should `create_kms_key` default to `true`? It costs about $1/month, but the storage key
    cannot be changed after creation, so a caller who defaults to `aws/rds` and later needs a
    CMK has to rebuild the cluster from a snapshot.
-5. Audit log retention period required by EOTSS policy.
-6. Does the pending-maintenance notifier belong in this module or in `maintenance-calendar`?
+5. Tightening the KMS key policy. The module writes out the AWS default (root gets `kms:*`,
+   authorization delegated to IAM), which means a CMK currently buys rotation, distinct
+   CloudTrail attribution, and crypto-shredding — but not least-privilege isolation. A
+   restricted policy needs `kms:ViaService`, `kms:CreateGrant` with `kms:GrantIsForAWSResource`,
+   and Secrets Manager access handled correctly, and dropping root access is unrecoverable
+   without AWS Support. Add a `kms_key_policy` override variable when we take this on.
+6. Audit log retention period required by EOTSS policy.
+7. Does the pending-maintenance notifier belong in this module or in `maintenance-calendar`?
    (Recommend `maintenance-calendar`.)
-7. Should `deletion_protection` stay on by default given how many callers are non-production
+8. Should `deletion_protection` stay on by default given how many callers are non-production
    and get torn down?
 
 ## Phased build plan

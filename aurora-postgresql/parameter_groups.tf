@@ -1,7 +1,3 @@
-locals {
-  parameter_group_family = "aurora-postgresql${split(".", var.engine_version)[0]}"
-}
-
 resource "aws_rds_cluster_parameter_group" "this" {
   name_prefix = "${var.name}-"
   family      = local.parameter_group_family

@@ -5,11 +5,6 @@ check "encryption" {
   }
 }
 
-data "aws_subnet" "selected" {
-  for_each = toset(var.subnet_ids)
-  id       = each.value
-}
-
 check "high_availability" {
   assert {
     condition     = length(local.instances) < 2 || length(distinct([for subnet in data.aws_subnet.selected : subnet.availability_zone])) >= var.minimum_availability_zones

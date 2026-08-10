@@ -1,18 +1,3 @@
-locals {
-  instances = merge([
-    for name, group in var.instance_groups : {
-      for index in range(group.count) :
-      "${name}-${index + 1}" => {
-        group          = name
-        instance_class = coalesce(group.instance_class, var.instance_class)
-        promotion_tier = group.promotion_tier
-      }
-    }
-  ]...)
-
-  custom_endpoint_groups = toset([for name, group in var.instance_groups : name if group.custom_endpoint])
-}
-
 resource "aws_rds_cluster_instance" "this" {
   for_each = local.instances
 

@@ -1,5 +1,15 @@
-locals {
-  kms_key_arn = var.create_kms_key ? aws_kms_key.this[0].arn : var.kms_key_id
+data "aws_iam_policy_document" "kms" {
+  statement {
+    sid       = "EnableIAMUserPermissions"
+    effect    = "Allow"
+    actions   = ["kms:*"]
+    resources = ["*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+  }
 }
 
 resource "aws_kms_key" "this" {
@@ -8,6 +18,7 @@ resource "aws_kms_key" "this" {
   description             = "Aurora PostgreSQL cluster ${var.name}."
   deletion_window_in_days = var.kms_key_deletion_window_in_days
   enable_key_rotation     = true
+  policy                  = data.aws_iam_policy_document.kms.json
 
   tags = merge(var.tags, {
     Name = var.name

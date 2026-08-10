@@ -157,6 +157,11 @@ encryption can be changed afterwards — switching later means restoring a snaps
 cluster. Scheduling the key for deletion makes the cluster permanently unreadable, which is
 the point of a customer managed key and also the risk of one.
 
+The key policy is the AWS default — full access for the account root, delegating authorization
+to IAM — but written out explicitly so that an out-of-band edit shows up as drift instead of
+going unnoticed. It grants no isolation beyond ordinary IAM; a policy restricted to specific
+principals is worth adding for sensitive data and is not yet supported here.
+
 Two things are on by default because they cost nothing:
 
 - **`force_ssl`** sets `rds.force_ssl = 1` in the cluster parameter group, rejecting non-TLS
