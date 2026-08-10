@@ -1,3 +1,10 @@
+check "encryption" {
+  assert {
+    condition     = !(var.create_kms_key && var.kms_key_id != null)
+    error_message = "Both create_kms_key and kms_key_id are set for ${var.name}; the created key is used and kms_key_id is ignored."
+  }
+}
+
 data "aws_subnet" "selected" {
   for_each = toset(var.subnet_ids)
   id       = each.value

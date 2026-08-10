@@ -138,6 +138,39 @@ hold at least two instances; the module warns when one does not.
 Aurora allows five custom endpoints per cluster, and they are not captured in snapshots — a
 cluster restored from a snapshot needs them recreated.
 
+## Encryption and authentication
+
+Storage is always encrypted and the master password always lives in Secrets Manager. What is
+configurable is which key does the encrypting:
+
+```hcl
+create_kms_key = true
+```
+
+That creates a customer managed key with rotation enabled, and uses it for both the storage
+volume and the master password secret. Without it, both fall back to the AWS managed keys
+(`aws/rds` and `aws/secretsmanager`), which is still encryption at rest. Pass `kms_key_id`
+instead to reuse a key you already have.
+
+**Decide this before the cluster is created.** Neither the encryption key nor the fact of
+encryption can be changed afterwards — switching later means restoring a snapshot into a new
+cluster. Scheduling the key for deletion makes the cluster permanently unreadable, which is
+the point of a customer managed key and also the risk of one.
+
+Two things are on by default because they cost nothing:
+
+- **`force_ssl`** sets `rds.force_ssl = 1` in the cluster parameter group, rejecting non-TLS
+  connections. It is a dynamic parameter, so it applies without a reboot. PostgreSQL clients
+  negotiate TLS by default, so this rarely requires an application change; set
+  `sslmode=verify-full` and pin the CA to get the full benefit.
+- **`iam_database_authentication_enabled`** lets database roles granted `rds_iam` authenticate
+  with 15-minute IAM tokens instead of a password. Enabling it changes nothing until you grant
+  that role inside the database, and password authentication keeps working alongside it.
+
+`ca_cert_identifier` pins the certificate authority for the instance server certificates.
+Leaving it unset takes the current AWS default; setting it explicitly makes CA rotation a
+deliberate change rather than a surprise.
+
 ## Defaults worth knowing
 
 | Setting | Default | Why |
@@ -151,6 +184,9 @@ cluster restored from a snapshot needs them recreated.
 | `apply_immediately` | `false` | Modifications wait for the maintenance window. |
 | `storage_type` | `aurora` | Standard storage. Switch to `aurora-iopt1` once I/O is more than roughly a quarter of the cluster's spend. |
 | `engine_version` | `"17"` | Major version only, so AWS selects the minor and `auto_minor_version_upgrade` can keep it current. |
+| `create_kms_key` | `false` | The AWS managed keys still encrypt everything. Opt in for sensitive data, and decide before creation. |
+| `force_ssl` | `true` | Rejecting plaintext connections is free and rarely breaks a client. |
+| `iam_database_authentication_enabled` | `true` | Inert until a database role is granted `rds_iam`. |
 
 ## Warnings
 
@@ -161,11 +197,12 @@ intent:
   `minimum_availability_zones` (default 2) distinct zones, which would put every instance in
   one zone. Raise the variable on clusters deployed into a VPC with three availability zones.
 - An instance group that exposes a custom endpoint but holds a single instance.
+- Both `create_kms_key` and `kms_key_id` set, where the created key silently wins.
 
 A single-instance cluster does not warn — that is the intended default.
 
 ## Not yet included
 
-Parameter groups, pgAudit and log exports, enhanced monitoring and alarms, RDS event
-subscriptions, AWS Backup policy, and IAM database authentication are planned follow-on
-steps. See [ROADMAP.md](./ROADMAP.md).
+PostgreSQL logging parameters, per-group instance parameter groups, pgAudit and log exports,
+enhanced monitoring and alarms, and RDS event subscriptions are planned follow-on steps. See
+[ROADMAP.md](./ROADMAP.md).

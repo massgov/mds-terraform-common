@@ -14,18 +14,21 @@ resource "aws_rds_cluster" "this" {
   storage_type       = var.storage_type
   port               = var.port
 
-  database_name               = var.database_name
-  master_username             = var.master_username
-  manage_master_user_password = true
+  database_name                       = var.database_name
+  master_username                     = var.master_username
+  manage_master_user_password         = true
+  master_user_secret_kms_key_id       = local.kms_key_arn
+  iam_database_authentication_enabled = var.iam_database_authentication_enabled
 
-  db_subnet_group_name = aws_db_subnet_group.this.name
+  db_subnet_group_name            = aws_db_subnet_group.this.name
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.this.name
   vpc_security_group_ids = concat(
     [aws_security_group.cluster.id],
     var.security_group_ids,
   )
 
   storage_encrypted = true
-  kms_key_id        = var.kms_key_id
+  kms_key_id        = local.kms_key_arn
 
   backup_retention_period      = var.backup_retention_period
   preferred_backup_window      = var.preferred_backup_window

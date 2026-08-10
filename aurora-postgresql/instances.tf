@@ -25,6 +25,7 @@ resource "aws_rds_cluster_instance" "this" {
   db_subnet_group_name         = aws_db_subnet_group.this.name
   promotion_tier               = each.value.promotion_tier
   publicly_accessible          = false
+  ca_cert_identifier           = var.ca_cert_identifier
   preferred_maintenance_window = var.preferred_maintenance_window
   auto_minor_version_upgrade   = var.auto_minor_version_upgrade
   apply_immediately            = var.apply_immediately

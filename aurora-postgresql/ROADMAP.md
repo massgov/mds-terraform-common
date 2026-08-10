@@ -135,33 +135,28 @@ provisioned instance is cheaper for the idle non-production case.
   UTC maintenance; reuse those so operators only learn one schedule.
 - `copy_tags_to_snapshot = true`, `deletion_protection = true`, and a real
   `final_snapshot_identifier` (never `skip_final_snapshot = true` in prod).
-- **Automated backups are not enough for a PII store.** Add an **AWS Backup** plan with:
-  - a scheduled snapshot rule with longer retention (e.g. monthly → 1 year, annual → 7 years,
-    to whatever EOTSS retention policy requires);
-  - **cross-region and ideally cross-account copy** into a separate vault;
-  - **Vault Lock in compliance mode** on the copy vault so no principal — including an
-    account admin or an attacker with our credentials — can shorten retention or delete
-    recovery points. This is the ransomware/insider control.
-  - a restore-test plan (AWS Backup restore testing) so we can evidence RTO, not just claim it.
-- **Snapshot export to S3** produces Parquet, which is useful for cheap cold storage:
-  cheap cold storage plus Athena access without touching the cluster.
-- Restores are cluster-level; document the runbook (restore to a new cluster, repoint, then
-  retire the old one) rather than pretending it's in-place.
+Scoped to Aurora's native backups. AWS Backup plans, cross-region and cross-account copies,
+Vault Lock, restore testing, and snapshot export to S3 are out of scope for this module —
+account-wide backup policy belongs with the team that owns it, not in every cluster module.
+
+All of the above is already implemented in Step 1.
 
 ### 4. Encryption, secrets, and access control
 
-- `storage_encrypted = true` with a **customer-managed KMS key**, not `aws/rds`. A CMK gives us
-  a key policy (so we can deny access from outside the account/roles), rotation, and — for a PII
-  store — the ability to make data cryptographically unrecoverable by scheduling key deletion.
-  Encryption cannot be added after creation, so this must land early (it is in Step 2, before
-  any real data exists).
+- `storage_encrypted = true` always. A **customer-managed KMS key** adds a key policy, rotation,
+  and the ability to make data cryptographically unrecoverable by scheduling key deletion —
+  worth it for sensitive data, unnecessary for most. Opt in via `create_kms_key`, or pass an
+  existing key with `kms_key_id`. **Neither the key nor the decision to encrypt can be changed
+  after the cluster is created**; switching later means restoring a snapshot into a new cluster.
 - `manage_master_user_password = true` puts the master credential in Secrets Manager with
   automatic rotation and no plaintext in state. Encrypt that secret with the same CMK.
-- **`rds.force_ssl = 1`** in the cluster parameter group rejects non-TLS connections. Pair with
-  `ca_cert_identifier` on the instances and application-side `sslmode=verify-full`.
+- **`rds.force_ssl = 1`** in the cluster parameter group rejects non-TLS connections. Dynamic,
+  so it applies without a reboot. Pair with `ca_cert_identifier` on the instances and
+  application-side `sslmode=verify-full`. Safe to default on: libpq negotiates TLS by default.
 - **IAM database authentication** (`iam_database_authentication_enabled`) removes long-lived
-  passwords for humans and for services that can assume a role. Tokens last 15 minutes. This
-  is the right default for a PII store; app roles still need a `rds_iam`-granted DB role.
+  passwords for humans and for services that can assume a role. Tokens last 15 minutes. Free
+  to leave enabled and it changes nothing until a DB role is granted `rds_iam`, so default on;
+  password auth continues to work alongside it.
 - No public accessibility, private subnets, and the SG-to-SG accessor pattern. Keep the
   `-accessor` security group output so callers attach it exactly like `rdsinstance`.
 - **Inside the database** (out of Terraform's reach, but the module should document it):
@@ -299,7 +294,9 @@ Not every cluster needs these, but they shape what the module has to support.
 2. Is Database Activity Streams required for any of our datasets, or is pgAudit + CloudTrail
    sufficient? (Drives cost and a Kinesis consumer.)
 3. CloudWatch alarms vs. New Relic conditions as the authoritative alerting path.
-4. Cross-account backup vault — do we have a destination account, or is cross-region only?
+4. Should `create_kms_key` default to `true`? It costs about $1/month, but the storage key
+   cannot be changed after creation, so a caller who defaults to `aws/rds` and later needs a
+   CMK has to rebuild the cluster from a snapshot.
 5. Audit log retention period required by EOTSS policy.
 6. Does the pending-maintenance notifier belong in this module or in `maintenance-calendar`?
    (Recommend `maintenance-calendar`.)
@@ -315,19 +312,21 @@ cluster replacement.
 |---|---|---|
 | **1** | **Core cluster** — `aws_rds_cluster`, `aws_rds_cluster_instance`, subnet group, DB security group, accessor security group, outputs. | Done. Encrypted with the default RDS key, master password in Secrets Manager, deletion protection on. |
 | **2** | **High availability** — instance groups, per-group instance class and `promotion_tier`, custom reader endpoints, AZ coverage and instance count checks. | Done. Instances moved from `count` to `for_each` so groups resize independently. |
-| 3 | KMS CMK for storage + secret, `rds.force_ssl`, IAM database authentication, `ca_cert_identifier`. | Storage encryption key cannot change later — land before real data. |
-| 4 | Cluster and instance parameter groups, PostgreSQL logging parameters, per-group reader parameter groups. | Introduces the reboot-on-static-change behavior. |
-| 5 | pgAudit — `shared_preload_libraries`, `pgaudit.*`, `rds_pgaudit` role docs, `enabled_cloudwatch_logs_exports`, log group with retention and KMS. | Object-level auditing on PII tables. |
+| **3** | **Encryption and authentication** — optional KMS CMK for storage and the master secret, cluster parameter group enforcing `rds.force_ssl`, IAM database authentication, `ca_cert_identifier`. | Done. The storage key cannot change later — land before real data. |
+| 4 | Parameter groups proper — PostgreSQL logging parameters, per-group instance parameter groups, static vs dynamic handling. | Extends the parameter group created in Step 3. |
+| 5 | pgAudit — `shared_preload_libraries`, `pgaudit.*`, `rds_pgaudit` role docs, `enabled_cloudwatch_logs_exports`, log group with retention and KMS. | Object-level auditing on sensitive tables. |
 | 6 | Monitoring — Enhanced Monitoring role, Database Insights Advanced, CloudWatch alarms, SNS wiring, New Relic outputs. | |
 | 7 | RDS event subscriptions; pending-maintenance notifier (likely a `maintenance-calendar` change). | |
-| 8 | Backups — AWS Backup plan, cross-region/cross-account copy, Vault Lock, restore testing, snapshot export to S3. | |
-| 9 | Scale and performance — Serverless v2 instance groups, optional RDS Proxy. | |
-| 10 | Optional hardening — Database Activity Streams, Aurora Global Database. | Only if the risk assessment calls for it. |
+| 8 | Scale and performance — Serverless v2 instance groups, optional RDS Proxy. | |
+| 9 | Optional hardening — Database Activity Streams, Aurora Global Database. | Only if the risk assessment calls for it. |
 
-Deliberately excluded: **read replica autoscaling** (`aws_appautoscaling_target` on
-`rds:cluster:ReadReplicaCount`). Replicas it creates are not in Terraform state, so it
-conflicts with managing instances explicitly. A Serverless v2 instance group is the better
-answer for variable read capacity.
+Deliberately excluded:
+
+- **Backup policy beyond Aurora's native backups** — AWS Backup plans, cross-region and
+  cross-account copies, Vault Lock, restore testing, snapshot export to S3.
+- **Read replica autoscaling** (`aws_appautoscaling_target` on `rds:cluster:ReadReplicaCount`).
+  Replicas it creates are not in Terraform state, so it conflicts with managing instances
+  explicitly. A Serverless v2 instance group is the better answer for variable read capacity.
 
 ## Sources
 

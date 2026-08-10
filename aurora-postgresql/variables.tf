@@ -165,8 +165,38 @@ variable "final_snapshot_identifier" {
   default     = null
 }
 
+variable "create_kms_key" {
+  description = "Create a customer managed KMS key for the storage volume and the master password secret."
+  type        = bool
+  default     = false
+}
+
 variable "kms_key_id" {
-  description = "KMS key ARN for storage encryption. Defaults to the AWS managed RDS key."
+  description = "ARN of an existing KMS key to encrypt the storage volume and the master password secret. Defaults to the AWS managed keys."
+  type        = string
+  default     = null
+}
+
+variable "kms_key_deletion_window_in_days" {
+  description = "Waiting period before a created KMS key is destroyed."
+  type        = number
+  default     = 30
+}
+
+variable "iam_database_authentication_enabled" {
+  description = "Allow database roles granted rds_iam to authenticate with short lived IAM tokens."
+  type        = bool
+  default     = true
+}
+
+variable "force_ssl" {
+  description = "Reject connections that do not use TLS."
+  type        = bool
+  default     = true
+}
+
+variable "ca_cert_identifier" {
+  description = "Certificate authority for the instance server certificates. Defaults to the current AWS default."
   type        = string
   default     = null
 }

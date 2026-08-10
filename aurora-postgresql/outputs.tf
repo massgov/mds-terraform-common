@@ -72,3 +72,13 @@ output "subnet_group_name" {
   description = "Name of the DB subnet group."
   value       = aws_db_subnet_group.this.name
 }
+
+output "cluster_parameter_group_name" {
+  description = "Name of the cluster parameter group."
+  value       = aws_rds_cluster_parameter_group.this.name
+}
+
+output "kms_key_arn" {
+  description = "ARN of the key encrypting the storage volume and the master password secret. Null when the AWS managed keys are used."
+  value       = local.kms_key_arn
+}
