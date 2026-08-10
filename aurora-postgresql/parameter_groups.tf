@@ -6,7 +6,7 @@ resource "aws_rds_cluster_parameter_group" "this" {
   parameter {
     name         = "rds.force_ssl"
     value        = var.force_ssl ? "1" : "0"
-    apply_method = "immediate"
+    apply_method = "pending-reboot"
   }
 
   lifecycle {

@@ -135,12 +135,6 @@ variable "auto_minor_version_upgrade" {
   default     = true
 }
 
-variable "allow_major_version_upgrade" {
-  description = "Permit an in-place major version upgrade. Prefer a blue/green deployment instead."
-  type        = bool
-  default     = false
-}
-
 variable "apply_immediately" {
   description = "Apply modifications immediately rather than during the maintenance window."
   type        = bool
@@ -161,6 +155,12 @@ variable "skip_final_snapshot" {
 
 variable "final_snapshot_identifier" {
   description = "Identifier for the final snapshot. Defaults to the cluster name with a -final suffix."
+  type        = string
+  default     = null
+}
+
+variable "account_id" {
+  description = "Account ID used in the created KMS key policy. Looked up when not supplied and a key is created."
   type        = string
   default     = null
 }

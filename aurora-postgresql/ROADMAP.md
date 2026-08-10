@@ -47,7 +47,10 @@ Delete this file before the module is released, or move the durable parts into
    enforcement, and audit logging are on unless a caller deliberately turns them off.
    Security defaults are free; capacity defaults are not, so capacity is opt in.
 2. **No plaintext credentials in Terraform.** The master password is always managed by
-   RDS in Secrets Manager; the module never accepts a `password` variable.
+   RDS in Secrets Manager; the module never accepts a `password` variable. This was
+   challenged during adoption, because a cluster with a Terraform-managed password cannot
+   move onto the module without a credential rotation. Decision: hold the line, and require
+   that a migrating cluster move to an RDS-managed password as a separate change first.
 3. **Composable, not monolithic.** The cluster module owns cluster resources. Alerting,
    backup policy, and New Relic conditions stay in their own modules and are wired up by
    the caller, matching how `rdsinstance` + `maintenance-calendar` + `teamsalerts` work today.
@@ -63,8 +66,16 @@ Delete this file before the module is released, or move the durable parts into
 **Version.** Aurora PostgreSQL 13.x reached end of standard support on 2026-02-28. Current
 supported majors are 14–18. Default the module to **17** (mature, wide extension support,
 Database Insights Advanced compatible) and let callers pin a minor. Specifying the major
-only (`"17"`) is safe with the AWS provider — it prefix-matches and lets AWS pick the minor,
-which pairs correctly with `auto_minor_version_upgrade`.
+only (`"17"`) is safe: the provider documents `engine_version` as able to "contain a partial
+version where supported by the API", and exposes `engine_version_actual` for what AWS
+resolved. A warning in mymassgov's module against partial versions came from resolving
+through `data.aws_rds_engine_version`, which behaves differently — it does not apply here.
+
+Pinning a **minor** version is the risky choice, because `auto_minor_version_upgrade` will
+eventually move the cluster forward and the configured version becomes a downgrade that
+cannot be applied. Rather than default `auto_minor_version_upgrade` to `false` — which would
+penalise the safe major-only default to guard against a caller's choice — the module warns on
+the combination.
 
 **Storage configuration.** Two options:
 
@@ -257,9 +268,33 @@ Confirm the org trail already captures RDS management events.
   downtime vs. ~1 hour for an in-place `pg_upgrade`. Caveat for us: Terraform's `blue_green_update`
   block only exists on `aws_db_instance`, not on `aws_rds_cluster`, so this is an out-of-band
   runbook (create B/G, switch over, then reconcile the engine version in Terraform). Document it.
+- **In-place major upgrades need an instance parameter group on the target family**, wired
+  through `db_instance_parameter_group_name` on the cluster. The provider documents that
+  argument as "only valid in combination with the `allow_major_version_upgrade` parameter",
+  and a PG15 to PG17 upgrade on mymassgov failed until it was supplied. It must be a real
+  resource reference, not a literal name, or there is no dependency edge and Terraform
+  attempts the cluster modification before the group exists. Until Step 5 lands,
+  `allow_major_version_upgrade` is hardcoded to `false` rather than exposed, so nobody sets it
+  and assumes it works. When Step 5 does land, note that the cluster-level
+  `db_instance_parameter_group_name` is consulted only during the upgrade, while per-group
+  tuning uses `db_parameter_group_name` on each instance; both must be on the target family.
+- **`apply_method` on a hardcoded parameter must be `pending-reboot`.** Setting `immediate` on
+  a parameter whose value never changes produces a permanent, unresolvable diff: AWS only
+  persists a new `apply_method` when the parameter's *value* also changes, so the config can
+  never converge. Confirmed on two environments, and
+  [#22857](https://github.com/hashicorp/terraform-provider-aws/issues/22857) was closed as an
+  API limitation rather than fixed. This is not about the parameter being static —
+  `rds.force_ssl` is dynamic in `aurora-postgresql17`. It applies to every parameter the module
+  hardcodes, which matters most in Step 4.
 - Static parameter changes require a reboot; the module should be explicit about which
   parameters are static (`shared_preload_libraries`, `rds.force_ssl` is dynamic, most
   `pgaudit.*` are dynamic) and should not set `apply_immediately = true` by default.
+- **Security groups need `name_prefix` plus `create_before_destroy`.** `name` and `description`
+  both force replacement, and a security group cannot be deleted while anything references it.
+  `create_before_destroy` alone is not enough: security group names are unique per VPC, so the
+  replacement collides with the original it is meant to replace. `name_prefix` lets the two
+  coexist. Note this only helps within this module's state — a consumer in another state that
+  attached the accessor group still pins it by ID until they re-apply.
 
 ### 8. Cost controls
 
@@ -320,11 +355,12 @@ cluster replacement.
 | **2** | **High availability** — instance groups, per-group instance class and `promotion_tier`, custom reader endpoints, AZ coverage and instance count checks. | Done. Instances moved from `count` to `for_each` so groups resize independently. |
 | **3** | **Encryption and authentication** — optional KMS CMK for storage and the master secret, cluster parameter group enforcing `rds.force_ssl`, IAM database authentication, `ca_cert_identifier`. | Done. The storage key cannot change later — land before real data. |
 | 4 | Parameter groups proper — PostgreSQL logging parameters, per-group instance parameter groups, static vs dynamic handling. | Extends the parameter group created in Step 3. |
-| 5 | pgAudit — `shared_preload_libraries`, `pgaudit.*`, `rds_pgaudit` role docs, `enabled_cloudwatch_logs_exports`, log group with retention and KMS. | Object-level auditing on sensitive tables. |
-| 6 | Monitoring — Enhanced Monitoring role, Database Insights Advanced, CloudWatch alarms, SNS wiring, New Relic outputs. | |
-| 7 | RDS event subscriptions; pending-maintenance notifier (likely a `maintenance-calendar` change). | |
-| 8 | Scale and performance — Serverless v2 instance groups, optional RDS Proxy. | |
-| 9 | Optional hardening — Database Activity Streams, Aurora Global Database. | Only if the risk assessment calls for it. |
+| 5 | In-place major version upgrades — instance parameter group on the target family, `db_instance_parameter_group_name` on the cluster, reintroduce `allow_major_version_upgrade`. | Depends on Step 4. See below. |
+| 6 | pgAudit — `shared_preload_libraries`, `pgaudit.*`, `rds_pgaudit` role docs, `enabled_cloudwatch_logs_exports`, log group with retention and KMS. | Object-level auditing on sensitive tables. |
+| 7 | Monitoring — Enhanced Monitoring role, Database Insights Advanced, CloudWatch alarms, SNS wiring, New Relic outputs. | |
+| 8 | RDS event subscriptions; pending-maintenance notifier (likely a `maintenance-calendar` change). | |
+| 9 | Scale and performance — Serverless v2 instance groups, optional RDS Proxy. | |
+| 10 | Optional hardening — Database Activity Streams, Aurora Global Database. | Only if the risk assessment calls for it. |
 
 Deliberately excluded:
 

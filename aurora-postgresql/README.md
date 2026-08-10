@@ -51,6 +51,27 @@ data "aws_secretsmanager_secret_version" "master" {
 }
 ```
 
+## Adopting this module on an existing cluster
+
+The module always sets `manage_master_user_password`, and takes no `master_password` input by
+design — no credential should reach Terraform state. A cluster whose master password is
+currently managed by Terraform therefore cannot move onto this module without the password
+changing, which is a coordinated credential rotation rather than a refactor.
+
+**Move the cluster to an RDS-managed password first, as its own change, then adopt this
+module.** The module deliberately offers no escape hatch for this.
+
+Two other differences cost resource replacement rather than being free renames:
+
+- **Instance identifiers.** Instances are named `<cluster>-<group>-<ordinal>` and `identifier`
+  forces replacement. Add the new instance group first and remove the old instances in a
+  second apply, so the cluster is never left with zero instances — a cluster with no instances
+  is unreachable. Replacing instances never touches data, since they are compute over the
+  shared storage volume.
+- **Security group rules.** The module uses `aws_vpc_security_group_ingress_rule`. Converting
+  from the older `aws_security_group_rule` cannot use `moved`, because `moved` does not change
+  resource type; it needs `removed` with `destroy = false` followed by `import`.
+
 ## Turning on high availability
 
 A single-instance cluster recovers from an instance failure by rebuilding the instance, which
@@ -185,7 +206,7 @@ deliberate change rather than a surprise.
 | `backup_retention_period` | `35` | The Aurora maximum for point-in-time recovery. |
 | `deletion_protection` | `true` | Deleting a cluster is not recoverable from a running instance. Set to `false` in environments that get torn down. |
 | `skip_final_snapshot` | `false` | A final snapshot named `<name>-final` is taken on destroy. |
-| `allow_major_version_upgrade` | `false` | Major upgrades should go through a blue/green deployment, not an in-place apply. |
+| major version upgrades | not supported | Hardcoded to `false` rather than exposed, because in-place upgrades need an instance parameter group this module does not yet create. Use a blue/green deployment. |
 | `apply_immediately` | `false` | Modifications wait for the maintenance window. |
 | `storage_type` | `aurora` | Standard storage. Switch to `aurora-iopt1` once I/O is more than roughly a quarter of the cluster's spend. |
 | `engine_version` | `"17"` | Major version only, so AWS selects the minor and `auto_minor_version_upgrade` can keep it current. |
@@ -203,6 +224,9 @@ intent:
   one zone. Raise the variable on clusters deployed into a VPC with three availability zones.
 - An instance group that exposes a custom endpoint but holds a single instance.
 - Both `create_kms_key` and `kms_key_id` set, where the created key silently wins.
+- `engine_version` pinned to a minor while `auto_minor_version_upgrade` is on. AWS will
+  eventually apply a minor upgrade, after which the configured version is a downgrade that
+  cannot be applied. Pin the major alone, or turn off automatic minor upgrades.
 
 A single-instance cluster does not warn — that is the intended default.
 

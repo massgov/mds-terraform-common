@@ -1,3 +1,10 @@
+check "engine_version" {
+  assert {
+    condition     = !(local.engine_minor_pinned && var.auto_minor_version_upgrade)
+    error_message = "${var.name} pins engine_version to ${var.engine_version} while auto_minor_version_upgrade is enabled; once AWS applies a minor upgrade the configured version becomes a downgrade that cannot be applied. Pin the major version alone, or disable auto_minor_version_upgrade."
+  }
+}
+
 check "encryption" {
   assert {
     condition     = !(var.create_kms_key && var.kms_key_id != null)

@@ -1,7 +1,11 @@
 resource "aws_security_group" "cluster" {
-  name        = var.name
+  name_prefix = "${var.name}-"
   description = "Aurora PostgreSQL cluster ${var.name}."
   vpc_id      = var.vpc_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = merge(var.tags, {
     Name = var.name
@@ -9,9 +13,13 @@ resource "aws_security_group" "cluster" {
 }
 
 resource "aws_security_group" "accessor" {
-  name        = "${var.name}-accessor"
+  name_prefix = "${var.name}-accessor-"
   description = "Grants access to the Aurora PostgreSQL cluster ${var.name}."
   vpc_id      = var.vpc_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = merge(var.tags, {
     Name = "${var.name}-accessor"

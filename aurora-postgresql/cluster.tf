@@ -26,7 +26,7 @@ resource "aws_rds_cluster" "this" {
   preferred_maintenance_window = var.preferred_maintenance_window
   copy_tags_to_snapshot        = true
 
-  allow_major_version_upgrade = var.allow_major_version_upgrade
+  allow_major_version_upgrade = false
   apply_immediately           = var.apply_immediately
 
   deletion_protection       = var.deletion_protection
