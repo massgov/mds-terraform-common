@@ -1,6 +1,6 @@
 # Overview
 
-This module manages the resources for an EC2 instance intended for use during development or prototyping, hence the abbreviated name: _proto_ instance. The module differ from, say, the `aws_instance` resource provided by the aws terraform provider in a few ways; chief among them is the inclusion of a _management_ Lambda function, which periodically tears the instance down and rebuilds it using the latest version of the AMI given by [var.ami_search_filters](#ami_search_filters).
+This module manages the resources for an EC2 instance intended for use during development or prototyping, hence the abbreviated name: _proto_ instance. In order to keep the instance up-to-date with the latest OS builds, the module imposes a level of instance ephemerality. For example, when `var.ami_search_filters` yields a later image than the one currently in use, terraform will tear down and rebuild the EC2 instance. In order to cope with this, the module provisions, mounts, and symlinks a persistent [S3 Filesystem](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-files.html) for each user.
 
 ## Setup
 
