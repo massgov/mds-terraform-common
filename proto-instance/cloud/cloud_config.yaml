@@ -7,11 +7,12 @@ write_files:
     # symlinked to the user's home dir. This directory persists across instance termination
     # and recreation
 
-    if [[ ! -d $HOME/persist ]]; then
-      mkdir -p /mnt/s3files/$USER
-      chown $USER:$USER /mnt/s3files/$USER
-      chmod 1740 /mnt/s3files/$USER
+    if [[ ! -d /mnt/s3files/$USER/persist ]]; then
       mkdir -p /mnt/s3files/$USER/persist
+      chown -R $USER:$USER /mnt/s3files/$USER
+      chmod -R 1740 /mnt/s3files/$USER
+    fi
+    if [[ ! -d $HOME/persist ]]; then
       ln -s /mnt/s3files/$USER/persist $HOME/persist
       echo "Files in this directory are automatically synced to S3. Please do not store information such as passwords, private keys, or API tokens here." > $HOME/persist/README
     fi
@@ -45,7 +46,7 @@ write_files:
     unset rc
   permissions: '0644'
 
-- path: /etc/skel/.bash_profile'
+- path: /etc/skel/.bash_profile
   content: |
     # .bash_profile
 
