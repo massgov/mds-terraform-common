@@ -23,22 +23,12 @@ echo "[+] Installing botocore"
 sudo pip3 install botocore
 
 echo "[+] Mounting s3 filesystem to /mnt/s3files"
+sudo mkdir -p /mnt/s3files
 sudo mount -t s3files -o iam,tls $FILE_SYSTEM_ID:/ /mnt/s3files
-sudo chmod a+w /mnt/s3files
+sudo chmod 1777 /mnt/s3files
 
 echo "[+] Adding entry to fstab"
 sudo echo "$FILE_SYSTEM_ID:/ /mnt/s3files s3files _netdev,nofail 0 0" >> /etc/fstab
 sudo mount -a
-
-echo "[+] Updating /etc/profile.d"
-cat <<EOF > /etc/profile.d/s3fs.sh
-  if [[ ! -f $HOME/persist/README ]]; then
-   mkdir -p /mnt/s3files/$USER/persist
-   chown $USER:$USER /mnt/s3files/$USER/persist
-   chmod "u=wrx,g=wrx,o=" /mnt/s3files/$USER/persist
-   ln -s /mnt/s3files/$USER/persist $HOME/persist
-   echo "Files in this directory are automatically synced to S3. Please do not store information such as passwords, private keys, or API tokens here." > $HOME/persist/README
-  fi
-EOF
 
 echo "[+] Done"
