@@ -316,6 +316,15 @@ data "cloudinit_config" "default" {
   base64_encode = true
 
   part {
+    filename     = "cloud_config.yaml"
+    content_type = "text/cloud-config"
+
+    content = file(
+      "${path.module}/cloud/cloud_config.yaml",
+    )
+  }
+
+  part {
     filename     = "install_ssm_agent.sh"
     content_type = "text/x-shellscript"
 

@@ -8,12 +8,12 @@ set -eE
 FILE_SYSTEM_ID='${file_system_id}'
 
 sudo dnf upgrade -y --color=never \
-  && sudo dnf install -y --color=never curl pip3 python3
+  && sudo dnf install -y --color=never curl python3
 
 echo "[+] Installing EFS utils"
-install_dir=$(mktemp)
+install_dir=$(mktemp -d)
 curl -fsSL -o $install_dir/efs-utils-installer.sh https://amazon-efs-utils.aws.com/efs-utils-installer.sh
-sudo sh install_dir/efs-utils-installer.sh --install
+sudo sh $install_dir/efs-utils-installer.sh --install
 
 echo "[+] Installing AWS CLI"
 curl -fsSL -o $install_dir/aws-install.sh https://awscli.amazonaws.com/v2/install.sh
