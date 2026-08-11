@@ -25,7 +25,7 @@ sudo pip3 install botocore
 echo "[+] Mounting s3 filesystem to /mnt/s3files"
 sudo mkdir -p /mnt/s3files
 sudo mount -t s3files -o iam,tls $FILE_SYSTEM_ID:/ /mnt/s3files
-sudo chmod 1777 /mnt/s3files
+sudo chmod 1766 /mnt/s3files
 
 echo "[+] Adding entry to fstab"
 sudo echo "$FILE_SYSTEM_ID:/ /mnt/s3files s3files _netdev,nofail 0 0" >> /etc/fstab

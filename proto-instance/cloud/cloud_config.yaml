@@ -10,7 +10,7 @@ write_files:
     if [[ ! -d /mnt/s3files/$USER/persist ]]; then
       mkdir -p /mnt/s3files/$USER/persist
       chown -R $USER:$USER /mnt/s3files/$USER
-      chmod -R 1740 /mnt/s3files/$USER
+      chmod -R 1700 /mnt/s3files/$USER
     fi
     if [[ ! -d $HOME/persist ]]; then
       ln -s /mnt/s3files/$USER/persist $HOME/persist
