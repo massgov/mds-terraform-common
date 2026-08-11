@@ -5,7 +5,7 @@ require('esbuild')
     ],
     bundle: true,
     platform: 'node',
-    target: 'node20',
+    target: 'node24',
     outfile: 'dist/lambda.js',
   })
   .then(() => {

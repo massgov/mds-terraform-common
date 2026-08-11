@@ -43,7 +43,7 @@ resource "aws_iam_policy" "read_parameter_store" {
 module "sns_to_teams" {
   source  = "github.com/massgov/mds-terraform-common//lambda?ref=1.0.91"
   package = "${path.module}/lambda/dist/archive.zip"
-  runtime = "nodejs22.x"
+  runtime = "nodejs24.x"
   handler = "lambda.handler"
   environment = {
     variables = {

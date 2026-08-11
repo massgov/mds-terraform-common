@@ -14,7 +14,7 @@ const run = async (): Promise<void> => {
     entryPoints: [path.join(__dirname, "..", "src", "index.ts")],
     bundle: true,
     platform: "node",
-    target: "node20",
+    target: "node24",
     outfile: path.join(tmp, "lambda.js"),
     external: [
       "@aws-sdk/client-ssm"
