@@ -18,7 +18,7 @@ resource "newrelic_synthetics_cert_check_monitor" "monitor" {
   domain                 = var.domain
   locations_public       = var.locations
   runtime_type           = "NODE_API"
-  runtime_type_version   = "16.10"
+  runtime_type_version   = "22.20.0"
 
   dynamic "tag" {
     for_each = var.tags
