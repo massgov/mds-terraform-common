@@ -1,5 +1,7 @@
 locals {
-  trust_policy = var.custom_policy_json != "" ? var.custom_policy_json : data.aws_iam_policy_document.assume_policy.json
+  trust_policy   = var.custom_policy_json != "" ? var.custom_policy_json : data.aws_iam_policy_document.assume_policy.json
+  subject_prefix = var.allow_legacy_subject ? "repo:${var.gh_org}/${var.gh_repo}" : "repo:${var.gh_org}@${var.org_id}/${var.gh_repo}@${var.repo_id}"
+
 }
 
 data "aws_iam_policy_document" "assume_policy" {
@@ -18,7 +20,7 @@ data "aws_iam_policy_document" "assume_policy" {
     condition {
       test = "StringLike"
       values = [
-        for oidc_subject_claim in var.oidc_subject_claims : "repo:${var.gh_org}/${var.gh_repo}:${oidc_subject_claim}"
+        for oidc_subject_claim in var.oidc_subject_claims : "${local.subject_prefix}:${oidc_subject_claim}"
       ]
       variable = "token.actions.githubusercontent.com:sub"
     }

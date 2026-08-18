@@ -26,6 +26,32 @@ variable "oidc_subject_claims" {
   default = ["*"]
 }
 
+# OIDC subject claim formats:
+# Legacy: repo:octo-org/octo-repo:ref:refs/heads/main
+# Immutable: repo:octo-org@${org_id}/octo-repo@${repo_id}:ref:refs/heads/main
+
+# Repos created after 07-15-2026 emit an immutable subject claim
+# Set allow_legacy_subject to false for new repos created after this date or if opting in to use new immutable claims
+# Immutable claims require org_id and repo_id
+# https://github.com/aws-actions/configure-aws-credentials/tree/v6/#immutable-subject-claims
+variable "allow_legacy_subject" {
+  type        = bool
+  description = "Accept the legacy OIDC subject claim (repo:ORG/REPO:...)"
+  default     = true
+}
+
+variable "org_id" {
+  type        = string
+  description = "GitHub organization ID, required unless allow_legacy_subject is true"
+  default     = ""
+}
+
+variable "repo_id" {
+  type        = string
+  description = "Github repository ID, required unless allow_legacy_subject is true"
+  default     = ""
+}
+
 # if templated (default) trust policy will not be used
 variable "custom_policy_json" {
   type        = string
