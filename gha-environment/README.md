@@ -10,15 +10,15 @@ The sections of this README between `BEGIN_TF_DOCS` and `END_TF_DOCS` are genera
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8 |
-| <a name="requirement_github"></a> [github](#requirement\_github) | >= 6.2 |
+| <a name="requirement_github"></a> [github](#requirement\_github) | >= 6.13 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_github"></a> [github](#provider\_github) | >= 6.2 |
+| ---- | ------- |
+| <a name="provider_github"></a> [github](#provider\_github) | >= 6.13 |
 
 ## Modules
 
@@ -27,7 +27,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [github_actions_environment_variable.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) | resource |
 | [github_repository_environment.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_environment) | resource |
 | [github_repository_environment_deployment_policy.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/repository_environment_deployment_policy) | resource |
@@ -35,7 +35,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_branch_restriction_patterns"></a> [branch\_restriction\_patterns](#input\_branch\_restriction\_patterns) | Specify branch restrictions for the environment | `list(string)` | `[]` | no |
 | <a name="input_deployment_reviewers_teams"></a> [deployment\_reviewers\_teams](#input\_deployment\_reviewers\_teams) | Specify teams that may approve workflow runs when they access this environment | `list(string)` | `[]` | no |
 | <a name="input_deployment_reviewers_users"></a> [deployment\_reviewers\_users](#input\_deployment\_reviewers\_users) | Specify users that may approve workflow runs when they access this environment | `list(string)` | `[]` | no |

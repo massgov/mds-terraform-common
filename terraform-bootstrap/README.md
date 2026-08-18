@@ -6,15 +6,15 @@ This module contains the resources to initialize an AWS account for use with Ter
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.45 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.45.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.45 |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.45.0 |
 
 ## Modules
 
@@ -23,7 +23,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_dynamodb_table.lock](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
 | [aws_iam_policy.apply](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.plan](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -40,7 +40,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_create_apply_policy"></a> [create\_apply\_policy](#input\_create\_apply\_policy) | Whether to create a policy that allows the Terraform state bucket to be accessed for apply operations | `bool` | `true` | no |
 | <a name="input_create_plan_policy"></a> [create\_plan\_policy](#input\_create\_plan\_policy) | Whether to create a policy that allows the Terraform state bucket to be accessed for plan operations | `bool` | `true` | no |
 | <a name="input_iam_policy_path"></a> [iam\_policy\_path](#input\_iam\_policy\_path) | The path to use for the IAM policies | `string` | `"/soe/"` | no |
@@ -52,7 +52,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_apply_policy_arn"></a> [apply\_policy\_arn](#output\_apply\_policy\_arn) | ARN of the IAM policy used to apply Terraform state |
 | <a name="output_lock_table_arn"></a> [lock\_table\_arn](#output\_lock\_table\_arn) | ARN of the DynamoDB table used to store Terraform state lock |
 | <a name="output_lock_table_name"></a> [lock\_table\_name](#output\_lock\_table\_name) | Name of the DynamoDB table used to store Terraform state lock |
