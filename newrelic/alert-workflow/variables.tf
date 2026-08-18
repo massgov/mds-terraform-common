@@ -97,14 +97,14 @@ variable "webhook_channels" {
       teams_adaptive_card   (bool)      — use the newer Adaptive Card format for MS Teams instead of the legacy MessageCard (only applicable if payload is omitted or uses the built-in Teams template)
   EOT
   type = list(object({
-    name                     = string
-    url                      = optional(string, "")
-    channel_name             = optional(string, null)
-    destination_id           = optional(string, null)
-    payload                  = optional(string, null)
-    payload_label            = optional(string, null)
-    source_label             = optional(string, null)
-    custom_headers           = optional(map(string), {})
+    name           = string
+    url            = optional(string, "")
+    channel_name   = optional(string, null)
+    destination_id = optional(string, null)
+    payload        = optional(string, null)
+    payload_label  = optional(string, null)
+    source_label   = optional(string, null)
+    custom_headers = optional(map(string), {})
     auth_basic = optional(object({
       user     = string
       password = string
