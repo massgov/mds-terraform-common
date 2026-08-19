@@ -1,10 +1,10 @@
 output "full_bucket_name" {
-  value = aws_s3_bucket.default_bucket.id
+  value       = aws_s3_bucket.default_bucket.id
   description = "Full bucket name, including random characters if var.guarantee_uniqueness is used."
 }
 
 output "full_bucket_arn" {
-  value = aws_s3_bucket.default_bucket.arn
+  value       = aws_s3_bucket.default_bucket.arn
   description = "Full bucket ARN"
 }
 

@@ -5,7 +5,7 @@ resource "random_id" "bucket_id" {
 
 locals {
   bucket_root_name = var.guarantee_uniqueness ? "${var.bucket_name}-${random_id.bucket_id.dec}" : var.bucket_name
-  account_id = data.aws_caller_identity.default.account_id
+  account_id       = data.aws_caller_identity.default.account_id
 }
 
 data "aws_caller_identity" "default" {}
@@ -16,13 +16,13 @@ data "aws_caller_identity" "default" {}
 
 data "aws_iam_policy_document" "default_key_policy" {
   statement {
-    sid = "Enable IAM User Permissions"
+    sid    = "Enable IAM User Permissions"
     effect = "Allow"
     principals {
-      type = "AWS" 
+      type        = "AWS"
       identifiers = ["arn:aws:iam::${local.account_id}:root"]
     }
-    actions = ["kms:*"]
+    actions   = ["kms:*"]
     resources = ["*"]
   }
 }
@@ -33,7 +33,7 @@ resource "aws_kms_key" "s3_key" {
   description             = "This key is used to encrypt bucket objects in ${local.bucket_root_name} and ${local.bucket_root_name}-logs"
   deletion_window_in_days = var.deletion_window_in_days # Length of time the key will be retained when a deletion is scheduled.
   enable_key_rotation     = true
-  policy = coalesce(var.kms_policy, data.aws_iam_policy_document.default_key_policy.json)
+  policy                  = coalesce(var.kms_policy, data.aws_iam_policy_document.default_key_policy.json)
 }
 
 resource "aws_kms_alias" "s3_key_alias" {
@@ -50,7 +50,7 @@ resource "aws_kms_alias" "s3_key_alias" {
 resource "aws_s3_bucket" "log_bucket" {
   count  = var.enable_logging ? 1 : 0
   bucket = "${local.bucket_root_name}-logs"
-  tags          = {
+  tags = {
     Name = "${local.bucket_root_name}-logs"
   }
 }
@@ -75,8 +75,8 @@ resource "aws_s3_bucket_acl" "log_bucket_acl" {
 
 # If bucket is NOT important, force_destroy = true; force-destroyed bucket contents are not recoverable!
 resource "aws_s3_bucket" "default_bucket" {
-  bucket        = local.bucket_root_name
-  tags          = merge(
+  bucket = local.bucket_root_name
+  tags = merge(
     var.bucket_tags,
     {
       Name = local.bucket_root_name
@@ -92,11 +92,11 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
 
   # No sense in enabling public ACLs, since we aren't touching
   # bucket ownership settings
-  block_public_acls = true
+  block_public_acls  = true
   ignore_public_acls = true
 
   # Allow callers to enable public access thru the custom_policy variable
-  block_public_policy = false
+  block_public_policy     = false
   restrict_public_buckets = false
 }
 

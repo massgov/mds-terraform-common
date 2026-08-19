@@ -90,15 +90,15 @@ aws ssm start-session \
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.8 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.45 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.26.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.45 |
+| ---- | ------- |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.26.0 |
 
 ## Modules
 
@@ -107,7 +107,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_iam_instance_profile.profile](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_role.jump](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.ssm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
@@ -119,7 +119,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_ami"></a> [ami](#input\_ami) | The ami to use for the jump box. If the SSM Agent is not already installed on the ami, it should be installed through the user\_data variable. | `string` | n/a | yes |
 | <a name="input_instance_tags"></a> [instance\_tags](#input\_instance\_tags) | Additional tags to apply to the EC2 instance. | `map(string)` | `{}` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The instance type to use for the instance. | `string` | `"t4g.nano"` | no |
@@ -133,7 +133,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_jump_box_instance"></a> [jump\_box\_instance](#output\_jump\_box\_instance) | n/a |
 | <a name="output_jump_box_security_group"></a> [jump\_box\_security\_group](#output\_jump\_box\_security\_group) | n/a |
 <!-- END_TF_DOCS -->

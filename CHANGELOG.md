@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.134] - 2026-08-18
+- [GHA Role]
+  - Allow GHA role to support new immutable OIDC subject claims
+
 ## [1.0.133] - 2026-06-03
 - [S3 Bucket]
   - Fix invalid resource references, invalid `dynamic` block uses, and erroenous use of public bucket ACL
