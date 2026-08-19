@@ -61,12 +61,20 @@ variable "org_id" {
   type        = string
   description = "GitHub organization ID, required unless allow_legacy_subject is true"
   default     = ""
+  validation {
+    condition     = var.allow_legacy_subject || var.org_id != ""
+    error_message = "org_id is required when allow_legacy_subject is false."
+  }
 }
 
 variable "repo_id" {
   type        = string
   description = "Github repository ID, required unless allow_legacy_subject is true"
   default     = ""
+  validation {
+    condition     = var.allow_legacy_subject || var.org_id != ""
+    error_message = "org_id is required when allow_legacy_subject is false."
+  }
 }
 
 # if templated (default) trust policy will not be used
