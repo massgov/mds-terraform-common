@@ -44,19 +44,21 @@ variable "org_id" {
   type        = string
   description = "GitHub organization ID, required unless allow_legacy_subject is true"
   default     = ""
-  validation {
-    condition     = var.allow_legacy_subject || var.org_id != ""
-    error_message = "org_id is required when allow_legacy_subject is false."
-  }
 }
 
 variable "repo_id" {
   type        = string
   description = "Github repository ID, required unless allow_legacy_subject is true"
   default     = ""
-  validation {
-    condition     = var.allow_legacy_subject || var.repo_id != ""
-    error_message = "repo_id is required when allow_legacy_subject is false."
+}
+
+# Variable validation blocks can't reference other variables before Terraform 1.9, so we have to use this precondition
+resource "terraform_data" "validate_subject_config" {
+  lifecycle {
+    precondition {
+      condition     = var.allow_legacy_subject || (var.org_id != "" && var.repo_id != "")
+      error_message = "org_id and repo_id are required when allow_legacy_subject is false."
+    }
   }
 }
 
