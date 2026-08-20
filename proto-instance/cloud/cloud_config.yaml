@@ -44,6 +44,11 @@ write_files:
         done
     fi
     unset rc
+
+    # Source persistent bashrc
+    if [ -f ~/persist/.bashrc ]; then
+      . ~/persist/.bashrc
+    fi
   permissions: '0644'
 
 - path: /etc/skel/.bash_profile
@@ -53,6 +58,11 @@ write_files:
     # Get the aliases and functions
     if [ -f ~/.bashrc ]; then
         . ~/.bashrc
+    fi
+
+    # Source persistent profile
+    if [ -f ~/persist/.bash_profile ]; then
+      . ~/persist/.bash_profile
     fi
 
     # User specific environment and startup programs
