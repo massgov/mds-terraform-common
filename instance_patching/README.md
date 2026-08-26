@@ -1,6 +1,6 @@
 # Instance Patching
 
-This Terraform module schedules AWS Systems Manager patching for running EC2 instances in non-production environments. Instances are selected by their `environment` tag, ECS and Kubernetes/EKS container hosts are excluded, and selected instances are processed in batches of up to 50.
+This Terraform module schedules AWS Systems Manager patching for running EC2 instances within a defined environment via tags. Instances are selected by their `environment` tag, ECS and Kubernetes/EKS container hosts are excluded, and selected instances are processed in batches of up to 50.
 
 Each batch uses the AWS-managed `AWS-RunPatchBaselineWithHooks` document to:
 
@@ -13,12 +13,22 @@ The extended update pass is best effort. Its errors are written to the SSM comma
 
 ## Usage
 
+Example shows once a month starting with nonprod evironments, then 1 week after nonprod, prod will run.
+These are for all tags with 'environment = prod', 'environment = development', etc., etc.
+
 ```terraform
 module "instance_patching" {
   source = "./instance_patching"
 
-  patch_environments       = ["development", "staging"]
-  patch_schedule_expression = "cron(0 3 ? * SUN *)"
+  patch_environments        = ["development", "staging"]
+  patch_schedule_expression = "cron(0 3 ? * SUN#1 *)" #this patches 1st Sunday of the month
+}
+
+module "instance_patching_prod" {
+  source = "./instance_patching"
+
+  patch_environments        = ["prod", "production"]
+  patch_schedule_expression = "cron(0 3 ? * SUN#2 *)" #this patches 2nd Sunday of the month (week later)
 }
 ```
 
@@ -37,25 +47,25 @@ The module creates no associations when no matching running instances are found.
 
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| Terraform | >= 1.7 |
-| AWS provider | ~> 6.0 |
+| Name         | Version |
+| ------------ | ------- |
+| Terraform    | >= 1.7  |
+| AWS provider | ~> 6.0  |
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| `patch_environments` | Existing environment tag values that are eligible for patching. | `set(string)` | n/a | yes |
-| `patch_schedule_expression` | AWS Systems Manager State Manager schedule expression. | `string` | n/a | yes |
-| `additional_container_host_tag_keys` | Additional EC2 tag keys that identify ECS/EKS hosts. This input is declared for the module interface but is not currently used by the implementation. | `set(string)` | `[]` | no |
+| Name                                 | Description                                                                                                                                           | Type          | Default | Required |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------- | :------: |
+| `patch_environments`                 | Existing environment tag values that are eligible for patching.                                                                                       | `set(string)` | n/a     |   yes    |
+| `patch_schedule_expression`          | AWS Systems Manager State Manager schedule expression.                                                                                                | `string`      | n/a     |   yes    |
+| `additional_container_host_tag_keys` | Additional EC2 tag keys that identify ECS/EKS hosts. This input is declared for the module interface but is not currently used by the implementation. | `set(string)` | `[]`    |    no    |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
+| Name                              | Description                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
 | `instances_selected_for_patching` | Sorted IDs of running instances selected for patching after container-host tag exclusions. |
-| `ecs_instances_excluded` | Sorted IDs of running instances excluded because they have an ECS-related tag key. |
+| `ecs_instances_excluded`          | Sorted IDs of running instances excluded because they have an ECS-related tag key.         |
 
 ## Resources Created
 
