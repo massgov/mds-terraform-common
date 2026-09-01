@@ -1,47 +1,19 @@
 locals {
-  patch_environments = var.patch_environments
-  instance_states    = ["running"]
-
-  excluded_container_nodes = data.aws_instances.ecs_nodes.ids
-
-  patch_instance_ids = sort(tolist(setsubtract(
-    toset(data.aws_instances.patch_candidates.ids),
-    local.excluded_container_nodes
-  )))
-
-  patch_batches = {
-    for index, ids in chunklist(local.patch_instance_ids, 50) :
-    tostring(index) => ids
-  }
+  ssm_unique_name        = "extended-patching-${random_string.name_suffix.result}"
+  container_unique_name  = "Block-Container-Host-Patching-${random_string.name_suffix.result}"
+  package_updates_unique = "Extended-Native-Package-Updates-${random_string.name_suffix.result}"
 }
 
-data "aws_instances" "patch_candidates" {
-  instance_state_names = local.instance_states
-
-  filter {
-    name   = "tag:environment"
-    values = local.patch_environments
-  }
+resource "random_string" "name_suffix" {
+  length  = 8
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
 }
 
-data "aws_instances" "ecs_nodes" {
-  instance_state_names = local.instance_states
-
-  filter {
-    name = "tag-key"
-
-    values = [
-      "AmazonECSCreated",
-      "AmazonECSManaged",
-      "aws:ecs:clusterName"
-    ]
-  }
-}
-
-resource "aws_ssm_association" "nonprod_extended_patching" {
-  for_each = local.patch_batches
-
-  association_name = "nonprod-extended-patching-${each.key}"
+resource "aws_ssm_association" "extended_patching" {
+  association_name = local.ssm_unique_name
   name             = "AWS-RunPatchBaselineWithHooks"
 
   schedule_expression         = var.patch_schedule_expression
@@ -56,8 +28,8 @@ resource "aws_ssm_association" "nonprod_extended_patching" {
   }
 
   targets {
-    key    = "InstanceIds"
-    values = each.value
+    key    = "tag:environment"
+    values = sort(tolist(var.patch_environments))
   }
 
   max_concurrency = "25%"
@@ -65,7 +37,7 @@ resource "aws_ssm_association" "nonprod_extended_patching" {
 }
 
 resource "aws_ssm_document" "container_host_guard" {
-  name            = "NonProd-Block-Container-Host-Patching"
+  name            = local.container_unique_name
   document_type   = "Command"
   document_format = "JSON"
 
@@ -157,7 +129,7 @@ resource "aws_ssm_document" "container_host_guard" {
 }
 
 resource "aws_ssm_document" "extended_native_updates" {
-  name            = "NonProd-Extended-Native-Package-Updates"
+  name            = local.package_updates_unique
   document_type   = "Command"
   document_format = "JSON"
 
@@ -339,6 +311,6 @@ resource "aws_ssm_document" "extended_native_updates" {
     ]
   })
   tags = {
-    Purpose = "Extended nonproduction patching"
+    Purpose = "Extended patching"
   }
 }
