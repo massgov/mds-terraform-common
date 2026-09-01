@@ -2,6 +2,16 @@ locals {
   ssm_unique_name        = "extended-patching-${random_string.name_suffix.result}"
   container_unique_name  = "Block-Container-Host-Patching-${random_string.name_suffix.result}"
   package_updates_unique = "Extended-Native-Package-Updates-${random_string.name_suffix.result}"
+
+  # AWS max ssm association is 5, this allows us to chunk the env tag list`
+  # to create multiple SSM associations.
+  patch_environment_batches = {
+    for index, values in chunklist(
+      sort(tolist(var.patch_environments)),
+      5
+    ) : tostring(index) => values
+  }
+
 }
 
 resource "random_string" "name_suffix" {
@@ -13,7 +23,9 @@ resource "random_string" "name_suffix" {
 }
 
 resource "aws_ssm_association" "extended_patching" {
-  association_name = local.ssm_unique_name
+  for_each = local.patch_environment_batches
+
+  association_name = "${local.ssm_unique_name}-${each.key}"
   name             = "AWS-RunPatchBaselineWithHooks"
 
   schedule_expression         = var.patch_schedule_expression
@@ -29,7 +41,7 @@ resource "aws_ssm_association" "extended_patching" {
 
   targets {
     key    = "tag:environment"
-    values = sort(tolist(var.patch_environments))
+    values = each.value
   }
 
   max_concurrency = "25%"
