@@ -58,7 +58,6 @@ The module creates no associations when no matching running instances are found.
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------- | :------: |
 | `patch_environments`                 | Existing environment tag values that are eligible for patching.                                                                                       | `set(string)` | n/a     |   yes    |
 | `patch_schedule_expression`          | AWS Systems Manager State Manager schedule expression.                                                                                                | `string`      | n/a     |   yes    |
-| `additional_container_host_tag_keys` | Additional EC2 tag keys that identify ECS/EKS hosts. This input is declared for the module interface but is not currently used by the implementation. | `set(string)` | `[]`    |    no    |
 
 ## Outputs
 

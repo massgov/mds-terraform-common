@@ -1,16 +1,25 @@
-output "patch_target_configuration" {
+output "patch_target_configurations" {
   value = {
-    target_key    = "tag:environment"
-    target_values = sort(tolist(var.patch_environments))
+    for batch_key, target_values in local.patch_environment_batches :
+    batch_key => {
+      target_key    = "tag:environment"
+      target_values = target_values
+    }
   }
 }
 
-output "patch_association_id" {
-  value = aws_ssm_association.extended_patching.association_id
+output "patch_association_ids" {
+  value = {
+    for batch_key, association in aws_ssm_association.extended_patching :
+    batch_key => association.association_id
+  }
 }
 
-output "patch_association_arn" {
-  value = aws_ssm_association.extended_patching.arn
+output "patch_association_arns" {
+  value = {
+    for batch_key, association in aws_ssm_association.extended_patching :
+    batch_key => association.arn
+  }
 }
 
 output "container_host_guard_document" {
