@@ -2,7 +2,7 @@
 
 # Define your S3 bucket
 data "aws_s3_bucket" "docs" {
-  bucket = "itd-mgt-ssr-tagging.secure.digital.mass.gov"
+  bucket = local.registry_bucket
 }
 
 # Upload each file listed in the manifest to S3
