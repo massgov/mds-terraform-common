@@ -442,6 +442,12 @@ resource "aws_instance" "default" {
     id      = aws_launch_template.default.id
     version = aws_launch_template.default.latest_version
   }
+  lifecycle {
+    replace_triggered_by = [
+      aws_launch_template.default.id,
+      aws_launch_template.default.latest_version
+    ]
+  }
 }
 
 resource "aws_volume_attachment" "default" {
