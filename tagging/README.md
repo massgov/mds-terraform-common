@@ -3,7 +3,7 @@
 > [!WARNING]
 > Though it is public, it isn't advised that this module be used outside of the [massgov](https://github.com/massgov) GitHub organization. It will not work as expected if used by the general public.
 
-Terraform module for providing [managed tags](https://ssr-tagging.secure.digital.mass.gov/) to your terraform project.
+Terraform module for providing [managed tags](https://ssr-tagging.secure.digital.mass.gov/) to your terraform project. Tags are read from a `tags/tags.json` object published to the SSR tag registry bucket, rather than from the registry's Terraform state directly.
 
 ## Usage
 
@@ -32,14 +32,14 @@ provider "aws" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.37.0 |
-| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
 
 ## Modules
 
@@ -52,7 +52,7 @@ No modules.
 | [aws_s3_object.category](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_s3_object.files](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_object) | resource |
 | [aws_s3_bucket.docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket) | data source |
-| [terraform_remote_state.tags](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/data-sources/remote_state) | data source |
+| [aws_s3_object.tags](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_object) | data source |
 
 ## Inputs
 
