@@ -13,12 +13,9 @@ This module creates an IAM role that can be assumed by GitHub Actions. The role 
 ## Providers
 
 | Name | Version |
-<<<<<<< HEAD
-|------|---------|
-=======
 | ---- | ------- |
->>>>>>> 8e52de679f403757ad89d248a6d57b33e1a0d0b5
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.26.0 |
+| <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
 ## Modules
 
@@ -30,6 +27,7 @@ No modules.
 | ---- | ---- |
 | [aws_iam_role.role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_iam_role_policy_attachment.policy_attachments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
+| [terraform_data.validate_subject_config](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [aws_iam_policy_document.assume_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 ## Inputs
