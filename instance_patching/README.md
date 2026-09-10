@@ -1,13 +1,12 @@
 # Instance Patching
 
-This Terraform module schedules AWS Systems Manager patching for running EC2 instances within a defined environment via tags. Instances are selected by their `environment` tag, ECS and Kubernetes/EKS container hosts are excluded, and selected instances are processed in batches of up to 50.
+This Terraform module schedules AWS Systems Manager patching for EC2 instances selected by their `environment` tag. Each association targets up to five environment tag values. A host guard blocks detected ECS and Kubernetes/EKS workers before any package installation.
 
-Each batch uses the AWS-managed `AWS-RunPatchBaselineWithHooks` document to:
+Each association uses a custom wrapper document to:
 
-- Install the AWS Patch Baseline updates.
-- Reboot when required.
-- Run an extended native package-update pass for Linux and Windows.
 - Block patching when the target appears to be an ECS or Kubernetes/EKS worker.
+- Install missing `zstd`, `xz`, and `unzip` prerequisites on DNF-based Linux hosts before scanning.
+- Invoke the AWS-managed `AWS-RunPatchBaselineWithHooks` document to scan, install baseline updates, run the extended native update hook, and reboot when required.
 
 The extended update pass is best effort. Its errors are written to the SSM command output while the parent patch association is allowed to continue to its reboot and compliance-reporting steps.
 
@@ -36,14 +35,12 @@ The AWS provider must be configured by the calling module. The caller is respons
 
 ## Selection and Safety
 
-- Only running instances are considered.
 - An instance must have an `environment` tag whose value is in `patch_environments`.
-- Instances with the AWS ECS tag keys `AmazonECSCreated`, `AmazonECSManaged`, or `aws:ecs:clusterName` are excluded before associations are created.
-- The pre-install hook also checks Linux and Windows hosts for ECS or Kubernetes/EKS indicators and exits with code `42` when a container host is detected.
+- The host guard blocks detected ECS or Kubernetes/EKS workers before installing prerequisites and again before patch installation.
 - The schedule expression is passed to each SSM association with `apply_only_at_cron_interval = true`.
 - Associations use a maximum concurrency of `25%` and allow errors up to `5%`.
 
-The module creates no associations when no matching running instances are found.
+The module creates no associations when `patch_environments` is empty.
 
 ## Requirements
 
@@ -51,6 +48,7 @@ The module creates no associations when no matching running instances are found.
 | ------------ | ------- |
 | Terraform    | >= 1.7  |
 | AWS provider | ~> 6.0  |
+| SSM Agent    | >= 3.0.502 |
 
 ## Inputs
 
@@ -63,11 +61,14 @@ The module creates no associations when no matching running instances are found.
 
 | Name                              | Description                                                                                |
 | --------------------------------- | ------------------------------------------------------------------------------------------ |
-| `instances_selected_for_patching` | Sorted IDs of running instances selected for patching after container-host tag exclusions. |
-| `ecs_instances_excluded`          | Sorted IDs of running instances excluded because they have an ECS-related tag key.         |
+| `patch_target_configurations` | Environment tag targets for each association batch. |
+| `patch_association_ids` | Association IDs keyed by batch. |
+| `patch_association_arns` | Association ARNs keyed by batch. |
+| `container_host_guard_document` | Name of the container-host guard document. |
 
 ## Resources Created
 
-- One `aws_ssm_association` per batch of up to 50 selected instance IDs.
+- One `aws_ssm_association` per batch of up to five environment tag values.
+- An SSM wrapper document that checks the host and installs patch prerequisites before invoking AWS patching.
 - An SSM document that prevents in-place patching of detected ECS or Kubernetes/EKS hosts.
 - An SSM document that performs extended native package updates on Linux and Windows.

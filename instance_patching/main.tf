@@ -1,5 +1,6 @@
 locals {
   ssm_unique_name        = "extended-patching-${random_string.name_suffix.result}"
+  workflow_unique_name   = "Extended-Patching-Workflow-${random_string.name_suffix.result}"
   container_unique_name  = "Block-Container-Host-Patching-${random_string.name_suffix.result}"
   package_updates_unique = "Extended-Native-Package-Updates-${random_string.name_suffix.result}"
 
@@ -26,18 +27,11 @@ resource "aws_ssm_association" "extended_patching" {
   for_each = local.patch_environment_batches
 
   association_name = "${local.ssm_unique_name}-${each.key}"
-  name             = "AWS-RunPatchBaselineWithHooks"
+  name             = aws_ssm_document.patching_workflow.name
+  document_version = aws_ssm_document.patching_workflow.latest_version
 
   schedule_expression         = var.patch_schedule_expression
   apply_only_at_cron_interval = true
-
-  parameters = {
-    Operation              = "Install"
-    RebootOption           = "RebootIfNeeded"
-    PreInstallHookDocName  = aws_ssm_document.container_host_guard.name
-    PostInstallHookDocName = aws_ssm_document.extended_native_updates.name
-    OnExitHookDocName      = "AWS-Noop"
-  }
 
   targets {
     key    = "tag:environment"
@@ -46,6 +40,93 @@ resource "aws_ssm_association" "extended_patching" {
 
   max_concurrency = "25%"
   max_errors      = "5%"
+}
+
+resource "aws_ssm_document" "patching_workflow" {
+  name            = local.workflow_unique_name
+  document_type   = "Command"
+  document_format = "JSON"
+
+  content = jsonencode({
+    schemaVersion = "2.2"
+    description   = "Check container hosts and install patch prerequisites before the initial AWS patch scan."
+    mainSteps = [
+      {
+        action = "aws:runDocument"
+        name   = "checkContainerHost"
+        inputs = {
+          documentType = "SSMDocument"
+          documentPath = aws_ssm_document.container_host_guard.name
+          onFailure    = "exit"
+        }
+      },
+      {
+        action = "aws:runShellScript"
+        name   = "ensureLinuxPatchPrerequisites"
+        precondition = {
+          StringEquals = ["platformType", "Linux"]
+        }
+        inputs = {
+          onFailure      = "exit"
+          timeoutSeconds = "600"
+          runCommand = [<<-BASH
+            #!/usr/bin/env bash
+            set -eu
+
+            if ! command -v dnf >/dev/null 2>&1; then
+              echo "DNF patch prerequisites do not apply to this host."
+              exit 0
+            fi
+
+            # AWS-RunPatchBaselineWithHooks scans before its pre-install hook.
+            # Install decompression tools here so that first scan can succeed.
+            set --
+            command -v zstd >/dev/null 2>&1 || set -- "$@" zstd
+            command -v unxz >/dev/null 2>&1 || set -- "$@" xz
+            command -v unzip >/dev/null 2>&1 || set -- "$@" unzip
+
+            if [ "$#" -gt 0 ]; then
+              echo "Installing missing Patch Manager prerequisites: $*"
+              if ! dnf -y install "$@"; then
+                echo "ERROR: Could not install Patch Manager prerequisites. Check DNF repository access and package availability." >&2
+                exit 1
+              fi
+            fi
+
+            for tool in zstd unxz unzip; do
+              if ! command -v "$tool" >/dev/null 2>&1; then
+                echo "ERROR: Required Patch Manager executable is still missing: $tool" >&2
+                exit 1
+              fi
+            done
+
+            echo "DNF patch prerequisites are available."
+          BASH
+          ]
+        }
+      },
+      {
+        action = "aws:runDocument"
+        name   = "runPatchBaselineWithHooks"
+        inputs = {
+          documentType = "SSMDocument"
+          documentPath = "AWS-RunPatchBaselineWithHooks"
+          onFailure    = "exit"
+          documentParameters = {
+            Operation              = "Install"
+            RebootOption           = "RebootIfNeeded"
+            PreInstallHookDocName  = aws_ssm_document.container_host_guard.name
+            PostInstallHookDocName = aws_ssm_document.extended_native_updates.name
+            OnExitHookDocName      = "AWS-Noop"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Purpose = "Patch prerequisites and workflow"
+  }
 }
 
 resource "aws_ssm_document" "container_host_guard" {
