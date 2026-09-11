@@ -29,7 +29,19 @@ variable "policy_arns" {
   // Use list instead of set; with set, terraform wants anything this variable
   // depends on to be deployed separately before it is used here, which would
   // complicate the deployment process.
-  type = list(string)
+  description = <<EOF
+    (Deprecated, prefer `vars.attach_policies`) List of policy ARNs to attach to the
+    role. Note that the referenced resources must exist at apply time.
+  EOF
+  type        = list(string)
+  default     = []
+}
+
+# IAM policies to attach to the role.
+variable "attach_policies" {
+  description = "Map of policy ARNs to attach to the role"
+  type        = map(string)
+  default     = {}
 }
 
 # Additional filters to use for who can assume the role.
