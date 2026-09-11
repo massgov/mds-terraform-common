@@ -36,7 +36,7 @@ resource "aws_iam_role" "role" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "default" {
+resource "aws_iam_role_policy_attachment" "policy_attachments" {
   for_each   = merge(
     { for i, arn in var.policy_arns: "DeprecatedPolicyARNs${i}" => arn },
     var.attach_policies,

@@ -28,7 +28,11 @@ resource "aws_iam_role" "role" {
 }
 
 resource "aws_iam_role_policy_attachment" "policy_attachments" {
-  count      = length(var.policy_arns)
-  policy_arn = var.policy_arns[count.index]
-  role       = aws_iam_role.role.id
+  for_each   = merge(
+    { for i, arn in var.policy_arns: "DeprecatedPolicyARNs${i}" => arn },
+    var.attach_policies,
+  )
+
+  role       = aws_iam_role.role.name
+  policy_arn = each.value
 }

@@ -15,8 +15,20 @@ variable "policy_arns" {
   // Use list instead of set; with set, terraform wants anything this variable
   // depends on to be deployed separately before it is used here, which would
   // complicate the deployment process.
-  type = list(string)
+  description = <<EOF
+    (Deprecated, prefer `vars.attach_policies`) List of policy ARNs to attach to the
+    role. Note that the referenced resources must exist at apply time.
+  EOF
+  type        = list(string)
+  default     = []
 }
+
+variable "attach_policies" {
+  description = "Map of policy ARNs to attach to the role"
+  type        = map(string)
+  default     = {}
+}
+
 variable "oidc_subject_claims" {
   // This module always filters on the repository given, but you can use this
   // variable to additionally filter on a specific branch, tag, or environment,

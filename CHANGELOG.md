@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.138] - 2026-09-11
+- [GHA Role]
+  - Fix for non-deterministic `for_each` expression
+
 ## [1.0.134] - 2026-08-18
 - [GHA Role]
   - Allow GHA role to support new immutable OIDC subject claims
