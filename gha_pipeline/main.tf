@@ -29,7 +29,9 @@ resource "aws_iam_role" "role" {
 
 resource "aws_iam_role_policy_attachment" "policy_attachments" {
   for_each   = merge(
-    { for i, arn in var.policy_arns: "DeprecatedPolicyARNs${i}" => arn },
+    # Make the keys for the ARNs from the deprecated variable (var.policy_arns) weird so that
+    # they don't collide with var.attach_policies
+    { for i, arn in var.policy_arns: "PolicyARNFromDeprecatedVariable${i}" => arn },
     var.attach_policies,
   )
 
