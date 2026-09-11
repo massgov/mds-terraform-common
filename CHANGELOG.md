@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.138] - 2026-09-11
+## [1.0.139] - 2026-09-11
 - [GHA Role, GHA Pipeline]
   - Fix for non-deterministic `for_each` expression
 
