@@ -8,6 +8,10 @@ See [Requirements](#requirements) for a list of required provider versions, as w
 
 ## Usage
 
+### Terraform module
+
+This module can be invoked in the following way via terraform:
+
 ```hcl
 
 provider "aws" {
@@ -61,6 +65,23 @@ module "proto_instance" {
   ]
 }
 ```
+
+### System user setup
+
+The module uses `cloud-init` to write a script to `/etc/skel/.bashrc.d` which automatically creates a symlink from `/home/$USER/persist` to `/mnt/s3files/$USER/persist`. Each user's `~/persist` folder can be thought of as the persistent segment of that user's home directory, as _all other contents are subject to deletion when the proto instance AMI expires_.
+
+The module likewise includes some small changes to `/etc/skel/.bash_profile` and `/etc/skel/.bashrc` which automatically `source` their respective RCs from the given user's `~/persist` folder. These RCs can be used to configure various conveniences and niceties that conform to the s3files paradigm. For example, users hoping to configure connections for their snowflake CLI via the [standard config file location](https://docs.snowflake.com/en/developer-guide/snowflake-cli/connecting/configure-cli#location-of-the-toml-configuration-file) (`~/.snowflake/config.toml`) might add the following to their `~/persist/.bash_profile`:
+```sh
+# /home/userfoo/persist/.bash_profile
+
+if [ -d $HOME/persist/.snowflake ]; then
+  ln -sf $HOME/persist/.snowflake $HOME/.snowflake 
+fi
+
+# etc...
+```
+This will ensure that the user's home directory "looks normal" to the snowflake CLI while also jibing with the s3files setup.
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
