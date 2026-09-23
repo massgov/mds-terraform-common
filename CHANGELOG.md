@@ -4,6 +4,7 @@
 - [Tagging]
   - **Breaking:** Read managed tags from the `tags/tags.json` object in the `ssr-tagging-prod-251246747079` registry bucket (EOTSS-Digital-SSR-Prod) instead of `terraform_remote_state` against `itd-mgt-ssr-tagging.secure.digital.mass.gov`. The registry's Terraform state now lives in a KMS-encrypted SOE state bucket that other accounts cannot read, so the ssr-tagging root publishes its `tags` output as a JSON object instead. Consumers pinned to an old `ref` must bump to the new tag once released; the calling account also needs `s3:GetObject` on `ssr-tagging-prod-251246747079/tags/tags.json`, granted by the registry bucket policy to consumer accounts. Docs uploads (`aws_s3_object.docs`) and the `push.yml` workflow now target the same new bucket.
   - Fix provider cycle when the module output feeds the consumer's `default_tags`: the registry read now uses a module-local `aws.registry` provider (us-east-1). Consequence: the module declares its own provider block, so it cannot be called with `count`, `for_each`, or `depends_on`.
+  - Remove the explicit `aws >= 5.0` provider requirement added above. It only changed the constraint string recorded in consumer lockfiles, which fails lockfile-drift checks; every consumer already runs a provider that supports `aws_s3_object`.
 
 ## [1.0.139] - 2026-09-11
 - [GHA Role, GHA Pipeline]
