@@ -5,3 +5,11 @@ data "aws_ssm_parameter" "country_codes" {
 locals {
   locations = data.aws_ssm_parameter.country_codes.value == "" ? [] : split(",", nonsensitive(data.aws_ssm_parameter.country_codes.value))
 }
+
+resource "aws_ssm_parameter" "country_codes" {
+  count     = var.create_country_code_list == true
+  name      = "/infrastructure/geo-blocking/country-codes"
+  type      = "String"
+  value     = var.country_codes
+  overwrite = true
+}
