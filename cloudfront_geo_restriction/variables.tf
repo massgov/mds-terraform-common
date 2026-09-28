@@ -12,7 +12,7 @@ variable "create_country_code_list" {
 
 variable "overwrite_country_code_params" {
   type        = bool
-  default     = false
+  default     = true
   description = "If parameter store value already exists update with lates country code list from here"
 }
 
