@@ -22,7 +22,7 @@ jobs:
     name: Push docs to s3
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Configure AWS Creds
         uses: aws-actions/configure-aws-credentials@v6
         with:
