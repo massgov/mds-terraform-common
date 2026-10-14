@@ -452,8 +452,8 @@ resource "aws_instance" "default" {
 
 resource "aws_volume_attachment" "default" {
   for_each = var.volume_attachments
-
-  volume_id   = each.key
-  device_name = each.value
+  
+  volume_id   = each.value.volume_id
+  device_name = each.value.device_name
   instance_id = aws_instance.default.id
 }

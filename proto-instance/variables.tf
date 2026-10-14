@@ -89,8 +89,16 @@ variable "key_name" {
 }
 
 variable "volume_attachments" {
-  type        = map(string)
-  description = "Mapping of EBS volume IDs to device names"
+  type        = map(
+    object({
+      volume_id         = string
+      device_name       = string
+    })
+  )
+  description = <<EOF
+    Map of short names to volume attachment parameters. Short names do not affect behavior,
+    but are merely used by terraform to track changes.
+  EOF
   default     = {}
 }
 
