@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - run: terraform fmt -recursive -check || echo "Terraform fmt check failed. Run 'terraform fmt -recursive' to fix the formatting issues."
       - name: Check Terraform docs
         uses: terraform-docs/gh-actions@v1.4.1
