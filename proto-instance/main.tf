@@ -312,7 +312,7 @@ resource "aws_iam_role_policy_attachment" "additional_policies" {
 ################################################################################
 
 data "cloudinit_config" "default" {
-  gzip          = false
+  gzip          = true
   base64_encode = true
 
   part {
