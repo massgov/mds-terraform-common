@@ -27,6 +27,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: us-east-1
+          # NOTE: vars.ROLE_ARN must grant PutObject on the ssr-tagging-prod-251246747079 bucket (SSR-Prod, 251246747079).
           role-to-assume: ${{ vars.ROLE_ARN }}
 
       - name: Check for docs.manifest
@@ -49,13 +50,13 @@ jobs:
             }
           }' > _category_.json
   
-          aws s3 cp _category_.json s3://itd-mgt-ssr-tagging.secure.digital.mass.gov/documentation/${{ env.repo }}/
+          aws s3 cp _category_.json s3://ssr-tagging-prod-251246747079/documentation/${{ env.repo }}/
 
       - name: Upload files to S3
         shell: bash
         run: |
           (cat ${{ env.file_path }} ; echo ) | while read line; do
-            aws s3 cp $line s3://itd-mgt-ssr-tagging.secure.digital.mass.gov/documentation/${{ env.repo }}/
+            aws s3 cp $line s3://ssr-tagging-prod-251246747079/documentation/${{ env.repo }}/
           done
   
 
