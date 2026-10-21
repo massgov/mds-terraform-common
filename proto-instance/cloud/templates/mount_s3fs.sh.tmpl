@@ -7,8 +7,12 @@ set -eE
 
 FILE_SYSTEM_ID='${file_system_id}'
 
+export PATH="$PATH:/usr/local/bin"
+
 sudo dnf upgrade -y --color=never \
   && sudo dnf install -y --color=never curl python3
+
+python3 -m ensurepip --upgrade
 
 echo "[+] Installing EFS utils"
 install_dir=$(mktemp -d)
@@ -20,15 +24,20 @@ curl -fsSL -o $install_dir/aws-install.sh https://awscli.amazonaws.com/v2/instal
 sudo sh $install_dir/aws-install.sh --system
 
 echo "[+] Installing botocore"
-sudo pip3 install botocore
+pip3 install botocore
 
-echo "[+] Mounting s3 filesystem to /mnt/s3files"
 sudo mkdir -p /mnt/s3files
-sudo mount -t s3files -o iam,tls $FILE_SYSTEM_ID:/ /mnt/s3files
-sudo chmod 1777 /mnt/s3files
 
-echo "[+] Adding entry to fstab"
-sudo echo "$FILE_SYSTEM_ID:/ /mnt/s3files s3files _netdev,nofail 0 0" >> /etc/fstab
+if ! mountpoint -q /mnt/s3files; then
+  echo "[+] Mounting s3 filesystem to /mnt/s3files"
+  sudo mount -t s3files -o iam,tls $FILE_SYSTEM_ID:/ /mnt/s3files
+  sudo chmod 1777 /mnt/s3files
+
+  echo "[+] Adding entry to fstab"
+  sudo echo "$FILE_SYSTEM_ID:/ /mnt/s3files s3files _netdev,nofail 0 0" >> /etc/fstab
+fi
+
+sudo systemctl daemon-reload
 sudo mount -a
 
 echo "[+] Done"
