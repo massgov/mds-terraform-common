@@ -57,7 +57,7 @@ resource "aws_lb_listener_rule" "static" {
 resource "aws_lb_target_group" "alb" {
   for_each = length(coalesce(var.ecs_load_balancers, {})) != 0 ? var.ecs_load_balancers : {}
 
-  name                 = substr(join("-", [terraform.workspace, each.key, each.value["tls"] ? "HTTPS" : "HTTP"]), 0, 32)
+  name                 = substr(join("-", [var.environment_name, each.key, each.value["tls"] ? "HTTPS" : "HTTP"]), 0, 32)
   port                 = lookup(each.value, "service_port", each.value["container_port"])
   protocol             = each.value["tls"] ? "HTTPS" : "HTTP"
   target_type          = "ip"

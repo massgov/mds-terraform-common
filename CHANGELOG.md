@@ -6,6 +6,10 @@
   - Fix provider cycle when the module output feeds the consumer's `default_tags`: the registry read now uses a module-local `aws.registry` provider (us-east-1). Consequence: the module declares its own provider block, so it cannot be called with `count`, `for_each`, or `depends_on`.
   - Remove the explicit `aws >= 5.0` provider requirement added above. It only changed the constraint string recorded in consumer lockfiles, which fails lockfile-drift checks; every consumer already runs a provider that supports `aws_s3_object`.
 
+## [1.0.140] - 2026-11-18`
+- [ECS Fargate]
+  - Replace `terraform.workspace` with `var.environment_name` 
+
 ## [1.0.139] - 2026-09-11
 - [GHA Role, GHA Pipeline]
   - Fix for non-deterministic `for_each` expression

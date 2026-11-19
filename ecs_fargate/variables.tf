@@ -14,6 +14,12 @@ variable "tags" {
   default = {
   }
 }
+variable "environment_name" {
+  description = "Name of the environment"
+  type        = string
+  nullable    = true
+  default     = "default"
+}
 
 // Networking/Compute
 variable "vpc_id" {
