@@ -31,7 +31,7 @@ resource "aws_ssm_association" "extended_patching" {
   document_version = aws_ssm_document.patching_workflow.latest_version
 
   schedule_expression         = var.patch_schedule_expression
-  apply_only_at_cron_interval = true
+  apply_only_at_cron_interval = var.apply_only_at_cron_interval
 
   targets {
     key    = "tag:environment"
