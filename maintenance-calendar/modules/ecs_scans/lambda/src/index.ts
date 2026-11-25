@@ -381,7 +381,6 @@ function formatResults(
 const handler: Handler<Input, void> = async (
   event,
   context,
-  callback,
 ): Promise<void> => {
   const logger = defaultLogger.child({
     functionArn: context.invokedFunctionArn,
